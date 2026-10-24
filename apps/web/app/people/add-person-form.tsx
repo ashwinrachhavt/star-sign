@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { Button, Input } from "@/components/ui";
 
@@ -20,7 +19,6 @@ export default function AddPersonForm() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const supabase = createClient();
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -28,17 +26,24 @@ export default function AddPersonForm() {
     setError(null);
     const precision =
       timeKnown === "yes" ? "exact" : timeKnown === "approx" ? "approximate" : "unknown";
-    const { error: err } = await supabase.from("people").insert({
-      display_name: displayName,
-      relation,
-      birth_date: birthDate || null,
-      birth_time: precision === "unknown" ? null : birthTime || null,
-      birth_time_precision: precision,
-      birth_time_zone: birthDate ? timeZone : null,
+    // Mutations go through the API (api.md): the handler derives owner_id
+    // from the verified session — never from client input.
+    const res = await fetch("/api/people", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        displayName,
+        relation,
+        birthDate: birthDate || null,
+        birthTime: precision === "unknown" ? null : birthTime || null,
+        birthTimePrecision: precision,
+        birthTimeZone: birthDate ? timeZone : null,
+      }),
     });
     setBusy(false);
-    if (err) {
-      setError(err.message);
+    if (!res.ok && res.status !== 201) {
+      const body = await res.json().catch(() => null);
+      setError(body?.error?.message ?? "Could not add person.");
       return;
     }
     setDisplayName("");
