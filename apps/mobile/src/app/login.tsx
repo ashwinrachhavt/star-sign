@@ -6,10 +6,18 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  TextInput,
 } from "react-native";
 import { router } from "expo-router";
 import { supabase } from "../lib/supabase";
+import { Input } from "../../components/ui";
+import {
+  colors,
+  microLabel,
+  sansProse,
+  serifDisplay,
+  space,
+  type,
+} from "../../theme/type";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -38,46 +46,51 @@ export default function Login() {
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <Text style={styles.title}>Star Sign</Text>
-      <Text style={styles.subtitle}>A private sky shared with someone you care about.</Text>
+      <Text style={[serifDisplay, type.s36, styles.title]}>Star Sign</Text>
+      <Text style={[sansProse, type.s15, styles.subtitle]}>
+        A private sky shared with someone you care about.
+      </Text>
 
-      <TextInput
-        style={styles.input}
+      <Input
+        label="Email"
         placeholder="Email"
-        placeholderTextColor="#9aa3c7"
         autoCapitalize="none"
         keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
       />
-      <TextInput
-        style={styles.input}
+      <Input
+        label="Password"
         placeholder="Password"
-        placeholderTextColor="#9aa3c7"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
       />
 
-      {error && <Text style={styles.error}>{error}</Text>}
+      {error && (
+        <Text style={[sansProse, type.s13, styles.error]}>{error}</Text>
+      )}
 
-      <Pressable style={styles.button} onPress={submit} disabled={busy}>
+      <Pressable
+        onPress={submit}
+        disabled={busy}
+        style={({ pressed }) => [styles.button, pressed && busy === false && { opacity: 0.9 }]}
+        accessibilityRole="button"
+      >
         {busy ? (
-          <ActivityIndicator color="#0b0e1a" />
+          <ActivityIndicator color={colors.bg} />
         ) : (
-          <Text style={styles.buttonText}>
+          <Text style={[microLabel, { fontSize: 13, color: colors.bg }]}>
             {mode === "signin" ? "Sign in" : "Create account"}
           </Text>
         )}
       </Pressable>
 
-      <Pressable
-        onPress={() => setMode(mode === "signin" ? "signup" : "signin")}
-      >
-        <Text style={styles.switchText}>
+      <Pressable onPress={() => setMode(mode === "signin" ? "signup" : "signin")} style={styles.switch}>
+        <Text style={[microLabel, { color: colors.inkSecondary }]}>
           {mode === "signin"
-            ? "New here? Create an account"
-            : "Already have an account? Sign in"}
+            ? "New here? Create an account ›"
+            : "Already have an account? Sign in ›"}
         </Text>
       </Pressable>
     </KeyboardAvoidingView>
@@ -85,28 +98,35 @@ export default function Login() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0b0e1a", padding: 24, justifyContent: "center" },
-  title: { color: "#e8eaf6", fontSize: 32, fontWeight: "700", marginBottom: 8 },
-  subtitle: { color: "#9aa3c7", fontSize: 15, marginBottom: 32 },
-  input: {
-    backgroundColor: "#141830",
-    borderColor: "#2a3158",
-    borderWidth: 1,
-    borderRadius: 12,
-    color: "#e8eaf6",
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 16,
-    marginBottom: 12,
+  container: {
+    flex: 1,
+    backgroundColor: colors.bg,
+    padding: space[5],
+    justifyContent: "center",
+    gap: space[4],
+  },
+  title: {
+    color: colors.ink,
+    marginBottom: space[1],
+  },
+  subtitle: {
+    color: colors.inkSecondary,
+    marginBottom: space[5],
+  },
+  error: {
+    color: colors.danger,
   },
   button: {
-    backgroundColor: "#8b9cf9",
-    borderRadius: 12,
-    paddingVertical: 14,
+    backgroundColor: colors.ink,
+    minHeight: 44,
     alignItems: "center",
-    marginTop: 8,
+    justifyContent: "center",
+    paddingHorizontal: space[5],
+    marginTop: space[2],
   },
-  buttonText: { color: "#0b0e1a", fontSize: 16, fontWeight: "600" },
-  error: { color: "#f28b82", fontSize: 13, marginTop: 4 },
-  switchText: { color: "#8b9cf9", textAlign: "center", marginTop: 20 },
+  switch: {
+    minHeight: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 });
