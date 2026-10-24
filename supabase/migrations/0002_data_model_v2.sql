@@ -90,6 +90,8 @@ create trigger set_updated_at before update on public.compatibility_reports
 create trigger set_updated_at before update on public.reflections
   for each row execute function public.set_updated_at();
 
+commit;
+
 -- 0.2d — IANA timezone on birth_profiles: added above (line 42), before
 -- the index that references it. Fallback in the read path is the existing
 -- birth_time_zone; the column stays nullable so old profiles exist without
