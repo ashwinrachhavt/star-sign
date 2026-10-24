@@ -94,17 +94,23 @@ export function computeNatalChart(profile: BirthProfile): NatalChart {
   const aspects = aspectsBetween(placements);
 
   if (profile.birthTimePrecision === "exact") {
-    const angles = anglesFor(utc, profile.birthPlace.lat, profile.birthPlace.lon);
-    const cusps = porphyryCusps(angles);
-    return {
-      placements: placements.map((p) => ({
-        ...p,
-        house: houseForLongitude(p.longitude, cusps),
-      })),
-      aspects,
-      ascendant: signForLongitude(angles.asc),
-      houses: { system: "porphyry", cusps },
-    };
+    try {
+      const angles = anglesFor(utc, profile.birthPlace.lat, profile.birthPlace.lon);
+      const cusps = porphyryCusps(angles);
+      return {
+        placements: placements.map((p) => ({
+          ...p,
+          house: houseForLongitude(p.longitude, cusps),
+        })),
+        aspects,
+        ascendant: signForLongitude(angles.asc),
+        houses: { system: "porphyry", cusps },
+      };
+    } catch {
+      // Polar latitude (|lat| ≥ 66°): no meaningful houses/ascendant —
+      // return the chart without them, never a guess.
+      return { placements, aspects };
+    }
   }
   return { placements, aspects };
 }

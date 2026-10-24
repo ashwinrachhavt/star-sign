@@ -16,6 +16,14 @@ export interface ChartAngles {
   mc: number;
 }
 
+/**
+ * Beyond the arctic/antarctic circles the ascendant is undefined for
+ * parts of the day (circumpolar singularity) and quadrant houses lose
+ * meaning; Porphyry is not computed there. 66° matches the astrological
+ * convention for the meaningful-house band.
+ */
+export const HOUSE_LATITUDE_LIMIT = 66;
+
 function normalize(deg: number): number {
   return ((deg % 360) + 360) % 360;
 }
@@ -30,6 +38,11 @@ function normalize(deg: number): number {
  * within 180° rising above the horizon.
  */
 export function anglesFor(utcDate: Date, lat: number, lon: number): ChartAngles {
+  if (Math.abs(lat) >= HOUSE_LATITUDE_LIMIT) {
+    throw new Error(
+      `latitude ${lat} beyond ±${HOUSE_LATITUDE_LIMIT}°: houses and ascendant are not meaningful (circumpolar singularity)`,
+    );
+  }
   const jd = utcDate.getTime() / 86400000 + 2440587.5;
   const T = (jd - 2451545.0) / 36525;
 
