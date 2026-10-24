@@ -55,6 +55,12 @@ export interface NatalChart {
   aspects: Aspect[];
   /** Ascendant sign; only present for exact birth time */
   ascendant?: ZodiacSign;
+  /**
+   * The 12 Porphyry cusp longitudes (degrees [0,360), cusp 1 = asc, 10 =
+   * mc) plus the system name for provenance; only present for exact birth
+   * time. Houses are never guessed for approximate/unknown times.
+   */
+  houses?: { system: "porphyry"; cusps: number[] };
 }
 
 export interface TransitObservation {

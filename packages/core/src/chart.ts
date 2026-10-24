@@ -10,6 +10,7 @@ import {
   ZODIAC_SIGNS,
 } from "./types";
 import { planetLongitude } from "./ephemeris";
+import { anglesFor, porphyryCusps, houseForLongitude } from "./houses";
 
 const SIGNS_INDEX = new Map<ZodiacSign, number>(ZODIAC_SIGNS.map((s, i) => [s, i]));
 const DEG_PER_SIGN = 30;
@@ -57,27 +58,11 @@ export function ascendantFor(
   lat: number,
   lon: number,
 ): ZodiacSign | undefined {
-  const jd = utcDate.getTime() / 86400000 + 2440587.5;
-  const T = (jd - 2451545.0) / 36525;
-  // Mean sidereal time at Greenwich (degrees)
-  let gmst =
-    280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933 * T * T;
-  const lst = (((gmst + lon) % 360) + 360) % 360;
-  const ramc = lst;
-  const obl = 23.4392911 * (Math.PI / 180);
-  const eps = obl;
-  const latR = (lat * Math.PI) / 180;
-  const ramcR = (ramc * Math.PI) / 180;
-  // Ascendant longitude formula
-  const tanAsc =
-    Math.cos(ramcR) /
-    (-Math.sin(ramcR) * Math.cos(eps) - Math.tan(latR) * Math.sin(eps));
-  let asc = (Math.atan(tanAsc) * 180) / Math.PI;
-  // Quadrant resolution
-  if (Math.cos(ramcR) < 0) asc += 180;
-  asc = ((asc % 360) + 360) % 360;
-  if (!Number.isFinite(asc)) return undefined;
-  return signForLongitude(asc);
+  try {
+    return signForLongitude(anglesFor(utcDate, lat, lon).asc);
+  } catch {
+    return undefined;
+  }
 }
 
 /**
@@ -109,8 +94,17 @@ export function computeNatalChart(profile: BirthProfile): NatalChart {
   const aspects = aspectsBetween(placements);
 
   if (profile.birthTimePrecision === "exact") {
-    const ascendant = ascendantFor(utc, profile.birthPlace.lat, profile.birthPlace.lon);
-    return { placements, aspects, ascendant };
+    const angles = anglesFor(utc, profile.birthPlace.lat, profile.birthPlace.lon);
+    const cusps = porphyryCusps(angles);
+    return {
+      placements: placements.map((p) => ({
+        ...p,
+        house: houseForLongitude(p.longitude, cusps),
+      })),
+      aspects,
+      ascendant: signForLongitude(angles.asc),
+      houses: { system: "porphyry", cusps },
+    };
   }
   return { placements, aspects };
 }
