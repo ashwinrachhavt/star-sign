@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import {
@@ -15,18 +15,31 @@ const repoRoot = path.join(
 );
 
 describe("provenance constants agree with the database (ASH-232 criterion 3)", () => {
-  const migration = readFileSync(
-    path.join(repoRoot, "supabase/migrations/0002_data_model_v2.sql"),
-    "utf8",
-  );
+  // Latest-wins scan of all migrations: a later ALTER COLUMN ... SET
+  // DEFAULT supersedes an earlier one, so the effective default for a
+  // column is the last mention across migration order.
+  const migrations = readdirSync(path.join(repoRoot, "supabase/migrations"))
+    .filter((f) => f.endsWith(".sql"))
+    .sort()
+    .map((f) =>
+      readFileSync(path.join(repoRoot, "supabase/migrations", f), "utf8"),
+    );
 
   const defaultFor = (column: string) => {
+    // Matches both forms: "add column X text not null default 'v'" and
+    // "alter column X set default 'v'" (case-insensitive, either form).
     const re = new RegExp(
-      `add column ${column} text not null default '([^']+)'`,
+      `(?:add|alter)\\s+column\\s+${column}\\s+(?:text\\s+not\\s+null\\s+)?default\\s+'([^']+)'|(?:add|alter)\\s+column\\s+${column}\\s+set\\s+default\\s+'([^']+)'`,
+      "gi",
     );
-    const m = migration.match(re);
-    if (!m) throw new Error(`No default found for ${column} in migration 0002`);
-    return m[1];
+    let last: string | null = null;
+    for (const m of migrations) {
+      for (const match of m.matchAll(re)) {
+        last = match[1] ?? match[2];
+      }
+    }
+    if (!last) throw new Error(`No default found for ${column} in any migration`);
+    return last;
   };
 
   it("ruleset_version matches RULESET_VERSION", () => {
