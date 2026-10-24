@@ -90,6 +90,17 @@ export interface ReadingProvenance {
   inputs: ReadingProvenanceInput[];
 }
 
+/** Ephemeris identity for provenance display (ProvenanceBlock, EPIC 2). */
+export interface EphemerisInfo {
+  name: string;
+  version: string;
+}
+
+/** Builds the display-facing ephemeris info from a provenance record. */
+export function ephemerisInfoOf(provenance: ReadingProvenance): EphemerisInfo {
+  return { name: provenance.ephemerisName, version: provenance.ephemerisVersion };
+}
+
 export interface DailyReading {
   id: string;
   /** Local calendar date (user's zone) this reading belongs to */

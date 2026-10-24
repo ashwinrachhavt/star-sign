@@ -64,13 +64,14 @@ const AREA_BY_SIGN: Record<string, LifeArea> = {
 };
 
 function uncertaintyFor(profile: BirthProfile): string {
+  const method = `Positions are calculated with the ${EPHEMERIS_NAME} astronomical library (v${EPHEMERIS_VERSION}).`;
   switch (profile.birthTimePrecision) {
     case "exact":
-      return "Calculated from your exact birth time. House-sensitive details are reliable.";
+      return `Calculated from your exact birth time. House-sensitive details are reliable. ${method}`;
     case "approximate":
-      return "Your birth time is approximate. Sign placements are solid; house details may shift.";
+      return `Your birth time is approximate. Sign placements are solid; house details may shift. ${method}`;
     case "unknown":
-      return "No birth time was given. Your Moon sign and all house placements could differ from what's shown. Noon was used as a neutral placeholder.";
+      return `No birth time was given. Your Moon sign and all house placements could differ from what's shown. Noon was used as a neutral placeholder. ${method}`;
   }
 }
 
