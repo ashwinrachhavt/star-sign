@@ -140,6 +140,110 @@ function mcOf(cusps: number[]): number {
   return cusps[9];
 }
 
+describe("ascendant/MC accuracy (ASH-238)", () => {
+  // Five charts equatorial → ~60°N. Asc/MC signs locked; NYC chart has an
+  // independent astro.com anchor (Asc Leo, MC Taurus). The rest verify via
+  // physical consistency: RAMC↔MC tracking (|MC − RAMC| small at these
+  // latitudes, ≤ ~2° for |lat| < 45° growing near the pole), and the
+  // sunrise-ascendant identity tested above.
+  const CHARTS: Array<{
+    name: string;
+    iso: string;
+    lat: number;
+    lon: number;
+    ascSign: string;
+    mcSign: string;
+  }> = [
+    {
+      name: "equatorial Quito 1990-06-15 09:30",
+      iso: "1990-06-15T14:30:00Z",
+      lat: -0.1807,
+      lon: -78.4678,
+      ascSign: "leo",
+      mcSign: "taurus",
+    },
+    {
+      name: "New York 1990-06-15 09:30 (astro.com anchor)",
+      iso: "1990-06-15T13:30:00Z",
+      lat: 40.7128,
+      lon: -74.006,
+      ascSign: "leo",
+      mcSign: "taurus",
+    },
+    {
+      name: "Los Angeles 1985-11-21 18:00",
+      iso: "1985-11-22T02:00:00Z",
+      lat: 34.0522,
+      lon: -118.2437,
+      ascSign: "gemini",
+      mcSign: "pisces",
+    },
+    {
+      name: "London 2000-01-01 12:00",
+      iso: "2000-01-01T12:00:00Z",
+      lat: 51.5074,
+      lon: -0.1278,
+      ascSign: "aries",
+      mcSign: "capricorn",
+    },
+    {
+      name: "Oslo 1995-07-04 06:00",
+      iso: "1995-07-04T05:00:00Z",
+      lat: 59.9139,
+      lon: 10.7522,
+      ascSign: "leo",
+      mcSign: "aries",
+    },
+  ];
+
+  it.each(CHARTS)("asc+mc signs for $name", ({ iso, lat, lon, ascSign, mcSign, name }) => {
+    const angles = anglesFor(new Date(iso), lat, lon);
+    expect(signForLongitude(angles.asc), `${name} asc`).toBe(ascSign);
+    expect(signForLongitude(angles.mc), `${name} mc`).toBe(mcSign);
+    // MC physically tracks RAMC within obliquity distortion
+    const jd = new Date(iso).getTime() / 86400000 + 2440587.5;
+    const T = (jd - 2451545.0) / 36525;
+    const gmst = 280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933 * T * T;
+    const ramc = ((gmst + lon) % 360 + 360) % 360;
+    const sep = Math.abs(((angles.mc - ramc + 540) % 360) - 180);
+    expect(sep, `${name} mc-vs-ramc`).toBeLessThan(3);
+  });
+
+  it("polar latitudes (≥ ±66°) are refused, not guessed", () => {
+    const utc = new Date("1990-06-15T13:30:00Z");
+    expect(() => anglesFor(utc, 66.5, 0)).toThrowError(/not meaningful/);
+    expect(() => anglesFor(utc, -70, 0)).toThrowError(/not meaningful/);
+    // computeNatalChart degrades gracefully: chart without houses/ascendant
+    const chart = computeNatalChart({
+      birthDate: "1990-06-15",
+      birthTime: "09:30",
+      birthTimePrecision: "exact",
+      birthTimeZone: "America/New_York",
+      birthPlace: { lat: 70, lon: 20 },
+    });
+    expect(chart.houses).toBeUndefined();
+    expect(chart.ascendant).toBeUndefined();
+    expect(chart.placements).toHaveLength(10); // placements still correct
+  });
+
+  it("approximate/unknown birth times still produce no ascendant", () => {
+    const approx = computeNatalChart({
+      birthDate: "1990-06-15",
+      birthTimePrecision: "approximate",
+      birthTimeZone: "America/New_York",
+      birthPlace: { lat: 40.7128, lon: -74.006 },
+    });
+    expect(approx.ascendant).toBeUndefined();
+    const unknown = computeNatalChart({
+      birthDate: "1990-06-15",
+      birthTimePrecision: "unknown",
+      birthTimeZone: "America/New_York",
+      birthPlace: { lat: 40.7128, lon: -74.006 },
+    });
+    expect(unknown.ascendant).toBeUndefined();
+  });
+});
+
 describe("computeNatalChart house integration (ASH-237 criterion 1/2)", () => {
   it("exact birth time: 12 cusps present, every placement has a house 1-12", () => {
     const chart = computeNatalChart(exactProfile);
