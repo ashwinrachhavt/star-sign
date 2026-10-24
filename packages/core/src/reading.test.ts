@@ -35,7 +35,16 @@ describe("generateDailyReading", () => {
   it("changes across dates", () => {
     const a = generateDailyReading(base);
     const b = generateDailyReading({ ...base, forDate: "2026-10-25" });
-    expect(a.headline).not.toEqual(b.headline);
+    // Transit-driven headlines (ASH-247) can legitimately repeat when two
+    // days share the same dominant transit; the reading as a whole must
+    // still vary — event selection and the dos derived from it do.
+    const varies =
+      a.headline !== b.headline ||
+      a.explanation !== b.explanation ||
+      JSON.stringify(a.dos) !== JSON.stringify(b.dos) ||
+      JSON.stringify(a.provenance.selectedEvents) !==
+        JSON.stringify(b.provenance.selectedEvents);
+    expect(varies).toBe(true);
   });
 
   it("includes full provenance", () => {
