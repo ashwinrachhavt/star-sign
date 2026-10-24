@@ -7,7 +7,7 @@
  * convention); provenance declares "porphyry".
  */
 import type { ZodiacSign } from "./types";
-import { signForLongitude } from "./chart.js";
+import { signForLongitude } from "./chart";
 
 export interface ChartAngles {
   /** Ascendant ecliptic longitude, degrees [0, 360) */

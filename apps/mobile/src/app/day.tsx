@@ -11,10 +11,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router, useFocusEffect } from "expo-router";
 import { supabase } from "../lib/supabase";
 import {
-  fetchMyBirthProfile,
-  getOrCreateDailyReading,
-  rowToBirthProfile,
-} from "../lib/readings";
+  fetchMyBirthProfileApi,
+  getOrCreateDailyReadingApi,
+} from "../lib/api";
 import type { DailyReading } from "@star-sign/core";
 import { Glance, LifeAreaRow, ProvenanceBlock } from "../../components/ui";
 import {
@@ -52,22 +51,19 @@ export default function Day() {
           router.replace("/login");
           return;
         }
-        const profileRow = await fetchMyBirthProfile();
+        const profileRow = await fetchMyBirthProfileApi();
         if (!profileRow) {
           router.replace("/onboarding");
           return;
         }
-        const forDate = new Intl.DateTimeFormat("en-CA", {
-          timeZone: profileRow.birth_time_zone,
-        }).format(new Date());
-        const { reading: r, error: err } = await getOrCreateDailyReading(
-          data.user.id,
-          forDate,
-          rowToBirthProfile(profileRow),
-        );
-        if (err || !r) setError(err ?? "Could not load today's reading.");
-        else setReading(r);
-        setLoading(false);
+        try {
+          const r = await getOrCreateDailyReadingApi();
+          setReading(r);
+        } catch (e) {
+          setError(e instanceof Error ? e.message : "Could not load today's reading.");
+        } finally {
+          setLoading(false);
+        }
       })();
     }, []),
   );
