@@ -78,6 +78,7 @@ export default async function DayPage() {
         title="My Day"
         tabs={[
           { id: "day", label: "My Day", href: "/day" },
+          { id: "week", label: "Week", href: "/week" },
           { id: "people", label: "People", href: "/people" },
         ]}
         activeTab="day"
