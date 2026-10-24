@@ -10,8 +10,8 @@ import type {
 
 export const RULESET_VERSION = "2026-10.1";
 export const COPY_VERSION = "2026-10.1";
-export const EPHEMERIS_NAME = "astronomia";
-export const EPHEMERIS_VERSION = "4.2.0";
+export const EPHEMERIS_NAME = "astronomy-engine";
+export const EPHEMERIS_VERSION = "2.1.19";
 
 /**
  * Copy packs are the only source of interpretation language. They are

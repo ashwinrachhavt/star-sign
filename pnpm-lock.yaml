@@ -154,9 +154,9 @@ importers:
 
   packages/core:
     dependencies:
-      astronomia:
-        specifier: ^4.1.0
-        version: 4.2.0
+      astronomy-engine:
+        specifier: ^2.1.19
+        version: 2.1.19
     devDependencies:
       typescript:
         specifier: ^5.6.3
@@ -2089,9 +2089,8 @@ packages:
     resolution: {integrity: sha512-Izi8RQcffqCeNVgFigKli1ssklIbpHnCYc6AknXGYoB6grJqyeby7jv12JUQgmTAnIDnbck1uxksT4dzN3PWBA==}
     engines: {node: '>=12'}
 
-  astronomia@4.2.0:
-    resolution: {integrity: sha512-mTvpBGyXB80aSsDhAAiuwza5VqAyqmj5yzhjBrFhRy17DcWDzJrb8Vdl4Sm+g276S+mY7bk/5hi6akZ5RQFeHg==}
-    engines: {node: '>=12.0.0'}
+  astronomy-engine@2.1.19:
+    resolution: {integrity: sha512-8yWKNf7UeNbH458h3sAJ6ZgAjE5jTXp/mNNRFoC20j2SHwZIjAQeEsBB2Q3uCFRaTCCJRv33K2XhkhZQMXoX6w==}
 
   async-function@1.0.0:
     resolution: {integrity: sha512-hsU18Ae8CDTR6Kgu9DYf0EbCr/a5iGL0rytQDobUcdpYOKokk8LEjVphnXkDkgpi0wYVsqrXuP0bZxJaTqdgoA==}
@@ -6131,9 +6130,7 @@ snapshots:
       metro-runtime: 0.87.1
     transitivePeerDependencies:
       - '@babel/core'
-      - bufferutil
       - supports-color
-      - utf-8-validate
 
   '@react-native/normalize-colors@0.74.89': {}
 
@@ -6665,7 +6662,7 @@ snapshots:
 
   assertion-error@2.0.1: {}
 
-  astronomia@4.2.0: {}
+  astronomy-engine@2.1.19: {}
 
   async-function@1.0.0: {}
 
