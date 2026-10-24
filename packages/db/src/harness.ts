@@ -18,18 +18,28 @@ export const migrationsDir = path.join(
 
 export type TestDb = ReturnType<typeof postgres>;
 
-const MIGRATIONS = ["0001_initial_schema.sql", "0002_data_model_v2.sql"];
+const MIGRATIONS = [
+  "0001_initial_schema.sql",
+  "0002_data_model_v2.sql",
+  "0003_job_pattern.sql",
+];
 
 export async function createHarnessDb(): Promise<TestDb> {
   const url =
     process.env.STAR_SIGN_TEST_DATABASE_URL ??
     "postgres://postgres:postgres@localhost:54329/postgres";
   const sql = postgres(url, { max: 1, onnotice: () => {} });
-  // Start clean: the harness owns its database and every run rebuilds it.
-  await sql.unsafe(`drop schema if exists public cascade; drop schema if exists auth cascade; create schema public;`);
+  await installShims(sql);
+  return sql;
+}
 
-  // Role + auth shims mirroring Supabase local stack: auth.uid() reads the
-  // JWT sub claim; authenticated/anon get DML grants and rely on RLS.
+/**
+ * Role + auth shims mirroring the Supabase local stack: auth.uid() reads
+ * the JWT sub claim; authenticated/anon get DML grants and rely on RLS.
+ * Re-runnable — called on every reset since the reset drops the auth
+ * schema.
+ */
+async function installShims(sql: TestDb) {
   await sql.unsafe(`
     create schema if not exists auth;
     create schema if not exists public;
@@ -50,18 +60,20 @@ export async function createHarnessDb(): Promise<TestDb> {
       create role service_role nologin bypassrls;
     exception when duplicate_object then null; end $$;
     alter role service_role bypassrls;
-    grant authenticated, anon, service_role to postgres;
+    -- Note: roles are NOT granted to postgres (superuser) — Supabase keeps
+    -- them separate, and superuser membership would bypass REVOKE/RLS.
     grant usage on schema public to authenticated, anon, service_role;
     grant select, insert, update, delete on all tables in schema public
       to authenticated, anon, service_role;
     alter default privileges in schema public
       grant select, insert, update, delete on tables to authenticated, anon, service_role;
   `);
-  return sql;
 }
 
-/** Applies every migration file in order, then refreshes role grants. */
+/** Resets the schema and applies every migration file in order. */
 export async function applyMigrations(sql: TestDb) {
+  await sql.unsafe(`drop schema if exists public cascade; drop schema if exists auth cascade; create schema public;`);
+  await installShims(sql);
   for (const file of MIGRATIONS) {
     const text = readFileSync(path.join(migrationsDir, file), "utf8");
     if (/^\s*begin;/m.test(text)) {
