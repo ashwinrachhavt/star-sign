@@ -2,6 +2,14 @@
 
 Append-only record of shipped changes. Format per `.agents/workflows.md`.
 
+## 2026-10-24 — API design pattern: route handlers, contracts, rate limits (ASH-233)
+
+- Change: Materialized `.agents/api.md` as code. New `packages/core/src/contracts.ts` — Zod schemas are the single definition for every transport payload (birth profile, person, reflection, daily reading request), domain types derive via z.infer. New `apps/web/app/api/` — `_lib/api.ts` (jsonOk/jsonCreated/jsonError envelopes with meta.requestId, parseBody 400 details, requireActor 401 guard, notFoundIfForeign 404-not-403, in-process token-bucket rate limiter) plus route handlers for all five mutation groups: daily-readings (POST create→201/existing→200, GET read-only), me/birth-profile (GET/PUT), people (GET/POST/DELETE, foreign target → 404), reflections (GET paginated cursor list/POST), reflections/[id] (GET/PATCH/DELETE, idempotent 204). Mobile day screen now reads/writes via the same API (`apps/mobile/src/lib/api.ts`, bearer-token authenticated) — parity proven; RLS-direct read kept only for the birth-profile existence check documented in api.ts. Web gains test/typecheck scripts (closes the 0.5-flagged gap); 10 API contract tests pin the status map.
+- Migration: none
+- Rollback: revert PR (routes are additive; mobile falls back to nothing — mobile previously wrote readings RLS-direct, so revert restores that path).
+- Risk: rate limiter is in-process per serverless instance (documented fail-open choice — generation is DB-unique-constrained anyway, so a limiter miss degrades to the idempotency guard, not abuse). Shared-store limiter is a follow-up when abuse is measured. Handlers trust `supabase.auth.getUser()` for identity — Clerk migration (ASH-231) will swap the guard implementation, not the call sites.
+- Decisions: rate-limit mechanism = in-process token bucket (filed per ticket 0.3d); cursor pagination = opaque created_at ISO string (api.md's stable ordering); DELETE people takes `?id=` query param (v1 — no dynamic route needed until EPIC 5); zod pinned ^3 (v4 ESM interop unresolved at time of writing).
+
 ## 2026-10-24 — Testing + CI baseline (ASH-235)
 
 - Change: Added `.github/workflows/ci.yml` — two jobs: (1) `checks` (pnpm install with store cache → typecheck → lint → core Vitest → db RLS/job harness against a Postgres service container), (2) `smoke` (local Supabase via `supabase/setup-cli` + Playwright golden path: signup → onboarding → day page, asserting the reading persisted). New `e2e/` workspace package with Playwright config on dedicated port 3010 (dev machines often run other apps on 3000).

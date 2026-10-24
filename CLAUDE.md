@@ -2,7 +2,8 @@
 
 Project brain docs live in `.agents/` — start with `.agents/index.md`, then read
 `company.md`, `product.md`, and `engineering.md` before any implementation work.
-API conventions in `.agents/api.md` govern every route handler; current-state
+API conventions in `.agents/api.md` govern every route handler (implementations
+in `apps/web/app/api/`, helpers in `apps/web/app/api/_lib/api.ts`); current-state
 facts in `.agents/architecture.md` with the proposed persistence model in
 `.agents/data-model.md`. Design system in `.agents/design-system.md` (v2 draft
 in `.agents/design-system-v2-draft.md` is NOT accepted). Shipping rules in
