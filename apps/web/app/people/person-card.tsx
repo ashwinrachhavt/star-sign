@@ -73,41 +73,57 @@ export default async function PersonCard({ person }: { person: Person }) {
   }
 
   return (
-    <div className="card">
-      <h2 style={{ fontSize: "1.2rem", marginBottom: 4 }}>
-        {person.display_name}
-      </h2>
-      <p className="muted" style={{ marginBottom: 10 }}>
-        {person.relation}
-        {personSun && <> · Sun in {personSun}</>}
-        {person.birth_time_precision === "unknown" && " · birth time unknown"}
+    <article className="card" style={{ marginBottom: 0 }}>
+      <p className="type-prose t-15">{person.display_name}</p>
+      <p
+        className="type-micro-label t-11"
+        style={{
+          color: "var(--ink-secondary)",
+          marginTop: "var(--space-1)",
+        }}
+      >
+        {person.relation.toUpperCase()}
+        {personSun && <> · ☉ {personSun.toUpperCase()}</>}
+        {person.birth_time_precision === "unknown" && " · BIRTH TIME UNKNOWN"}
       </p>
 
       {report && (
         <details>
-          <summary>Compatibility report</summary>
-          <div style={{ marginTop: 12 }}>
+          <summary className="ui-focusable type-micro-label t-11">
+            Compatibility report
+          </summary>
+          <div
+            style={{
+              marginTop: "var(--space-3)",
+              display: "flex",
+              flexDirection: "column",
+              gap: "var(--space-4)",
+            }}
+          >
             {report.dimensions.map((d) => (
-              <div key={d.area} style={{ marginBottom: 12 }}>
-                <p style={{ fontSize: "0.9rem", fontWeight: 600 }}>
-                  {AREA_LABELS[d.area]}{" "}
-                  <span className="muted">
+              <div key={d.area}>
+                <p className="type-micro-label t-11">
+                  {AREA_LABELS[d.area].toUpperCase()}{" "}
+                  <span style={{ color: "var(--ink-tertiary)" }}>
                     {"●".repeat(d.tone)}
                     {"○".repeat(5 - d.tone)}
                   </span>
                 </p>
-                <p style={{ fontSize: "0.9rem", lineHeight: 1.5 }}>
+                <p
+                  className="type-prose t-15"
+                  style={{ marginTop: "var(--space-1)" }}
+                >
                   {d.summary}
                 </p>
               </div>
             ))}
-            <p className="muted" style={{ fontSize: "0.8rem" }}>
-              These patterns describe interaction styles, not outcomes. Ruleset{" "}
+            <p className="type-micro-label t-11" style={{ color: "var(--ink-tertiary)" }}>
+              THESE PATTERNS DESCRIBE INTERACTION STYLES, NOT OUTCOMES. RULESET{" "}
               {report.provenance.rulesetVersion}.
             </p>
           </div>
         </details>
       )}
-    </div>
+    </article>
   );
 }

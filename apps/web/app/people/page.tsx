@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import AddPersonForm from "./add-person-form";
 import PersonCard from "./person-card";
+import { ScreenHeader } from "@/components/ui";
 
 export default async function PeoplePage() {
   const supabase = await createClient();
@@ -16,19 +17,34 @@ export default async function PeoplePage() {
 
   return (
     <main className="container">
-      <nav className="top">
-        <a href="/day">My Day</a>
-        <a href="/people">People</a>
-      </nav>
+      <ScreenHeader
+        title="People"
+        tabs={[
+          { id: "day", label: "My Day", href: "/day" },
+          { id: "people", label: "People", href: "/people" },
+        ]}
+        activeTab="people"
+      />
 
-      <h1 style={{ margin: "16px 0 8px" }}>People</h1>
-      <p className="muted" style={{ marginBottom: 20 }}>
+      <p
+        className="type-prose t-15"
+        style={{ color: "var(--ink-secondary)", marginTop: "var(--space-5)" }}
+      >
         Privately add people you care about. Their data is visible only to you.
       </p>
 
-      <AddPersonForm />
+      <div style={{ marginTop: "var(--space-5)" }}>
+        <AddPersonForm />
+      </div>
 
-      <div style={{ marginTop: 24 }}>
+      <div
+        style={{
+          marginTop: "var(--space-5)",
+          display: "flex",
+          flexDirection: "column",
+          gap: "var(--space-3)",
+        }}
+      >
         {(people ?? []).map((person) => (
           <PersonCard key={person.id} person={person} />
         ))}

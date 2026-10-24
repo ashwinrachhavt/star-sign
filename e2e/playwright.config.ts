@@ -2,7 +2,7 @@ import { defineConfig } from "@playwright/test";
 
 // Port 3010 (not 3000): the dev machine often runs other Next apps on
 // 3000; a dedicated port guarantees the webServer below is OUR app.
-const PORT = 3010;
+const PORT = Number(process.env.E2E_PORT ?? 3010);
 
 export default defineConfig({
   testDir: ".",

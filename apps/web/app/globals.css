@@ -1,15 +1,6 @@
-/*
- * Global styles. All values come from ../styles/tokens.css (design-system v1).
- * Legacy page-level vars below are aliases kept until ticket 2.4 restyles pages.
- */
-
-:root {
-  --surface: var(--card-bg);
-  --text: var(--ink);
-  --muted: var(--ink-secondary);
-  --accent: var(--ink);
-  --accent-soft: var(--hairline);
-}
+/* Global page styles (ticket 2.4). All values from ../styles/tokens.css —
+   no hard-coded hexes/px in components; square corners, hairline borders,
+   no shadows, no fills (design-system.md §1–4). */
 
 * {
   box-sizing: border-box;
@@ -19,8 +10,9 @@
 
 body {
   background: var(--bg);
-  color: var(--text);
-  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  color: var(--ink);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  font-weight: 300;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
 }
@@ -30,111 +22,47 @@ a {
   text-decoration: none;
 }
 
+/* Single column, 640px max, 20px mobile gutters (§4) */
 .container {
-  max-width: 560px;
+  max-width: 640px;
   margin: 0 auto;
-  padding: 24px 20px 64px;
+  padding: var(--space-5) var(--space-5) var(--space-8);
 }
 
+@media (max-width: 480px) {
+  .container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+/* Hairline box: 1px border, no radius, no shadow, no fill */
 .card {
   background: var(--card-bg);
   border: 1px solid var(--hairline);
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 16px;
+  padding: var(--space-5);
+  margin-bottom: var(--space-4);
 }
 
-.headline {
-  font-size: 1.75rem;
-  line-height: 1.2;
-  margin-bottom: 12px;
+/* Form status messages — the only two semantic colors in-product */
+.form-error {
+  color: var(--danger);
+  margin-top: var(--space-3);
 }
 
-.muted {
-  color: var(--ink-secondary);
-  font-size: 0.9rem;
-}
-
-label {
-  display: block;
-  font-size: 0.85rem;
-  color: var(--ink-secondary);
-  margin: 14px 0 6px;
-}
-
-input,
-select {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--hairline);
-  background: var(--bg);
-  color: var(--ink);
-  font-size: 1rem;
-}
-
-button,
-.button {
-  display: inline-block;
-  width: 100%;
-  padding: 12px;
-  margin-top: 18px;
-  border-radius: 12px;
-  border: none;
-  background: var(--ink);
-  color: var(--bg);
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  text-align: center;
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-.dos-donts {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.dos-donts ul {
-  list-style: none;
-}
-
-.dos-donts li {
-  padding: 6px 0;
-  border-bottom: 1px solid var(--hairline);
-  font-size: 0.92rem;
-}
-
-.badge {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: var(--hairline);
-  color: var(--ink);
-  font-size: 0.75rem;
-  margin-right: 6px;
-  margin-bottom: 6px;
+.form-status {
+  color: var(--ink-tertiary);
+  margin-top: var(--space-3);
 }
 
 details {
-  margin-top: 12px;
+  margin-top: var(--space-3);
 }
 
 summary {
   cursor: pointer;
   color: var(--ink-secondary);
-  font-size: 0.85rem;
-}
-
-nav.top {
+  min-height: 44px;
   display: flex;
-  gap: 16px;
-  padding: 14px 0;
-  margin-bottom: 8px;
-  border-bottom: 1px solid var(--hairline);
+  align-items: center;
 }

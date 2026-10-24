@@ -34,11 +34,11 @@ test("golden path: signup → onboarding → day page", async ({ page }) => {
   await page.getByLabel("Longitude").fill("-74.006");
   await page.getByRole("button", { name: /continue/i }).click();
 
-  // Day page renders the reading ritual: the headline h1 carries the
-  // generated text, so assert on stable anchors — the date line and the
-  // Dos section.
+  // Day page renders the reading ritual: the Glance headline (h2, serif
+  // display) carries the generated text, so assert on stable anchors —
+  // the date line and the Dos section.
   await page.waitForURL("**/day", { timeout: 15_000 });
-  await expect(page.locator("h1.headline")).toBeVisible({ timeout: 20_000 });
+  await expect(page.locator("h2.type-display")).toBeVisible({ timeout: 20_000 });
   await expect(page.getByText("Dos")).toBeVisible();
 
   // The reading exists in the database (idempotent creation ran).

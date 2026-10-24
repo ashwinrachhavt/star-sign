@@ -5,6 +5,8 @@ export const dynamic = "force-dynamic";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Button, Input } from "@/components/ui";
+import { fontSerif } from "@/app/fonts";
 
 const COMMON_ZONES = [
   "America/New_York",
@@ -17,6 +19,12 @@ const COMMON_ZONES = [
   "Asia/Tokyo",
   "Australia/Sydney",
 ];
+
+const PRECISION_OPTIONS = [
+  { value: "yes", label: "I know it exactly" },
+  { value: "approx", label: "Approximate — close enough" },
+  { value: "no", label: "I don't know it" },
+] as const;
 
 export default function OnboardingPage() {
   const [birthDate, setBirthDate] = useState("");
@@ -32,6 +40,9 @@ export default function OnboardingPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const supabase = createClient();
+
+  const precisionChip =
+    timeKnown === "yes" ? "Exact" : timeKnown === "approx" ? "Approximate" : "Unknown";
 
   function useMyLocation() {
     if (!navigator.geolocation) return;
@@ -80,103 +91,155 @@ export default function OnboardingPage() {
 
   return (
     <main className="container">
-      <h1 style={{ margin: "32px 0 8px" }}>Your birth details</h1>
-      <p className="muted" style={{ marginBottom: 24 }}>
+      <h1
+        className={`type-display t-28 ${fontSerif.className}`}
+        style={{ margin: "var(--space-6) 0 var(--space-2)" }}
+      >
+        Your birth details
+      </h1>
+      <p
+        className="type-prose t-15"
+        style={{ color: "var(--ink-secondary)", marginBottom: "var(--space-5)" }}
+      >
         Precision matters: we store exactly how precise your time is and never
         pretend otherwise.
       </p>
       <form onSubmit={submit} className="card">
-        <label htmlFor="bd">Birth date</label>
-        <input
-          id="bd"
-          type="date"
-          required
-          value={birthDate}
-          onChange={(e) => setBirthDate(e.target.value)}
-        />
+        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-5)" }}>
+          <Input
+            id="bd"
+            label="Birth date"
+            type="date"
+            required
+            value={birthDate}
+            onChange={(e) => setBirthDate(e.target.value)}
+          />
 
-        <label htmlFor="tk">Birth time</label>
-        <select
-          id="tk"
-          value={timeKnown}
-          onChange={(e) => setTimeKnown(e.target.value as never)}
-        >
-          <option value="yes">I know it exactly</option>
-          <option value="approx">Approximate</option>
-          <option value="no">I don&apos;t know it</option>
-        </select>
+          <div className="ui-input-field">
+            <span
+              id="tk-label"
+              className="ui-input-label type-micro-label t-11"
+            >
+              Birth time
+            </span>
+            <div
+              role="radiogroup"
+              aria-labelledby="tk-label"
+              style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)" }}
+            >
+              {PRECISION_OPTIONS.map((opt) => (
+                <label
+                  key={opt.value}
+                  className="ui-focusable type-prose t-15"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "var(--space-3)",
+                    minHeight: "44px",
+                    cursor: "pointer",
+                    color:
+                      timeKnown === opt.value
+                        ? "var(--ink)"
+                        : "var(--ink-secondary)",
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="timeKnown"
+                    value={opt.value}
+                    checked={timeKnown === opt.value}
+                    onChange={() => setTimeKnown(opt.value)}
+                    style={{ accentColor: "var(--ink)" }}
+                  />
+                  {opt.label}
+                </label>
+              ))}
+            </div>
+          </div>
 
-        {timeKnown !== "no" && (
-          <>
-            <label htmlFor="bt">Time</label>
-            <input
+          {timeKnown !== "no" && (
+            <Input
               id="bt"
+              label="Time"
+              chip={precisionChip}
               type="time"
               required
               value={birthTime}
               onChange={(e) => setBirthTime(e.target.value)}
             />
-          </>
-        )}
+          )}
 
-        <label htmlFor="tz">Time zone at birth</label>
-        <input
-          id="tz"
-          list="zones"
-          value={timeZone}
-          onChange={(e) => setTimeZone(e.target.value)}
-          required
-        />
-        <datalist id="zones">
-          {COMMON_ZONES.map((z) => (
-            <option key={z} value={z} />
-          ))}
-        </datalist>
+          <Input
+            id="tz"
+            label="Time zone at birth"
+            list="zones"
+            value={timeZone}
+            onChange={(e) => setTimeZone(e.target.value)}
+            required
+          />
+          <datalist id="zones">
+            {COMMON_ZONES.map((z) => (
+              <option key={z} value={z} />
+            ))}
+          </datalist>
 
-        <label htmlFor="pl">Birth place (optional label)</label>
-        <input
-          id="pl"
-          type="text"
-          placeholder="e.g. New York, NY"
-          value={placeLabel}
-          onChange={(e) => setPlaceLabel(e.target.value)}
-        />
+          <Input
+            id="pl"
+            label="Birth place (optional label)"
+            type="text"
+            placeholder="e.g. New York, NY"
+            value={placeLabel}
+            onChange={(e) => setPlaceLabel(e.target.value)}
+          />
 
-        <label htmlFor="lat">Latitude</label>
-        <input
-          id="lat"
-          type="number"
-          step="any"
-          min="-90"
-          max="90"
-          required
-          value={lat}
-          onChange={(e) => setLat(e.target.value)}
-        />
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "var(--space-4)",
+            }}
+          >
+            <Input
+              id="lat"
+              label="Latitude"
+              type="number"
+              step="any"
+              min="-90"
+              max="90"
+              required
+              value={lat}
+              onChange={(e) => setLat(e.target.value)}
+            />
+            <Input
+              id="lon"
+              label="Longitude"
+              type="number"
+              step="any"
+              min="-180"
+              max="180"
+              required
+              value={lon}
+              onChange={(e) => setLon(e.target.value)}
+            />
+          </div>
 
-        <label htmlFor="lon">Longitude</label>
-        <input
-          id="lon"
-          type="number"
-          step="any"
-          min="-180"
-          max="180"
-          required
-          value={lon}
-          onChange={(e) => setLon(e.target.value)}
-        />
-        <button type="button" onClick={useMyLocation} style={{ marginTop: 8 }}>
-          Use my current location
-        </button>
+          <button
+            type="button"
+            onClick={useMyLocation}
+            className="ui-button-link ui-focusable type-micro-label t-13"
+            style={{ width: "fit-content" }}
+          >
+            Use my current location
+          </button>
 
-        {error && (
-          <p style={{ color: "#f28b82", marginTop: 12, fontSize: "0.9rem" }}>
-            {error}
-          </p>
-        )}
-        <button type="submit" disabled={busy}>
-          {busy ? "Saving…" : "Continue"}
-        </button>
+          {error && <p className="form-error type-prose t-15">{error}</p>}
+
+          <div>
+            <Button type="submit" variant="solid" disabled={busy}>
+              {busy ? "Saving…" : "Continue"}
+            </Button>
+          </div>
+        </div>
       </form>
     </main>
   );

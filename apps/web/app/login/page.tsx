@@ -5,6 +5,8 @@ export const dynamic = "force-dynamic";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { Button, Input } from "@/components/ui";
+import { fontMono, fontSerif } from "@/app/fonts";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -38,47 +40,66 @@ export default function LoginPage() {
 
   return (
     <main className="container">
-      <h1 style={{ margin: "48px 0 8px", fontSize: "2rem" }}>Star Sign</h1>
-      <p className="muted" style={{ marginBottom: 32 }}>
-        A private sky shared with someone you care about.
+      <h1
+        className={`type-display t-36 ${fontSerif.className}`}
+        style={{ margin: "var(--space-8) 0 var(--space-2)" }}
+      >
+        Star Sign
+      </h1>
+      <p
+        className={`type-mono t-13 ${fontMono.className}`}
+        style={{ color: "var(--ink-secondary)", marginBottom: "var(--space-6)" }}
+      >
+        A PRIVATE SKY SHARED WITH SOMEONE YOU CARE ABOUT.
       </p>
       <form onSubmit={submit} className="card">
-        <label htmlFor="email">Email</label>
-        <input
-          id="email"
-          type="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <label htmlFor="password">Password</label>
-        <input
-          id="password"
-          type="password"
-          required
-          minLength={8}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-5)" }}>
+          <Input
+            id="email"
+            label="Email"
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <Input
+            id="password"
+            label="Password"
+            type="password"
+            required
+            minLength={8}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
         {error && (
-          <p style={{ color: "#f28b82", marginTop: 12, fontSize: "0.9rem" }}>
-            {error}
-          </p>
+          <p className="form-error type-prose t-15">{error}</p>
         )}
-        <button type="submit" disabled={busy}>
-          {busy ? "…" : mode === "signin" ? "Sign in" : "Create account"}
-        </button>
+        <div style={{ marginTop: "var(--space-5)" }}>
+          <Button type="submit" variant="solid" disabled={busy}>
+            {busy ? "…" : mode === "signin" ? "Sign in" : "Create account"}
+          </Button>
+        </div>
       </form>
-      <p className="muted" style={{ textAlign: "center" }}>
-        {mode === "signin" ? "New here? " : "Already have an account? "}
+      <p
+        className={`type-mono t-13 ${fontMono.className}`}
+        style={{ color: "var(--ink-secondary)", textAlign: "center", marginTop: "var(--space-4)" }}
+      >
+        {mode === "signin" ? "NEW HERE? " : "ALREADY HAVE AN ACCOUNT? "}
         <a
           href="#"
+          className="ui-focusable"
+          style={{
+            color: "var(--ink)",
+            textDecoration: "underline",
+            textUnderlineOffset: "3px",
+          }}
           onClick={(e) => {
             e.preventDefault();
             setMode(mode === "signin" ? "signup" : "signin");
           }}
         >
-          {mode === "signin" ? "Create an account" : "Sign in"}
+          {mode === "signin" ? "CREATE AN ACCOUNT" : "SIGN IN"}
         </a>
       </p>
     </main>
