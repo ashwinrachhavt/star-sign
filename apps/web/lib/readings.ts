@@ -77,6 +77,11 @@ export async function getOrCreateDailyReading(
       dos: reading.dos,
       donts: reading.donts,
       life_areas: reading.lifeAreas,
+      ruleset_version: reading.provenance.rulesetVersion,
+      copy_version: reading.provenance.copyVersion,
+      ephemeris_name: reading.provenance.ephemerisName,
+      ephemeris_version: reading.provenance.ephemerisVersion,
+      selected_events: reading.provenance.selectedEvents,
       provenance: reading.provenance,
       uncertainty_note: reading.uncertaintyNote,
     })
