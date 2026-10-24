@@ -1,12 +1,12 @@
 {
-  "name": "@our-sky/mobile",
+  "name": "@star-sign/mobile",
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
     "@expo/ui": "~58.0.23",
-    "@our-sky/core": "workspace:*",
     "@react-native-async-storage/async-storage": "^3.1.1",
     "@react-navigation/native": "^7.5.1",
+    "@star-sign/core": "workspace:*",
     "@supabase/supabase-js": "^2.118.0",
     "expo": "~58.0.19",
     "expo-constants": "~58.0.13",
@@ -34,6 +34,8 @@
   },
   "devDependencies": {
     "@types/react": "~19.3.0",
+    "eslint": "^9.0.0",
+    "eslint-config-expo": "~58.0.4",
     "typescript": "~6.0.3"
   },
   "scripts": {
@@ -42,7 +44,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "eslint ."
   },
   "private": true
 }

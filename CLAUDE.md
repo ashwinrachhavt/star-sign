@@ -1,8 +1,14 @@
 # Star Sign
 
-Project brain docs live in `.agents/` — read `company.md`, `product.md`, and
-`engineering.md` before any implementation work. Design reference screenshots
-in `design/reference/`.
+Project brain docs live in `.agents/` — start with `.agents/index.md`, then read
+`company.md`, `product.md`, and `engineering.md` before any implementation work.
+API conventions in `.agents/api.md` govern every route handler; current-state
+facts in `.agents/architecture.md` with the proposed persistence model in
+`.agents/data-model.md`. Design system in `.agents/design-system.md` (v2 draft
+in `.agents/design-system-v2-draft.md` is NOT accepted). Shipping rules in
+`.agents/workflows.md`; Linear facts in `.agents/linear.md`. Design reference
+screenshots in `design/reference/`. Canonical long-form source lives in Notion
+("Costar : Product Notes"); keep both in sync when decisions change.
 
 ## Skill routing
 

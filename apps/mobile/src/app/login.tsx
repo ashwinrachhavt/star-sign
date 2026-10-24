@@ -7,7 +7,6 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  View,
 } from "react-native";
 import { router } from "expo-router";
 import { supabase } from "../lib/supabase";
@@ -39,7 +38,7 @@ export default function Login() {
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <Text style={styles.title}>Our Sky</Text>
+      <Text style={styles.title}>Star Sign</Text>
       <Text style={styles.subtitle}>A private sky shared with someone you care about.</Text>
 
       <TextInput

@@ -14,7 +14,7 @@ export const COPY_VERSION = "2026-10.1";
 /**
  * Copy packs are the only source of interpretation language. They are
  * versioned so any persisted reading can be traced to the exact text set
- * that produced it. This pack is original writing for Our Sky.
+ * that produced it. This pack is original writing for Star Sign.
  */
 const HEADLINES: Record<string, string[]> = {
   "sun+aries": ["Lead before you explain yourself.", "Start the thing. Tune it later."],

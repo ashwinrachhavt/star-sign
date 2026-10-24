@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Our Sky",
+  title: "Star Sign",
   description: "A private sky shared with someone you care about.",
 };
 

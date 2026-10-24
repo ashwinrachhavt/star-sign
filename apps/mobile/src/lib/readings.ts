@@ -1,4 +1,4 @@
-import { type BirthProfile, type DailyReading } from "@our-sky/core";
+import { type BirthProfile, type DailyReading } from "@star-sign/core";
 import { supabase } from "./supabase";
 
 export interface BirthProfileRow {
@@ -66,7 +66,7 @@ export async function getOrCreateDailyReading(
 
   if (existing) return { reading: rowToReading(existing), error: null };
 
-  const core = await import("@our-sky/core");
+  const core = await import("@star-sign/core");
   const generated = core.generateDailyReading({ profile, forDate });
 
   const { data: inserted, error } = await supabase

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -14,7 +14,7 @@ import {
   getOrCreateDailyReading,
   rowToBirthProfile,
 } from "../lib/readings";
-import type { DailyReading } from "@our-sky/core";
+import type { DailyReading } from "@star-sign/core";
 
 const AREA_LABELS: Record<string, string> = {
   love: "Love",
@@ -89,7 +89,7 @@ export default function Day() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 48 }}>
       <View style={styles.topBar}>
-        <Text style={styles.brand}>Our Sky</Text>
+        <Text style={styles.brand}>Star Sign</Text>
         <Pressable onPress={signOut}>
           <Text style={styles.link}>Sign out</Text>
         </Pressable>

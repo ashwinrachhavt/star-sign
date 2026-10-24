@@ -1,4 +1,4 @@
-import type { DailyReading } from "@our-sky/core";
+import type { DailyReading } from "@star-sign/core";
 
 export interface BirthProfileRow {
   user_id: string;
@@ -63,7 +63,7 @@ export async function getOrCreateDailyReading(
   if (existing) return readingFromRow(existing);
 
   const profile = rowToBirthProfile(profileRow as BirthProfileRow);
-  const reading = await import("@our-sky/core").then((m) =>
+  const reading = await import("@star-sign/core").then((m) =>
     m.generateDailyReading({ profile, forDate }),
   );
 

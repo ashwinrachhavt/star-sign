@@ -1,4 +1,4 @@
-# Our Sky
+# Star Sign
 
 A private sky shared with someone you care about. An independent,
 clean-room astrology and relationship-reflection product — inspired by
@@ -14,7 +14,7 @@ assets, trademarks, or authored text.
 ## Architecture
 
 pnpm monorepo (decision ARC-001..006 in
-[agents/specs/product-tech-spec.md](agents/specs/product-tech-spec.md)):
+[.agents/product-tech-spec.md](.agents/product-tech-spec.md)):
 
 ```
 apps/web        Next.js 15 (App Router) — web client
@@ -64,14 +64,14 @@ Or run everything locally with `supabase start` + `supabase db reset`.
 
 ```sh
 cp apps/web/.env.example apps/web/.env.local   # fill in Supabase values
-pnpm --filter @our-sky/web dev
+pnpm --filter @star-sign/web dev
 ```
 
 ### 3. iOS (Expo)
 
 ```sh
 cp apps/mobile/.env.example apps/mobile/.env    # fill in Supabase values
-pnpm --filter @our-sky/mobile start             # press i for iOS simulator
+pnpm --filter @star-sign/mobile start             # press i for iOS simulator
 ```
 
 Production iOS builds use [EAS Build](https://docs.expo.dev/build/introduction/):
@@ -97,7 +97,7 @@ Full Co–Star Pro-parity surface (ARC-006), built as ordered vertical slices:
 2. Life-area deep dives, dive-deeper long-form readings
 3. Transit alerts (full moons, retrogrades) via pg_cron + push notifications
 4. Daily recommendations (read/watch/listen), lessons
-5. Ask Our Sky (bounded Q&A over stored chart + transits)
+5. Ask Star Sign (bounded Q&A over stored chart + transits)
 6. Relationship prompts, shared reflections, rituals
 7. Premium boundary (depth as the natural paywall)
 

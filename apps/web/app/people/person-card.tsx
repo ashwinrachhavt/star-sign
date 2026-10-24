@@ -3,7 +3,7 @@ import {
   computeNatalChart,
   generateCompatibilityReport,
   type BirthProfile,
-} from "@our-sky/core";
+} from "@star-sign/core";
 
 const AREA_LABELS: Record<string, string> = {
   communication: "Communication",
