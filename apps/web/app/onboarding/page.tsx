@@ -2,8 +2,8 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button, Input } from "@/components/ui";
 import { fontSerif } from "@/app/fonts";
@@ -27,6 +27,14 @@ const PRECISION_OPTIONS = [
 ] as const;
 
 export default function OnboardingPage() {
+  return (
+    <Suspense fallback={null}>
+      <OnboardingForm />
+    </Suspense>
+  );
+}
+
+function OnboardingForm() {
   const [birthDate, setBirthDate] = useState("");
   const [timeKnown, setTimeKnown] = useState<"yes" | "approx" | "no">("yes");
   const [birthTime, setBirthTime] = useState("");
@@ -39,7 +47,37 @@ export default function OnboardingPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isEdit = searchParams.get("edit") === "1";
   const supabase = createClient();
+
+  // Edit mode (ASH-248 criterion 4): pre-fill from the stored profile.
+  useEffect(() => {
+    if (!isEdit) return;
+    (async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return;
+      const { data: row } = await supabase
+        .from("birth_profiles")
+        .select("*")
+        .eq("user_id", userData.user.id)
+        .maybeSingle();
+      if (!row) return;
+      setBirthDate(row.birth_date ?? "");
+      setTimeKnown(
+        row.birth_time_precision === "exact"
+          ? "yes"
+          : row.birth_time_precision === "approximate"
+            ? "approx"
+            : "no",
+      );
+      setBirthTime(row.birth_time ?? "");
+      setTimeZone(row.iana_timezone ?? row.birth_time_zone ?? "");
+      setPlaceLabel(row.birth_place_label ?? "");
+      setLat(row.birth_lat != null ? String(row.birth_lat) : "");
+      setLon(row.birth_lon != null ? String(row.birth_lon) : "");
+    })();
+  }, [isEdit, supabase]);
 
   const precisionChip =
     timeKnown === "yes" ? "Exact" : timeKnown === "approx" ? "Approximate" : "Unknown";
@@ -85,7 +123,9 @@ export default function OnboardingPage() {
       setError(upsertErr.message);
       return;
     }
-    router.push("/day");
+    // First-run goes through chart verification (ASH-248); edits return
+    // to the verification screen for a re-check.
+    router.push("/verify");
     router.refresh();
   }
 
