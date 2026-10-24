@@ -196,6 +196,15 @@ export function generateDailyReading(
   const headline = themes[0];
   const explanation = themes.slice(1).join(" ") || DEFAULT_HEADLINES[0];
 
+  // Houses, when known (exact birth time), ground the reading in life
+  // domains; they never appear for approximate/unknown times (never
+  // guessed). Appended to the explanation as a house line.
+  const sunHouse = sun.house;
+  const houseLine =
+    sunHouse !== undefined
+      ? ` Your Sun in the ${ordinal(sunHouse)} house colors where this lands today.`
+      : "";
+
   const provenance: ReadingProvenance = {
     rulesetVersion: RULESET_VERSION,
     copyVersion: COPY_VERSION,
@@ -210,13 +219,18 @@ export function generateDailyReading(
     id: `${forDate}`,
     forDate,
     headline,
-    explanation,
+    explanation: explanation + houseLine,
     dos,
     donts: uniqueDonts,
     lifeAreas: areaList,
     provenance,
     uncertaintyNote: uncertaintyFor(profile),
   };
+}
+
+const ORDINALS = ["", "1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th", "11th", "12th"];
+function ordinal(n: number): string {
+  return ORDINALS[n] ?? `${n}th`;
 }
 
 function cap(s: string): string {
