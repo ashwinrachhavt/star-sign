@@ -10,11 +10,13 @@ import type {
 
 export const RULESET_VERSION = "2026-10.1";
 export const COPY_VERSION = "2026-10.1";
+export const EPHEMERIS_NAME = "astronomy-engine";
+export const EPHEMERIS_VERSION = "2.1.19";
 
 /**
  * Copy packs are the only source of interpretation language. They are
  * versioned so any persisted reading can be traced to the exact text set
- * that produced it. This pack is original writing for Our Sky.
+ * that produced it. This pack is original writing for Star Sign.
  */
 const HEADLINES: Record<string, string[]> = {
   "sun+aries": ["Lead before you explain yourself.", "Start the thing. Tune it later."],
@@ -62,13 +64,14 @@ const AREA_BY_SIGN: Record<string, LifeArea> = {
 };
 
 function uncertaintyFor(profile: BirthProfile): string {
+  const method = `Positions are calculated with the ${EPHEMERIS_NAME} astronomical library (v${EPHEMERIS_VERSION}).`;
   switch (profile.birthTimePrecision) {
     case "exact":
-      return "Calculated from your exact birth time. House-sensitive details are reliable.";
+      return `Calculated from your exact birth time. House-sensitive details are reliable. ${method}`;
     case "approximate":
-      return "Your birth time is approximate. Sign placements are solid; house details may shift.";
+      return `Your birth time is approximate. Sign placements are solid; house details may shift. ${method}`;
     case "unknown":
-      return "No birth time was given. Your Moon sign and all house placements could differ from what's shown. Noon was used as a neutral placeholder.";
+      return `No birth time was given. Your Moon sign and all house placements could differ from what's shown. Noon was used as a neutral placeholder. ${method}`;
   }
 }
 
@@ -194,9 +197,21 @@ export function generateDailyReading(
   const headline = themes[0];
   const explanation = themes.slice(1).join(" ") || DEFAULT_HEADLINES[0];
 
+  // Houses, when known (exact birth time), ground the reading in life
+  // domains; they never appear for approximate/unknown times (never
+  // guessed). Appended to the explanation as a house line.
+  const sunHouse = sun.house;
+  const houseLine =
+    sunHouse !== undefined
+      ? ` Your Sun in the ${ordinal(sunHouse)} house colors where this lands today.`
+      : "";
+
   const provenance: ReadingProvenance = {
     rulesetVersion: RULESET_VERSION,
     copyVersion: COPY_VERSION,
+    ephemerisName: EPHEMERIS_NAME,
+    ephemerisVersion: EPHEMERIS_VERSION,
+    selectedEvents: chosen ? [{ kind: "transit", planet: chosen.planet, sign: chosen.sign, natal: chosen.natalAspects[0].natal }] : [],
     calculatedAt: now.toISOString(),
     inputs,
   };
@@ -205,13 +220,18 @@ export function generateDailyReading(
     id: `${forDate}`,
     forDate,
     headline,
-    explanation,
+    explanation: explanation + houseLine,
     dos,
     donts: uniqueDonts,
     lifeAreas: areaList,
     provenance,
     uncertaintyNote: uncertaintyFor(profile),
   };
+}
+
+const ORDINALS = ["", "1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th", "11th", "12th"];
+function ordinal(n: number): string {
+  return ORDINALS[n] ?? `${n}th`;
 }
 
 function cap(s: string): string {

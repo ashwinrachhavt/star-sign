@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Our Sky",
-    "slug": "our-sky",
+    "name": "Star Sign",
+    "slug": "star-sign",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

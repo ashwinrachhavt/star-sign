@@ -63,6 +63,7 @@ export default function OnboardingPage() {
         birth_time: precision === "unknown" ? null : birthTime || null,
         birth_time_precision: precision,
         birth_time_zone: timeZone,
+        iana_timezone: timeZone,
         birth_lat: parseFloat(lat),
         birth_lon: parseFloat(lon),
         birth_place_label: placeLabel || null,

@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrCreateDailyReading } from "@/lib/readings";
-import { computeNatalChart, type DailyReading } from "@our-sky/core";
+import { computeNatalChart, type DailyReading } from "@star-sign/core";
 import { redirect } from "next/navigation";
 import SignOutButton from "./signout-button";
 

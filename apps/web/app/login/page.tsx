@@ -38,7 +38,7 @@ export default function LoginPage() {
 
   return (
     <main className="container">
-      <h1 style={{ margin: "48px 0 8px", fontSize: "2rem" }}>Our Sky</h1>
+      <h1 style={{ margin: "48px 0 8px", fontSize: "2rem" }}>Star Sign</h1>
       <p className="muted" style={{ marginBottom: 32 }}>
         A private sky shared with someone you care about.
       </p>
