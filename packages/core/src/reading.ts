@@ -1,4 +1,12 @@
-import { computeNatalChart, computeTransits, signForLongitude } from "./chart";
+import { computeNatalChart, computeTransits } from "./chart";
+import {
+  dontsForEvents,
+  dosForEvents,
+  explanationForEvent,
+  rankLifeAreas,
+  scoreTransitEvents,
+  type TransitEvent,
+} from "./ruleset";
 import type {
   BirthProfile,
   DailyReading,
@@ -59,30 +67,6 @@ const EXPLANATIONS: Record<string, string> = {
   "sun+aries": "With the Sun in Aries, initiative is cheaper than usual. What you begin now carries your signature.",
   "moon+cancer": "The Moon in Cancer pulls attention toward home and the people who feel like it.",
   "mercury+retrograde": "Mercury retrograde favors revision over launches. Contracts, messages, and plans deserve a second pass.",
-};
-
-const DOS_BY_AREA: Record<LifeArea, string[]> = {
-  love: ["Say the warm thing out loud.", "Plan one small ritual together."],
-  work: ["Ship the smallest useful version.", "Ask the question you've been avoiding."],
-  money: ["Review one recurring charge.", "Delay one non-essential purchase."],
-  home: ["Fix the small thing that keeps nagging you."],
-  family: ["Check in without an agenda."],
-  friends: ["Reach out first.", "Make one plan with a friend this week."],
-  self: ["Take ten unhurried minutes for yourself.", "Write down what you want next."],
-};
-
-const DONTS: string[] = [
-  "Don't mistake urgency for importance.",
-  "Don't relitigate a decision that's already made.",
-  "Don't answer messages while you're angry.",
-  "Don't promise more than tonight-you can deliver.",
-  "Don't compare your chapter three to someone's chapter ten.",
-];
-
-const AREA_BY_SIGN: Record<string, LifeArea> = {
-  aries: "self", taurus: "money", gemini: "friends", cancer: "home",
-  leo: "love", virgo: "work", libra: "love", scorpio: "money",
-  sagittarius: "friends", capricorn: "work", aquarius: "friends", pisces: "self",
 };
 
 function uncertaintyFor(profile: BirthProfile): string {
@@ -148,6 +132,16 @@ export interface GenerateDailyReadingArgs {
   now?: Date;
 }
 
+function eventToInput(e: TransitEvent): ReadingProvenanceInput {
+  return {
+    kind: "transit",
+    planet: e.transit,
+    sign: e.transitSign ?? "aries",
+    natal: e.natal,
+    aspect: e.type,
+  };
+}
+
 /**
  * Deterministic: same profile + date + ruleset version produce the same
  * reading. Idempotency lives with the caller (unique constraint on
@@ -173,71 +167,52 @@ export function generateDailyReading(
 
   const sunExplanation = EXPLANATIONS[`sun+${sun.sign}`];
 
-  // Theme 1: strongest fast transit (mercury..mars) to a natal personal
-  // planet — the headline is transit-driven (ASH-247). Natal sign templates
-  // only apply when no fast transit qualifies.
-  const fastTransits = transits.filter(
-    (t) => ["mercury", "venus", "mars"].includes(t.planet) && t.natalAspects.length > 0,
-  );
-  const chosen = fastTransits[seed % Math.max(fastTransits.length, 1)];
+  // 3.1a/b: all interpretation is driven by scored transit events.
+  const signOf = new Map(transits.map((t) => [t.planet, t.sign]));
+  const events = scoreTransitEvents(transits).map((e) => ({
+    ...e,
+    transitSign: signOf.get(e.transit),
+  }));
+
+  const phase = lunarPhase(now);
+  inputs.push({ kind: "lunar_phase", phase });
+
+  // Strongest event becomes the transit theme: a transit-driven headline
+  // (ASH-247, keyed planet+aspect — retrograde Mercury gets its own pool)
+  // plus the explanation line. The same event is recorded first in
+  // selectedEvents, so headline ↔ provenance always correlate (criterion 2).
+  const chosen = events[0];
   let headline: string;
   if (chosen) {
-    const a = chosen.natalAspects[0];
-    inputs.push({ kind: "transit", planet: chosen.planet, sign: chosen.sign, natal: a.natal });
+    inputs.push(eventToInput(chosen));
     const key =
-      chosen.planet === "mercury" && chosen.retrograde
+      chosen.transit === "mercury" && chosen.retrograde
         ? "mercury+retrograde"
-        : `${chosen.planet}+${a.type}`;
+        : `${chosen.transit}+${chosen.type}`;
     const pool = TRANSIT_HEADLINES[key] ?? DEFAULT_HEADLINES;
     headline = enforceWordLimit(pick(pool, seed >> 3));
-    if (chosen.planet === "mercury" && chosen.retrograde) {
+    if (chosen.transit === "mercury" && chosen.retrograde) {
       themes.push(EXPLANATIONS["mercury+retrograde"]);
     } else {
-      themes.push(
-        `${cap(chosen.planet)} in ${cap(chosen.sign)} is ${a.type.replace("conjunction", "aligning with").replace("opposition", "facing")} your natal ${cap(a.natal)}. Expect that part of life to be louder today.`,
-      );
+      themes.push(explanationForEvent(chosen));
     }
   } else {
+    // No qualifying transit: natal fallback, still word-limited.
     headline = enforceWordLimit(pick(DEFAULT_HEADLINES, seed >> 3));
   }
   if (sunExplanation) themes.push(sunExplanation);
 
-  // Life areas: from the day's dominant signs
-  const areas = new Set<LifeArea>();
-  areas.add(AREA_BY_SIGN[sun.sign]);
-  if (chosen) areas.add(AREA_BY_SIGN[chosen.sign]);
-  const phase = lunarPhase(now);
-  inputs.push({ kind: "lunar_phase", phase });
-  if (phase === "full moon") areas.add("love");
-  if (chosen?.planet === "mars") areas.add("work");
+  // Life areas: ranked hot/warm/quiet from summed event scores, not sun
+  // signs (criterion 1: different charts → different rankings).
+  const ranked = rankLifeAreas(events);
+  const areaList = ranked.slice(0, 3).map((r) => r.area);
 
-  const areaList = [...areas].filter(Boolean).slice(0, 3);
-
-  const dos: string[] = [];
-  for (const area of areaList) {
-    const opts = DOS_BY_AREA[area];
-    dos.push(pick(opts, seed >> (dos.length + 1)));
-  }
-  // Always deliver three dos: pad from the general pool, skipping duplicates.
-  const generalPool = [
-    ...DOS_BY_AREA.self, ...DOS_BY_AREA.work, ...DOS_BY_AREA.friends,
-  ];
-  let pad = 0;
-  while (dos.length < 3 && pad < generalPool.length * 2) {
-    const candidate = pick(generalPool, (seed >> (pad + 3)) + pad * 7);
-    if (!dos.includes(candidate)) dos.push(candidate);
-    pad++;
-  }
-  while (dos.length < 3) {
-    dos.push(pick(DOS_BY_AREA.self, dos.length + seed));
-  }
-
-  const donts = [
-    pick(DONTS, seed >> 2),
-    pick(DONTS, seed >> 4),
-    pick(DONTS, seed >> 6),
-  ];
-  const uniqueDonts = [...new Set(donts)];
+  // 3.1b: dos/don'ts are selected by event themes — every item traces to
+  // a real event in selectedEvents (criterion 2). On quiet days the lists
+  // are intentionally shorter; no generic padding breaks traceability.
+  const selectedEvents = events.slice(0, 5);
+  const dos = dosForEvents(selectedEvents).slice(0, 3);
+  const donts = dontsForEvents(selectedEvents).slice(0, 3);
 
   const explanation = themes.slice(1).join(" ") || DEFAULT_HEADLINES[0];
 
@@ -255,7 +230,7 @@ export function generateDailyReading(
     copyVersion: COPY_VERSION,
     ephemerisName: EPHEMERIS_NAME,
     ephemerisVersion: EPHEMERIS_VERSION,
-    selectedEvents: chosen ? [{ kind: "transit", planet: chosen.planet, sign: chosen.sign, natal: chosen.natalAspects[0].natal }] : [],
+    selectedEvents: selectedEvents.map(eventToInput),
     calculatedAt: now.toISOString(),
     inputs,
   };
@@ -266,7 +241,7 @@ export function generateDailyReading(
     headline,
     explanation: explanation + houseLine,
     dos,
-    donts: uniqueDonts,
+    donts,
     lifeAreas: areaList,
     provenance,
     uncertaintyNote: uncertaintyFor(profile),

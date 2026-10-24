@@ -73,7 +73,14 @@ export interface TransitObservation {
 
 export type ReadingProvenanceInput =
   | { kind: "natal_placement"; planet: Planet; sign: ZodiacSign }
-  | { kind: "transit"; planet: Planet; sign: ZodiacSign; natal: Planet }
+  | {
+      kind: "transit";
+      planet: Planet;
+      sign: ZodiacSign;
+      natal: Planet;
+      /** Aspect family of the event; present from ruleset 2026-10.2 (ASH-246). */
+      aspect?: Aspect["type"];
+    }
   | { kind: "lunar_phase"; phase: string };
 
 export interface ReadingProvenance {

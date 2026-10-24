@@ -49,3 +49,11 @@ Append-only record of shipped changes. Format per `.agents/workflows.md`.
 - Rollback: revert PR
 - Risk: cosmetic naming only; import specifier changes touch all workspace `@our-sky/core` references — CI/typecheck catches a miss. design/reference/ screenshots now gitignored (clean-room: reference material stays local).
 - Decisions: `.agents/` brain docs remain untracked (local-only per owner's setup); PR covers rename + tooling, Linear epics untouched.
+
+## 2026-10-24 — Transit-driven life areas + dos/don'ts (ASH-246)
+
+- Change: Interpretation rewired from sun-sign mapping to scored transit events. New `packages/core/src/ruleset.ts` — event→life-area rules (transiting planet theme + natal-target refinement), aspect/orb/retrograde scoring, hot/warm/quiet ranking, event-traced dos/don'ts pools keyed by transiting planet and aspect family. `reading.ts` consumes it: areas ranked by summed event scores (never sun signs), dos/don'ts selected only from events recorded in `provenance.selectedEvents` (top-5 by score), strongest event drives the explanation theme. RULESET/COPY versions bumped to 2026-10.2.
+- Migration: 0004_ruleset_version_bump.sql (column defaults only)
+- Rollback: revert PR; DB undo in migration header comment.
+- Risk: readings generated after this change carry 2026-10.2 provenance — persisted rows keep old versions (no rewrite of past readings per copy.md template hygiene). Life-area lists can be shorter on eventless days (no generic padding, traceability rule); UI already tolerates variable-length lists.
+- Decisions: (1) `ReadingProvenanceInput` transit variant gains optional `aspect` field (additive, peer-coordinated) so each selected event carries its aspect family. (2) Dos/don'ts no longer padded to three from generic pools — traceability criterion beats the old "always three" shape; existing UI handles 0–3 items. (3) Outer→outer transit events excluded (move too slowly to feel "today"); at least one personal planet required per event. (4) Provenance harness generalized to latest-wins scan of all migrations (was hardcoded to 0002), so future version bumps only add a migration.
