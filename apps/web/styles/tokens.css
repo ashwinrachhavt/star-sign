@@ -1,0 +1,39 @@
+/* Star Sign design tokens — single source (`.agents/design-system.md` §2–4, §8).
+   Mobile mirror: apps/mobile/theme/tokens.ts must stay value-identical. */
+
+:root {
+  /* color — app is dark-first */
+  --bg: #0d0d0d;             /* near-black, slightly warm */
+  --ink: #e8e6e1;            /* off-white primary text */
+  --ink-secondary: #8f8d88;  /* inactive nav, secondary */
+  --ink-tertiary: #5a5854;   /* provenance, timestamps */
+  --hairline: #2e2d2b;       /* card borders, dividers */
+  --card-bg: transparent;    /* cards are bordered, not filled */
+  --danger: #b3401f;
+
+  /* spacing — 4px base scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* motion — calm fades only */
+  --motion-fast: 120ms;
+  --motion-base: 200ms;
+  --motion-slow: 320ms;
+  --motion-ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f7f6f3;
+    --ink: #111110;
+    --ink-secondary: #6d6b66;
+    --ink-tertiary: #a3a19c;
+    --hairline: #d8d6d1;
+  }
+}
