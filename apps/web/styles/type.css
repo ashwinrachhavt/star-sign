@@ -1,0 +1,77 @@
+/* Type system — three voices, strict roles (design-system.md §3).
+   Any UI element is exactly one of: .type-display (serif), .type-prose (sans),
+   .type-mono / .type-micro-label (mono). A card title is never mono; a label
+   is never serif. Role discipline is enforced in review. */
+
+/* ---- voices ---- */
+
+.type-display {
+  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: normal;
+}
+
+.type-prose {
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  font-weight: 300;
+  line-height: 1.6;
+  max-width: 60ch;
+}
+
+.type-prose b,
+.type-prose strong {
+  font-weight: 400;
+}
+
+.type-mono {
+  font-family: var(--font-mono), ui-monospace, "SF Mono", monospace;
+  font-weight: 400;
+}
+
+/* micro-label recipe (§3): mono 11px caps, tracking +0.08em */
+.type-micro-label {
+  font-family: var(--font-mono), ui-monospace, "SF Mono", monospace;
+  font-weight: 400;
+  font-size: 11px;
+  line-height: 1.45;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ---- web type scale: 11 / 13 / 15 / 17 / 22 / 28 / 36 ---- */
+
+.t-11 {
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.t-13 {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.t-15 {
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.t-17 {
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.t-22 {
+  font-size: 22px;
+  line-height: 1.25;
+}
+
+.t-28 {
+  font-size: 28px;
+  line-height: 1.15;
+}
+
+.t-36 {
+  font-size: 36px;
+  line-height: 1.15;
+}

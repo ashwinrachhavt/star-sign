@@ -30,11 +30,14 @@ begin;
 -- 0.2b — provenance columns on daily_readings ------------------------------
 -- Existing rows predate versioning; the v1 constants in
 -- packages/core/src/reading.ts are their faithful provenance.
+-- (Defaults updated in ASH-236 when the ephemeris moved to astronomy-engine;
+-- rows written under the old astronomia calculator keep their own column
+-- values — only the default for new rows changed.)
 alter table public.daily_readings
   add column ruleset_version text not null default '2026-10.1',
   add column copy_version text not null default '2026-10.1',
-  add column ephemeris_name text not null default 'astronomia',
-  add column ephemeris_version text not null default '4.2.0',
+  add column ephemeris_name text not null default 'astronomy-engine',
+  add column ephemeris_version text not null default '2.1.19',
   add column selected_events jsonb not null default '[]'::jsonb;
 
 -- 0.2d — IANA timezone on birth_profiles -----------------------------------
@@ -89,6 +92,8 @@ create trigger set_updated_at before update on public.compatibility_reports
   for each row execute function public.set_updated_at();
 create trigger set_updated_at before update on public.reflections
   for each row execute function public.set_updated_at();
+
+commit;
 
 -- 0.2d — IANA timezone on birth_profiles: added above (line 42), before
 -- the index that references it. Fallback in the read path is the existing

@@ -1,0 +1,416 @@
+/* Star Sign v1 component styles (design-system.md §5).
+   All values from tokens.css / type.css — no hard-coded hexes, px sizes,
+   durations, or easings here. Cards: 1px hairline border, no radius,
+   no shadow, no fill. Interactive elements: 44px min target, 2px focus
+   outline (AA floor per §8). */
+
+/* ---- shared ---- */
+
+.ui-card {
+  border: 1px solid var(--hairline);
+  background: var(--card-bg);
+  padding: var(--space-5);
+}
+
+.ui-focusable:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* ---- ScreenHeader ---- */
+
+.ui-screen-header {
+  display: flex;
+  flex-direction: column;
+}
+
+.ui-screen-header-title {
+  text-align: center;
+  padding: var(--space-4) 0;
+}
+
+.ui-screen-header-tabs {
+  display: flex;
+}
+
+.ui-screen-header-tab {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 44px;
+  color: var(--ink-secondary);
+  text-decoration: none;
+  padding: var(--space-3) var(--space-2);
+  border-bottom: 1px solid var(--hairline);
+  transition: color var(--motion-base) var(--motion-ease);
+}
+
+.ui-screen-header-tab[data-active="true"] {
+  color: var(--ink);
+  border-bottom: 2px solid var(--ink);
+}
+
+/* ---- TabBar ---- */
+
+.ui-tab-bar {
+  display: flex;
+  border-top: 1px solid var(--hairline);
+}
+
+.ui-tab-bar-item {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 44px;
+  color: var(--ink-secondary);
+  text-decoration: none;
+  transition: color var(--motion-base) var(--motion-ease);
+}
+
+.ui-tab-bar-item[data-active="true"] {
+  color: var(--ink);
+}
+
+/* ---- PlacementCard ---- */
+
+.ui-placement-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.ui-placement-card-prose {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* ---- CardFooterLink ---- */
+
+.ui-card-footer-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--ink-secondary);
+  min-height: 44px;
+}
+
+.ui-card-footer-link a {
+  color: var(--ink-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  transition: color var(--motion-base) var(--motion-ease);
+}
+
+.ui-card-footer-link a:hover {
+  color: var(--ink);
+}
+
+/* ---- ChartTable ---- */
+
+.ui-chart-table {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.ui-chart-table-axis {
+  color: var(--ink-tertiary);
+  writing-mode: vertical-rl;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ui-chart-table-axis-flipped {
+  transform: rotate(180deg);
+}
+
+.ui-chart-table-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.ui-chart-table-row {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr auto;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 44px;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.ui-chart-table-row:last-child {
+  border-bottom: none;
+}
+
+.ui-chart-table-house {
+  text-align: right;
+}
+
+/* ---- ProfileHeader ---- */
+
+.ui-profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  text-align: center;
+}
+
+.ui-profile-header-avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: var(--space-2);
+}
+
+.ui-profile-header-handle {
+  color: var(--ink-secondary);
+}
+
+.ui-profile-header-signs {
+  color: var(--ink-secondary);
+}
+
+/* ---- Glance ---- */
+
+.ui-glance {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.ui-glance-label {
+  color: var(--ink-tertiary);
+}
+
+/* ---- DosDonts ---- */
+
+.ui-dos-donts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+}
+
+@media (max-width: 480px) {
+  .ui-dos-donts {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ui-dos-donts-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.ui-dos-donts-label {
+  color: var(--ink-tertiary);
+}
+
+.ui-dos-donts-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* ---- TransitEventCard ---- */
+
+.ui-transit-event-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: center;
+  text-align: center;
+}
+
+.ui-transit-event-card-dates {
+  color: var(--ink-secondary);
+}
+
+/* ---- FriendRow ---- */
+
+.ui-friend-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 44px;
+  padding: var(--space-3) var(--space-4);
+  color: inherit;
+  text-decoration: none;
+  transition: background var(--motion-fast) var(--motion-ease);
+}
+
+.ui-friend-row-name {
+  margin-bottom: var(--space-1);
+}
+
+.ui-friend-row-signs {
+  color: var(--ink-secondary);
+}
+
+.ui-friend-row-arrow {
+  color: var(--ink-secondary);
+}
+
+/* ---- LifeAreaRow ---- */
+
+.ui-life-area-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 44px;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.ui-life-area-row:last-child {
+  border-bottom: none;
+}
+
+.ui-life-area-row-state {
+  color: var(--ink-secondary);
+}
+
+/* ---- ProvenanceBlock ---- */
+
+.ui-provenance-block {
+  border-top: 1px solid var(--hairline);
+  padding-top: var(--space-3);
+}
+
+.ui-provenance-block summary {
+  color: var(--ink-tertiary);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  list-style: none;
+}
+
+.ui-provenance-block summary::-webkit-details-marker {
+  display: none;
+}
+
+.ui-provenance-block summary::after {
+  content: "+";
+  margin-left: auto;
+}
+
+.ui-provenance-block[open] summary::after {
+  content: "−";
+}
+
+.ui-provenance-block-body {
+  color: var(--ink-tertiary);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2) 0 var(--space-3);
+}
+
+/* ---- Button ---- */
+
+.ui-button-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  color: var(--ink);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: color var(--motion-base) var(--motion-ease);
+}
+
+.ui-button-link:hover {
+  color: var(--ink-secondary);
+}
+
+.ui-button-solid {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-5);
+  background: var(--ink);
+  color: var(--bg);
+  border: 1px solid var(--ink);
+  cursor: pointer;
+  transition: opacity var(--motion-base) var(--motion-ease);
+}
+
+.ui-button-solid:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ---- Input ---- */
+
+.ui-input-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.ui-input-label {
+  color: var(--ink-secondary);
+}
+
+.ui-input-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.ui-input {
+  flex: 1;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--hairline);
+  color: var(--ink);
+  padding: var(--space-3) 0;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.ui-input:focus {
+  outline: none;
+  border-bottom-color: var(--ink);
+}
+
+.ui-input:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.ui-input-chip {
+  color: var(--ink-secondary);
+  border: 1px solid var(--hairline);
+  padding: var(--space-1) var(--space-2);
+  white-space: nowrap;
+}
+
+/* ---- GrainImage ---- */
+
+.ui-grain-image {
+  display: block;
+  filter: grayscale(1) contrast(1.1);
+  mix-blend-mode: normal;
+}

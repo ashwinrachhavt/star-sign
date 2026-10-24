@@ -1,0 +1,85 @@
+.demo {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-5) var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.demo-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: center;
+  text-align: center;
+}
+
+.demo-card {
+  border: 1px solid var(--hairline);
+  background: var(--card-bg);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.demo-footer {
+  color: var(--ink-secondary);
+}
+
+.demo-link {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.demo-chart {
+  display: flex;
+  gap: var(--space-3);
+  align-items: stretch;
+}
+
+.demo-axis {
+  color: var(--ink-secondary);
+  writing-mode: vertical-rl;
+  display: flex;
+  align-items: center;
+}
+
+.demo-axis-left {
+  transform: rotate(180deg);
+}
+
+.demo-rows {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.demo-row {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr auto;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.demo-row:last-child {
+  border-bottom: none;
+}
+
+.demo-sign {
+  color: var(--ink);
+}
+
+.demo-house {
+  color: var(--ink);
+  text-align: right;
+}
+
+.demo-scale {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
