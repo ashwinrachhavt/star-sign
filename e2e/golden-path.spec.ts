@@ -6,10 +6,11 @@ import { test, expect } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL = process.env.SUPABASE_URL ?? "http://localhost:54321";
-// Local stack's well-known anon key is stable per project; CI passes it
-// explicitly. Fallback covers `supabase start` default output.
+// The local Supabase stack's anon key is stable and public (printed by
+// `supabase start`); CI reuses it. An empty-string env var (unset secret)
+// must not override the fallback.
 const ANON_KEY =
-  process.env.SUPABASE_ANON_KEY ??
+  process.env.SUPABASE_ANON_KEY ||
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0";
 
 const email = `smoke-${Date.now()}@example.com`;
