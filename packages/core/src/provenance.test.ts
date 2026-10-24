@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import {
@@ -15,18 +15,28 @@ const repoRoot = path.join(
 );
 
 describe("provenance constants agree with the database (ASH-232 criterion 3)", () => {
-  const migration = readFileSync(
-    path.join(repoRoot, "supabase/migrations/0002_data_model_v2.sql"),
-    "utf8",
-  );
+  const migrationsDir = path.join(repoRoot, "supabase/migrations");
+  const migrations = readdirSync(migrationsDir)
+    .filter((f) => f.endsWith(".sql"))
+    .sort();
 
+  // Effective default = last `set default` (or initial add-column default)
+  // for the column across migrations, applied in filename order.
   const defaultFor = (column: string) => {
-    const re = new RegExp(
-      `add column ${column} text not null default '([^']+)'`,
-    );
-    const m = migration.match(re);
-    if (!m) throw new Error(`No default found for ${column} in migration 0002`);
-    return m[1];
+    let current: string | null = null;
+    const addRe = new RegExp(`add column ${column} text not null default '([^']+)'`);
+    const setRe = new RegExp(`alter column ${column} set default '([^']+)'`);
+    for (const file of migrations) {
+      const sql = readFileSync(path.join(migrationsDir, file), "utf8");
+      for (const line of sql.split("\n")) {
+        const add = line.match(addRe);
+        if (add) current = add[1];
+        const set = line.match(setRe);
+        if (set) current = set[1];
+      }
+    }
+    if (current === null) throw new Error(`No default found for ${column} in migrations`);
+    return current;
   };
 
   it("ruleset_version matches RULESET_VERSION", () => {

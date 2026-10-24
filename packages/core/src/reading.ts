@@ -8,8 +8,8 @@ import type {
   ReadingProvenanceInput,
 } from "./types";
 
-export const RULESET_VERSION = "2026-10.1";
-export const COPY_VERSION = "2026-10.1";
+export const RULESET_VERSION = "2026-10.2";
+export const COPY_VERSION = "2026-10.2";
 export const EPHEMERIS_NAME = "astronomy-engine";
 export const EPHEMERIS_VERSION = "2.1.19";
 
@@ -18,21 +18,43 @@ export const EPHEMERIS_VERSION = "2.1.19";
  * versioned so any persisted reading can be traced to the exact text set
  * that produced it. This pack is original writing for Star Sign.
  */
-const HEADLINES: Record<string, string[]> = {
-  "sun+aries": ["Lead before you explain yourself.", "Start the thing. Tune it later."],
-  "sun+taurus": ["Slow is a strategy today.", "Protect what you already built."],
-  "moon+cancer": ["Feelings get a vote, not the wheel.", "Home base needs attention."],
-  "mercury+retrograde": ["Say it twice. Confirm it once more.", "Re-read before you hit send."],
-  "venus+libra": ["Charm opens doors; honesty keeps them open.", "Ask for what you actually want."],
-  "mars+capricorn": ["Ambition wears work clothes today.", "One hard thing, done well."],
+/**
+ * Headline templates keyed to transit events (aspect family × theme), not
+ * sun signs — ASH-247. The day's actual sky picks the line; the natal sign
+ * only breaks ties when no fast transit qualifies. Key: `${planet}+${aspect}`
+ * (or `${planet}+retrograde`), evaluated in fast-first order
+ * (mercury → venus → mars). All lines ≤12 words, copy.md voice: second
+ * person, declarative, concrete, no certainty inflation, no fear-mongering.
+ */
+const TRANSIT_HEADLINES: Record<string, string[]> = {
+  "mercury+retrograde": [
+    "Say it twice. Confirm it once more.",
+    "Re-read before you hit send.",
+    "The message can wait until it's right.",
+  ],
+  "mercury+conjunction": ["Say the thing you've been rehearsing.", "One honest sentence opens the day."],
+  "mercury+sextile": ["The ask is easier than you think.", "Send it. See what comes back."],
+  "mercury+square": ["Say less. Mean more.", "The wrong words cost more than silence today."],
+  "mercury+trine": ["Talk it through — the words arrive easily.", "A conversation moves something stuck."],
+  "mercury+opposition": ["Hear them out before you answer.", "The other side has a point today."],
+  "venus+conjunction": ["What you want is closer than it looks.", "Let yourself be seen today."],
+  "venus+sextile": ["Make the warm gesture first.", "Beauty earns its keep today. Use it."],
+  "venus+square": ["Wanting and having argue. Don't referee.", "Spend on what lasts, not what shines."],
+  "venus+trine": ["Give the affection you've been saving.", "Pleasure is on the schedule today."],
+  "venus+opposition": ["Name what you need out loud.", "Meet them halfway — then say so."],
+  "mars+conjunction": ["Pick your moment and move.", "The door is open. Walk through it."],
+  "mars+sextile": ["Start before you feel ready.", "One decisive move beats three careful ones."],
+  "mars+square": ["Push, but pick the door that opens.", "Friction is information. Adjust grip, not goal."],
+  "mars+trine": ["Your effort pays same-day today.", "Do the hard thing while it's easy."],
+  "mars+opposition": ["The resistance is the workout.", "Stand your ground without raising your voice."],
 };
 
+/** Fallback only when no fast transit qualifies — the quiet-sky line. */
 const DEFAULT_HEADLINES = [
   "The sky is quiet. Make your own weather.",
   "Small moves compound today.",
   "Pay attention to what repeats.",
 ];
-
 const EXPLANATIONS: Record<string, string> = {
   "sun+aries": "With the Sun in Aries, initiative is cheaper than usual. What you begin now carries your signature.",
   "moon+cancer": "The Moon in Cancer pulls attention toward home and the people who feel like it.",
@@ -79,6 +101,21 @@ function pick<T>(arr: T[], seed: number): T {
   // Bitwise shifts on seeds ≥ 2^31 yield negatives; normalize the index.
   const i = ((Math.trunc(seed) % arr.length) + arr.length) % arr.length;
   return arr[i];
+}
+
+/** Headline quality bar (copy.md): hard ceiling of 12 words, generator-enforced. */
+const HEADLINE_MAX_WORDS = 12;
+
+function wordCount(s: string): number {
+  return s.trim().split(/\s+/).filter(Boolean).length;
+}
+
+function enforceWordLimit(headline: string): string {
+  if (wordCount(headline) <= HEADLINE_MAX_WORDS) return headline;
+  const sentences = headline.match(/[^.!?]+[.!?]+/g) ?? [headline];
+  const fits = sentences.map((s) => s.trim()).filter((s) => wordCount(s) > 0 && wordCount(s) <= HEADLINE_MAX_WORDS);
+  if (fits.length > 0) return fits[0];
+  return headline.split(/\s+/).slice(0, HEADLINE_MAX_WORDS).join(" ");
 }
 
 function hash(str: string): number {
@@ -134,28 +171,36 @@ export function generateDailyReading(
 
   const seed = hash(`${profile.birthDate}|${sun.sign}|${forDate}|${RULESET_VERSION}`);
 
-  // Theme 1: natal sun
-  themes.push(pick(HEADLINES[`sun+${sun.sign}`] ?? DEFAULT_HEADLINES, seed));
   const sunExplanation = EXPLANATIONS[`sun+${sun.sign}`];
-  if (sunExplanation) themes.push(sunExplanation);
 
-  // Theme 2: strongest fast transit (mercury..mars) to a natal personal planet
+  // Theme 1: strongest fast transit (mercury..mars) to a natal personal
+  // planet — the headline is transit-driven (ASH-247). Natal sign templates
+  // only apply when no fast transit qualifies.
   const fastTransits = transits.filter(
     (t) => ["mercury", "venus", "mars"].includes(t.planet) && t.natalAspects.length > 0,
   );
   const chosen = fastTransits[seed % Math.max(fastTransits.length, 1)];
+  let headline: string;
   if (chosen) {
     const a = chosen.natalAspects[0];
     inputs.push({ kind: "transit", planet: chosen.planet, sign: chosen.sign, natal: a.natal });
+    const key =
+      chosen.planet === "mercury" && chosen.retrograde
+        ? "mercury+retrograde"
+        : `${chosen.planet}+${a.type}`;
+    const pool = TRANSIT_HEADLINES[key] ?? DEFAULT_HEADLINES;
+    headline = enforceWordLimit(pick(pool, seed >> 3));
     if (chosen.planet === "mercury" && chosen.retrograde) {
-      themes.push(pick(HEADLINES["mercury+retrograde"], seed >> 3));
       themes.push(EXPLANATIONS["mercury+retrograde"]);
     } else {
       themes.push(
         `${cap(chosen.planet)} in ${cap(chosen.sign)} is ${a.type.replace("conjunction", "aligning with").replace("opposition", "facing")} your natal ${cap(a.natal)}. Expect that part of life to be louder today.`,
       );
     }
+  } else {
+    headline = enforceWordLimit(pick(DEFAULT_HEADLINES, seed >> 3));
   }
+  if (sunExplanation) themes.push(sunExplanation);
 
   // Life areas: from the day's dominant signs
   const areas = new Set<LifeArea>();
@@ -194,7 +239,6 @@ export function generateDailyReading(
   ];
   const uniqueDonts = [...new Set(donts)];
 
-  const headline = themes[0];
   const explanation = themes.slice(1).join(" ") || DEFAULT_HEADLINES[0];
 
   // Houses, when known (exact birth time), ground the reading in life
