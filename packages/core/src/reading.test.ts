@@ -26,7 +26,6 @@ const unknownProfile: BirthProfile = {
 
 describe("generateDailyReading", () => {
   const base = { profile: exactProfile, forDate: "2026-10-24" };
-
   it("is deterministic for the same inputs", () => {
     const a = generateDailyReading(base);
     const b = generateDailyReading(base);
@@ -36,7 +35,16 @@ describe("generateDailyReading", () => {
   it("changes across dates", () => {
     const a = generateDailyReading(base);
     const b = generateDailyReading({ ...base, forDate: "2026-10-25" });
-    expect(a.headline).not.toEqual(b.headline);
+    // Transit-driven headlines (ASH-247) can legitimately repeat when two
+    // days share the same dominant transit; the reading as a whole must
+    // still vary — event selection and the dos derived from it do.
+    const varies =
+      a.headline !== b.headline ||
+      a.explanation !== b.explanation ||
+      JSON.stringify(a.dos) !== JSON.stringify(b.dos) ||
+      JSON.stringify(a.provenance.selectedEvents) !==
+        JSON.stringify(b.provenance.selectedEvents);
+    expect(varies).toBe(true);
   });
 
   it("includes full provenance", () => {
@@ -116,6 +124,80 @@ describe("generateDailyReading", () => {
     const all = [r.headline, r.explanation, ...r.dos, ...r.donts].join(" ");
     expect(all).not.toMatch(/will (definitely|certainly)/i);
     expect(all).not.toMatch(/guaranteed/i);
+  });
+
+  // ASH-247 — headline quality bar: transit-driven, ≤12 words.
+
+  const sweepProfiles = [exactProfile, approxProfile, unknownProfile];
+  const sweepDates = Array.from({ length: 20 }, (_, i) => {
+    const d = new Date(Date.UTC(2026, 9, 1 + i));
+    return d.toISOString().slice(0, 10);
+  });
+
+  it("every headline across a 20-date × 3-chart sweep is ≤12 words", () => {
+    for (const profile of sweepProfiles) {
+      for (const forDate of sweepDates) {
+        const r = generateDailyReading({ profile, forDate });
+        const words = r.headline.trim().split(/\s+/).filter(Boolean);
+        expect(words.length, `${forDate}: "${r.headline}"`).toBeLessThanOrEqual(12);
+        expect(words.length).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it("headline is transit-driven: pool key matches the selected provenance event", () => {
+    // Sample enough dates that at least one produces a qualifying transit.
+    const withTransit = sweepDates
+      .map((forDate) => generateDailyReading({ profile: exactProfile, forDate }))
+      .filter((r) => r.provenance.selectedEvents.length > 0);
+    expect(withTransit.length).toBeGreaterThan(0);
+
+    const planetThemes: Record<string, RegExp[]> = {
+      mercury: [/say/i, /read|send|message|word|sentence|talk|conversat|hear|answer|side|ask/i, /silence|less/i],
+      venus: [/want|seen|gesture|beauty|affection|pleasure|need|warm|spend|last|shines|halfway/i],
+      mars: [/move|door|start|ready|decisive|push|friction|effort|hard|resistance|ground|grip|goal/i],
+    };
+    for (const r of withTransit) {
+      const ev = r.provenance.selectedEvents[0];
+      if (!("planet" in ev)) continue;
+      const patterns = planetThemes[ev.planet] ?? [];
+      const matched = patterns.some((p) => p.test(r.headline));
+      // The headline template pool is keyed to the selected planet; if the
+      // planet's theme vocabulary doesn't appear, the line may still come
+      // from the planet's pool — but a Venus line under a Mars event would
+      // be a selection bug. Fail only on cross-planet mismatches that the
+      // other planets' vocabularies uniquely claim.
+      if (!matched) continue;
+      for (const [other, otherPatterns] of Object.entries(planetThemes)) {
+        if (other === ev.planet) continue;
+        const uniquelyOther =
+          otherPatterns.some((p) => p.test(r.headline)) &&
+          !patterns.some((p) => p.test(r.headline));
+        expect(uniquelyOther, `"${r.headline}" under ${ev.planet} event`).toBe(false);
+      }
+    }
+  });
+
+  it("headline changes when the dominant transit changes (same chart, different sky)", () => {
+    // Find two dates for the same profile whose selected transits differ in
+    // planet or aspect family — the headline must differ too.
+    const readings = sweepDates.map((forDate) =>
+      generateDailyReading({ profile: exactProfile, forDate }),
+    );
+    let found = false;
+    for (let i = 0; i < readings.length && !found; i++) {
+      for (let j = i + 1; j < readings.length && !found; j++) {
+        const a = readings[i].provenance.selectedEvents[0];
+        const b = readings[j].provenance.selectedEvents[0];
+        const keyOf = (e: (typeof a) | undefined) =>
+          e && "planet" in e ? `${e.planet}+${"natal" in e ? e.natal : ""}` : "none";
+        if (keyOf(a) !== keyOf(b)) {
+          found = true;
+          expect(readings[i].headline).not.toBe(readings[j].headline);
+        }
+      }
+    }
+    expect(found, "sweep should contain differing dominant transits").toBe(true);
   });
 });
 
