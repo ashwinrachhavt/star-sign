@@ -2,7 +2,7 @@
 
 **Status:** Discovery draft
 
-**Last updated:** 2026-09-20
+**Last updated:** 2026-10-24
 
 **Decision status legend:**
 
@@ -91,25 +91,25 @@ This contract is **proposed**, not accepted.
 
 ### 8.1 Accepted architecture defaults
 
-- **Application shape:** Rails 8.1 modular monolith.
-- **Rendering:** server-rendered HTML using ERB and Hotwire.
-- **Primary database:** PostgreSQL.
-- **Async execution:** Solid Queue.
-- **Authentication:** Rails-native session-cookie flow with a durable, revocable session record.
-- **Tests:** Minitest initially.
+> **2026-10-24 pivot (product-owner decision):** the Rails-first proposal (ARC-001/003/004) is superseded. The product now targets a JavaScript monorepo with a Next.js web app, a managed Postgres, and an Expo iOS app. The apprenticeship docs in `ideation/` remain as learning source material, not governing architecture. Rails-specific slices in Sections 8–9 translate to the new stack: server-rendered flows become Next.js App Router routes, Solid Queue becomes scheduled Supabase Edge Functions / pg_cron, and Minitest becomes Vitest.
+
+- **Application shape:** pnpm monorepo — `apps/web` (Next.js App Router), `apps/mobile` (Expo/React Native), `packages/core` (shared domain types, astrology engine, reading generator), `packages/db` (Supabase schema types).
+- **Rendering:** Next.js App Router with server components; route handlers for API.
+- **Primary database:** Supabase Postgres (chosen over Neon for bundled Auth + Realtime + Storage), accessed from web/mobile via Supabase client; service-role access from server routes.
+- **Async execution:** pg_cron + scheduled Edge Functions for daily reading generation, transit checks, and notification dispatch.
+- **Authentication:** Supabase Auth (email + OAuth), session persistence in web and mobile.
+- **Tests:** Vitest for unit/domain, Playwright for web E2E.
 
 ### 8.2 System boundaries
 
 ```text
-Browser
-  -> Rails routes/controllers
-  -> application/domain layer
-  -> PostgreSQL (durable truth)
-  -> Solid Queue workers (scheduled and retryable work)
-  -> replaceable adapters: astrology calculation/provider, AI provider, notification provider
+Web (Next.js) / Mobile (Expo)
+  -> Supabase Auth (identity)
+  -> Postgres via RLS (durable truth) — RLS policies are the ownership boundary
+  -> packages/core domain layer (chart calc, reading generation, provenance) — deterministic, provider-agnostic
+  -> replaceable adapters: ephemeris provider, AI provider, push/notification provider
+  -> pg_cron + Edge Functions (scheduled + retryable work)
 ```
-
-Rails owns authorization, HTML rendering, domain rules, jobs, and durable state. External providers are inputs behind interfaces; they must not become the source of truth for identity, user-owned content, authorization, consent, or persisted reading provenance.
 
 ### 8.3 Initial data model
 
@@ -162,12 +162,14 @@ Do not create `Relationship`, `Person`, `BirthProfile`, `Chart`, `Transit`, `Rea
 
 | ID | Decision | Status | Rationale | Revisit trigger |
 | --- | --- | --- | --- | --- |
-| ARC-001 | Rails-first modular monolith | Proposed | Optimizes for coherent full-stack ownership and avoids premature split-stack complexity. | Multiple independently deployed clients or a measured team/product need. |
-| ARC-002 | PostgreSQL as durable truth | Proposed | Strong relational integrity and a natural fit for Rails domain data. | Material operational or product constraint. |
-| ARC-003 | ERB + Hotwire as first UI | Proposed | Delivers responsive browser interactions without maintaining a second client application. | Evidence that user needs cannot be met acceptably. |
-| ARC-004 | Solid Queue for jobs | Proposed | Keeps early asynchronous work within the Rails stack. | Operational limits demonstrated in production. |
-| PRD-001 | Under-one-minute useful insight | Proposed | Supports immediate perceived value and retention without withholding the core experience. | User research falsifies the hypothesis. |
-| PRD-002 | Explainability, privacy, consent, and uncertainty | Proposed | These are essential trust constraints for sensitive personal and relationship data. | Never; only implementation details may change. |
+| ARC-001 | ~~Rails-first modular monolith~~ → JS monorepo (Next.js + Expo + Supabase) | **Accepted** (superseded 2026-10-24) | Product owner wants web + iOS from day one and full Pro-parity scope; shared TypeScript domain layer serves both clients. | Operational limits of the managed stack. |
+| ARC-002 | PostgreSQL as durable truth (Supabase) | **Accepted** | Strong relational integrity; RLS enforces ownership at the database boundary for both clients. | — |
+| ARC-003 | ~~ERB + Hotwire~~ → Next.js App Router web client | **Accepted** (superseded 2026-10-24) | Shares types and domain logic with the mobile client. | — |
+| ARC-004 | ~~Solid Queue~~ → pg_cron + scheduled Edge Functions | **Accepted** (superseded 2026-10-24) | Keeps scheduled work inside the Supabase stack. | — |
+| ARC-005 | Mobile: React Native + Expo (over Flutter) | Accepted (2026-10-24) | Shared language/types with web; Expo EAS handles iOS builds. | Native performance or capability gaps. |
+| ARC-006 | Scope: full Co–Star Pro-parity feature surface | Accepted (2026-10-24) | Day-at-a-glance, dive-deeper, life areas, recommendations, transit alerts, connections/updates, compatibility reports. Built as ordered vertical slices; clean-room only. | Slice evidence, product-owner change. |
+| PRD-001 | Under-one-minute useful insight | Accepted | Supports immediate perceived value and retention without withholding the core experience. | User research falsifies the hypothesis. |
+| PRD-002 | Explainability, privacy, consent, and uncertainty | Accepted | Essential trust constraints for sensitive personal and relationship data. | Never; only implementation details may change. |
 
 ## 12. Open questions for discovery
 
