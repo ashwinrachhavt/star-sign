@@ -3,6 +3,14 @@ import { getOrCreateDailyReading } from "@/lib/readings";
 import { computeNatalChart, type DailyReading } from "@star-sign/core";
 import { redirect } from "next/navigation";
 import SignOutButton from "./signout-button";
+import {
+  DosDonts,
+  Glance,
+  LifeAreaRow,
+  ProvenanceBlock,
+  ScreenHeader,
+} from "@/components/ui";
+import { fontMono } from "@/app/fonts";
 
 function todayFor(timeZone: string): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone }).format(new Date());
@@ -59,75 +67,74 @@ export default async function DayPage() {
   const sun = chart.placements.find((p) => p.planet === "sun")!;
   const moon = chart.placements.find((p) => p.planet === "moon")!;
 
+  const dateLine = new Date(forDate + "T12:00:00").toLocaleDateString(
+    "en-US",
+    { weekday: "long", month: "long", day: "numeric" },
+  );
+
   return (
     <main className="container">
-      <nav className="top">
-        <a href="/day">My Day</a>
-        <a href="/people">People</a>
-        <span style={{ flex: 1 }} />
+      <ScreenHeader
+        title="My Day"
+        tabs={[
+          { id: "day", label: "My Day", href: "/day" },
+          { id: "people", label: "People", href: "/people" },
+        ]}
+        activeTab="day"
+      />
+
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          marginTop: "var(--space-2)",
+        }}
+      >
         <SignOutButton />
-      </nav>
+      </div>
 
-      <p className="muted" style={{ marginTop: 16 }}>
-        {new Date(forDate + "T12:00:00").toLocaleDateString("en-US", {
-          weekday: "long",
-          month: "long",
-          day: "numeric",
-        })}
-      </p>
-      <h1 className="headline" style={{ marginTop: 8 }}>
-        {reading.headline}
-      </h1>
-      <p style={{ lineHeight: 1.6 }}>{reading.explanation}</p>
-
-      <div className="card" style={{ marginTop: 20 }}>
-        <div className="dos-donts">
-          <div>
-            <p className="muted" style={{ marginBottom: 6 }}>
-              Dos
-            </p>
-            <ul>
-              {reading.dos.map((d, i) => (
-                <li key={i}>{d}</li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <p className="muted" style={{ marginBottom: 6 }}>
-              Don&apos;ts
-            </p>
-            <ul>
-              {reading.donts.map((d, i) => (
-                <li key={i}>{d}</li>
-              ))}
-            </ul>
-          </div>
+      <section style={{ marginTop: "var(--space-4)" }}>
+        <p
+          className={`type-micro-label t-11 ${fontMono.className}`}
+          style={{ color: "var(--ink-tertiary)" }}
+        >
+          {dateLine}
+        </p>
+        <div style={{ marginTop: "var(--space-4)" }}>
+          <Glance headline={reading.headline}>{reading.explanation}</Glance>
         </div>
-      </div>
+      </section>
 
-      <div>
+      <section className="card" style={{ marginTop: "var(--space-5)" }}>
+        <DosDonts dos={reading.dos} donts={reading.donts} doLabel="Dos" dontLabel="Don'ts" />
+      </section>
+
+      <section className="card" style={{ marginTop: "var(--space-4)" }}>
+        <p
+          className={`type-micro-label t-11 ${fontMono.className}`}
+          style={{ color: "var(--ink-tertiary)", marginBottom: "var(--space-2)" }}
+        >
+          Life areas today
+        </p>
         {reading.lifeAreas.map((area) => (
-          <span key={area} className="badge">
-            {AREA_LABELS[area] ?? area}
-          </span>
+          <LifeAreaRow key={area} area={AREA_LABELS[area] ?? area} state="—" />
         ))}
-      </div>
+      </section>
 
-      <details className="card" style={{ marginTop: 20 }}>
-        <summary>Why this reading? (chart &amp; provenance)</summary>
-        <p style={{ marginTop: 12, fontSize: "0.9rem" }}>
-          Sun in {sun.sign}, Moon in {moon.sign}
-          {chart.ascendant ? `, Ascendant ${chart.ascendant}` : ""}.
-        </p>
-        <p style={{ marginTop: 8, fontSize: "0.85rem" }} className="muted">
-          Ruleset {reading.provenance.rulesetVersion} · copy{" "}
-          {reading.provenance.copyVersion} ·{" "}
-          {reading.provenance.inputs.length} astronomical inputs
-        </p>
-        <p style={{ marginTop: 8, fontSize: "0.85rem", color: "#f5c98a" }}>
-          {reading.uncertaintyNote}
-        </p>
-      </details>
+      <section style={{ marginTop: "var(--space-5)" }}>
+        <ProvenanceBlock summary="Why this reading?">
+          <p className="type-prose t-15" style={{ color: "var(--ink)" }}>
+            Sun in {sun.sign}, Moon in {moon.sign}
+            {chart.ascendant ? `, Ascendant ${chart.ascendant}` : ""}.
+          </p>
+          <p>
+            Ruleset {reading.provenance.rulesetVersion} · copy{" "}
+            {reading.provenance.copyVersion} ·{" "}
+            {reading.provenance.inputs.length} astronomical inputs
+          </p>
+          <p>{reading.uncertaintyNote}</p>
+        </ProvenanceBlock>
+      </section>
     </main>
   );
 }
