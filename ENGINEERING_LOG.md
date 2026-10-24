@@ -2,6 +2,14 @@
 
 Append-only record of shipped changes. Format per `.agents/workflows.md`.
 
+## 2026-10-24 — Testing + CI baseline (ASH-235)
+
+- Change: Added `.github/workflows/ci.yml` — two jobs: (1) `checks` (pnpm install with store cache → typecheck → lint → core Vitest → db RLS/job harness against a Postgres service container), (2) `smoke` (local Supabase via `supabase/setup-cli` + Playwright golden path: signup → onboarding → day page, asserting the reading persisted). New `e2e/` workspace package with Playwright config on dedicated port 3010 (dev machines often run other apps on 3000).
+- Migration: none (0002/0003 fixed in this PR — see Decisions)
+- Rollback: revert PR (removes CI; branch protection rule is a GitHub setting, removed separately).
+- Risk: CI runs on free-tier GitHub runners only; no hosted staging created (explicit non-goal). Wall time budget: checks ~3 min, smoke ~4 min — under the 5-min criterion per job.
+- Decisions: (1) **Fixed a latent migration bug found by the smoke test** — 0002/0003 opened `begin;` without `commit;`; the Supabase CLI's runner left the transaction open and every table/function/column silently rolled back while still printing "Applying migration...". Both now `commit;` and `supabase db reset` applies all three recorded migrations; smoke test verifies against the real local stack. (2) e2e runs its own Next dev server on port 3010 so it can never collide with unrelated apps on 3000. (3) Branch protection (criterion 1's approval requirement + required checks) is an owner-applied GitHub setting, not code — instructions in the PR description.
+
 ## 2026-10-24 — Job pattern: run_job runner, job_run_logs, rollup exemplar, Edge Function skeleton (ASH-234)
 
 - Change: Added `0003_job_pattern.sql` — `job_run_logs` table (unique `(job_name, idempotency_key)`, RLS deny-all to clients), shared `run_job` PL/pgSQL runner (idempotency gate, structured `raise log` on success/failure with job+key+cause), exemplar `daily-reading-rollup` job (counts readings per date; monitor/rollup only per owner decision — no pre-generation), `reading_date` generated column + index on `daily_readings`. Edge Function skeleton in `supabase/functions/` (`_shared/job.ts` withJob wrapper + `example-job/`) with README documenting the mandatory job shape (purpose, idempotency key, retry policy, operational signal). Five new harness tests cover: success logging, same-key replay no-op, failure cause capture, live count correctness, client privilege denial.

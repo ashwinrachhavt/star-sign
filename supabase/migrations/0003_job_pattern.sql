@@ -116,6 +116,8 @@ revoke execute on function public.job_daily_reading_rollup(text) from public;
 revoke execute on function public.job_daily_reading_rollup(text) from authenticated, anon;
 grant execute on function public.run_job(text, text, text) to service_role;
 
+commit;
+
 -- pg_cron schedule: applied at deploy time (Supabase project with pg_cron
 -- enabled), not in this migration, so non-cron databases (local/test) can
 -- apply the schema cleanly. Deploy step, run once as postgres:
