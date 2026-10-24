@@ -1,5 +1,7 @@
 /* Star Sign design tokens — mobile mirror of apps/web/styles/tokens.css
-   (single source documented in `.agents/design-system.md`; keep values identical). */
+   (single source documented in `.agents/design-system.md`; keep values identical.
+   Colors/spacings/motion mirror 1:1; `type` sizes are the same numeric scale,
+   unitless px numbers for RN.) */
 
 export const tokens = {
   color: {
@@ -33,6 +35,15 @@ export const tokens = {
     base: 200,
     slow: 320,
     ease: [0.2, 0, 0, 1] as const,
+  },
+  type: {
+    s11: 11,
+    s13: 13,
+    s15: 15,
+    s17: 17,
+    s22: 22,
+    s28: 28,
+    s36: 36,
   },
 } as const;
 

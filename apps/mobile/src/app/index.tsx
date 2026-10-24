@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import { supabase } from "../lib/supabase";
 import { fetchMyBirthProfile } from "../lib/readings";
+import { colors } from "../../theme/type";
 
 export default function Index() {
   const [checking, setChecking] = useState(true);
@@ -25,8 +26,17 @@ export default function Index() {
   }, []);
 
   return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#0b0e1a" }}>
-      {checking && <ActivityIndicator color="#8b9cf9" />}
+    <View style={styles.container}>
+      {checking && <ActivityIndicator color={colors.ink} />}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.bg,
+  },
+});
