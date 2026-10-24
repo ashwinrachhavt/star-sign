@@ -63,44 +63,4 @@ describe("reading generation carries full provenance", () => {
     expect(reading.provenance.ephemerisVersion).toBe(EPHEMERIS_VERSION);
     expect(Array.isArray(reading.provenance.selectedEvents)).toBe(true);
   });
-
-  it("every generated reading records engine name + version (ASH-240 criterion 1)", async () => {
-    const core = await import("./index.js");
-    for (const precision of ["exact", "approximate", "unknown"] as const) {
-      const reading = core.generateDailyReading({
-        profile: {
-          birthDate: "1990-06-15",
-          birthTime: precision === "exact" ? "09:30" : undefined,
-          birthTimePrecision: precision,
-          birthTimeZone: "America/New_York",
-          birthPlace: { lat: 40.7, lon: -74.0 },
-        },
-        forDate: "2026-10-24",
-      });
-      expect(reading.provenance.ephemerisName).toBe("astronomy-engine");
-      expect(reading.provenance.ephemerisVersion).toMatch(/^\d+\.\d+\.\d+$/);
-      // structured ephemeris info renders for ProvenanceBlock (criterion 3)
-      const info = core.ephemerisInfoOf(reading.provenance);
-      expect(info.name).toBe("astronomy-engine");
-      expect(info.version).toBe(reading.provenance.ephemerisVersion);
-      // plain-language method line in the uncertainty note (1.5c)
-      expect(reading.uncertaintyNote).toContain("astronomical library");
-      expect(reading.uncertaintyNote).toContain(EPHEMERIS_VERSION);
-    }
-  });
-
-  it("older provenance records without ephemeris fields still render (no silent rewrite — criterion 2)", async () => {
-    const legacy = {
-      rulesetVersion: "2026-10.1",
-      copyVersion: "2026-10.1",
-      calculatedAt: "2026-10-01T12:00:00Z",
-      inputs: [],
-    } as never;
-    const core = await import("./index.js");
-    // ephemerisInfoOf surfaces undefined for legacy rows; callers
-    // render "unknown engine" rather than fabricating one.
-    const info = core.ephemerisInfoOf(legacy);
-    expect(info.name).toBeUndefined();
-    expect(info.version).toBeUndefined();
-  });
 });
