@@ -55,6 +55,12 @@ export interface NatalChart {
   aspects: Aspect[];
   /** Ascendant sign; only present for exact birth time */
   ascendant?: ZodiacSign;
+  /**
+   * The 12 Porphyry cusp longitudes (degrees [0,360), cusp 1 = asc, 10 =
+   * mc) plus the system name for provenance; only present for exact birth
+   * time. Houses are never guessed for approximate/unknown times.
+   */
+  houses?: { system: "porphyry"; cusps: number[] };
 }
 
 export interface TransitObservation {
@@ -82,6 +88,17 @@ export interface ReadingProvenance {
   selectedEvents: ReadingProvenanceInput[];
   calculatedAt: string;
   inputs: ReadingProvenanceInput[];
+}
+
+/** Ephemeris identity for provenance display (ProvenanceBlock, EPIC 2). */
+export interface EphemerisInfo {
+  name: string;
+  version: string;
+}
+
+/** Builds the display-facing ephemeris info from a provenance record. */
+export function ephemerisInfoOf(provenance: ReadingProvenance): EphemerisInfo {
+  return { name: provenance.ephemerisName, version: provenance.ephemerisVersion };
 }
 
 export interface DailyReading {
