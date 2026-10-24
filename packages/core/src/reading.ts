@@ -10,6 +10,8 @@ import type {
 
 export const RULESET_VERSION = "2026-10.1";
 export const COPY_VERSION = "2026-10.1";
+export const EPHEMERIS_NAME = "astronomia";
+export const EPHEMERIS_VERSION = "4.2.0";
 
 /**
  * Copy packs are the only source of interpretation language. They are
@@ -197,6 +199,9 @@ export function generateDailyReading(
   const provenance: ReadingProvenance = {
     rulesetVersion: RULESET_VERSION,
     copyVersion: COPY_VERSION,
+    ephemerisName: EPHEMERIS_NAME,
+    ephemerisVersion: EPHEMERIS_VERSION,
+    selectedEvents: chosen ? [{ kind: "transit", planet: chosen.planet, sign: chosen.sign, natal: chosen.natalAspects[0].natal }] : [],
     calculatedAt: now.toISOString(),
     inputs,
   };

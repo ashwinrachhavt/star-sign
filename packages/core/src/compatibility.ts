@@ -1,4 +1,5 @@
 import { aspectsBetween, computeNatalChart } from "./chart";
+import { EPHEMERIS_NAME, EPHEMERIS_VERSION } from "./reading";
 import type {
   Aspect,
   BirthProfile,
@@ -143,6 +144,9 @@ export function generateCompatibilityReport(args: CompatibilityArgs): Compatibil
     provenance: {
       rulesetVersion: "synastry-2026-10.1",
       copyVersion: "2026-10.1",
+      ephemerisName: EPHEMERIS_NAME,
+      ephemerisVersion: EPHEMERIS_VERSION,
+      selectedEvents: [],
       calculatedAt: (args.now ?? new Date()).toISOString(),
       inputs: [
         { kind: "natal_placement", planet: "sun", sign: sunA.sign },

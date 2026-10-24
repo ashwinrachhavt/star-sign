@@ -75,6 +75,11 @@ export interface ReadingProvenance {
   rulesetVersion: string;
   /** Version of the interpretation copy pack used */
   copyVersion: string;
+  /** Name and version of the ephemeris library that produced the positions */
+  ephemerisName: string;
+  ephemerisVersion: string;
+  /** Structured record of the transit events the ruleset selected */
+  selectedEvents: ReadingProvenanceInput[];
   calculatedAt: string;
   inputs: ReadingProvenanceInput[];
 }

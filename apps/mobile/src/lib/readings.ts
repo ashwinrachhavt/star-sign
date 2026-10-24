@@ -36,6 +36,7 @@ export async function saveBirthProfile(profile: {
     birth_time: profile.birthTime,
     birth_time_precision: profile.precision,
     birth_time_zone: profile.timeZone,
+    iana_timezone: profile.timeZone,
     birth_lat: profile.lat,
     birth_lon: profile.lon,
   });
@@ -79,6 +80,11 @@ export async function getOrCreateDailyReading(
       dos: generated.dos,
       donts: generated.donts,
       life_areas: generated.lifeAreas,
+      ruleset_version: generated.provenance.rulesetVersion,
+      copy_version: generated.provenance.copyVersion,
+      ephemeris_name: generated.provenance.ephemerisName,
+      ephemeris_version: generated.provenance.ephemerisVersion,
+      selected_events: generated.provenance.selectedEvents,
       provenance: generated.provenance,
       uncertainty_note: generated.uncertaintyNote,
     })
