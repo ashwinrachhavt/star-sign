@@ -67,7 +67,7 @@ describe("migration discipline", () => {
     const [col] = await sql`
       select column_default from information_schema.columns
       where table_name = 'daily_readings' and column_name = 'ruleset_version'`;
-    expect(col.column_default).toContain("2026-10.1");
+    expect(col.column_default).toContain("2026-10.2");
     const rows = await sql`
       select count(*)::int as n from daily_readings
       where ruleset_version is null or copy_version is null

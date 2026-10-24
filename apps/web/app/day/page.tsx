@@ -47,6 +47,20 @@ export default async function DayPage() {
   if ("error" in result) redirect("/onboarding");
   const reading = result as DailyReading;
 
+  // Stored events from the DB row (3.6b/c): the persisted facts the reading
+  // was built from. Read, never recomputed.
+  const storedEvents = (reading.provenance.selectedEvents ?? []).flatMap((e) =>
+    typeof e === "object" &&
+    e !== null &&
+    "kind" in e &&
+    e.kind === "transit" &&
+    "planet" in e &&
+    "natal" in e &&
+    "aspect" in e
+      ? [e as StoredEvent]
+      : [],
+  );
+
   const { data: fullProfile } = await supabase
     .from("birth_profiles")
     .select("*")
@@ -127,6 +141,22 @@ export default async function DayPage() {
             Sun in {sun.sign}, Moon in {moon.sign}
             {chart.ascendant ? `, Ascendant ${chart.ascendant}` : ""}.
           </p>
+          {/* 3.6c: renders the events as stored in the DB row — the facts
+              behind the prose, not a recomputation. */}
+          {storedEvents.length > 0 && (
+            <div>
+              {storedEvents.map((e, i) => (
+                <p
+                  key={i}
+                  className={`type-mono t-13 ${fontMono.className}`}
+                  style={{ color: "var(--ink-secondary)" }}
+                >
+                  {cap(e.planet)} {e.aspect} natal {cap(e.natal)} — orb{" "}
+                  {typeof e.orb === "number" ? e.orb.toFixed(2) : "—"}
+                </p>
+              ))}
+            </div>
+          )}
           <p>
             Ruleset {reading.provenance.rulesetVersion} · copy{" "}
             {reading.provenance.copyVersion} ·{" "}
@@ -137,4 +167,16 @@ export default async function DayPage() {
       </section>
     </main>
   );
+}
+
+type StoredEvent = {
+  kind: "transit";
+  planet: string;
+  natal: string;
+  aspect: string;
+  orb?: number;
+};
+
+function cap(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }

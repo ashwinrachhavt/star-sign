@@ -22,6 +22,8 @@ const MIGRATIONS = [
   "0001_initial_schema.sql",
   "0002_data_model_v2.sql",
   "0003_job_pattern.sql",
+  "0004_ruleset_version_bump_v2026_10_2.sql",
+  "0005_structured_event_persistence.sql",
 ];
 
 export async function createHarnessDb(): Promise<TestDb> {
