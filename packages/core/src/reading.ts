@@ -10,6 +10,7 @@ import {
 import type {
   BirthProfile,
   DailyReading,
+  DiveDeeper,
   LifeArea,
   NatalChart,
   ReadingProvenance,
@@ -235,6 +236,12 @@ export function generateDailyReading(
     inputs,
   };
 
+  // Dive deeper v1 (ASH-249): built from the same selected events the
+  // provenance records — no dive content exists without full provenance
+  // (criterion 3). On quiet days (no events) the section is omitted
+  // entirely rather than filled with generic content.
+  const diveDeeper = buildDiveDeeper(selectedEvents, phase);
+
   return {
     id: `${forDate}`,
     forDate,
@@ -245,7 +252,80 @@ export function generateDailyReading(
     lifeAreas: areaList,
     provenance,
     uncertaintyNote: uncertaintyFor(profile),
+    diveDeeper,
   };
+}
+
+/**
+ * Decode-the-day + lessons (ASH-249). Every decode line pairs the stored
+ * provenance input with its plain-language explanation and live geometry
+ * (aspect + orb + retrograde phase — criterion 1). Lessons are reflective,
+ * longer-form, and invite returning (criterion 2, copy.md dive register).
+ */
+function buildDiveDeeper(
+  events: TransitEvent[],
+  phase: string,
+): DiveDeeper | undefined {
+  if (events.length === 0) return undefined;
+
+  const decoded = events.map((e) => ({
+    event: eventToInput(e),
+    explanation: explanationForEvent(e),
+    geometry:
+      `${cap(e.transit)}${e.retrograde ? " retrograde" : ""} ` +
+      `${e.type} natal ${cap(e.natal)}, orb ${e.orb.toFixed(1)}°`,
+  }));
+
+  const lessons = lessonsFor(events, phase);
+  return { decoded, lessons };
+}
+
+/**
+ * Lessons of the day: reflective, grounded in the day's actual event
+ * mix — never predictive, never certain (copy.md). Invites returning.
+ */
+function lessonsFor(events: TransitEvent[], phase: string): string {
+  const harmonious = events.filter((e) => e.type === "trine" || e.type === "sextile").length;
+  const frictional = events.filter((e) => e.type === "square" || e.type === "opposition").length;
+  const retrogrades = events.filter((e) => e.retrograde).length;
+  const strongest = events[0];
+
+  const lines: string[] = [];
+
+  if (frictional > harmonious) {
+    lines.push(
+      "Today leans toward friction, and friction is information. The places that snag are usually the ones asking a question you've been deferring — not to answer it all at once, but to notice you were asked.",
+    );
+  } else if (harmonious > 0) {
+    lines.push(
+      "Today's currents run with you more than against you. Easy days are easy to spend without keeping anything — the lesson is to let what flows teach you what you actually want, while nothing is demanding it.",
+    );
+  } else {
+    lines.push(
+      "The sky is quiet today, and quiet is not empty. Days like this are where the slower material settles — what moved last week keeps moving inside you at its own pace.",
+    );
+  }
+
+  if (retrogrades > 0) {
+    lines.push(
+      "With a planet moving backward in your sky, the forward step today is the review, not the launch. Rereading, revisiting, revising — these count as motion.",
+    );
+  }
+
+  lines.push(
+    `The loudest thread today is ${cap(strongest.transit)} touching your natal ${cap(strongest.natal)} — worth returning to tonight, when the day has told you what it was about.`,
+  );
+  if (phase === "full moon") {
+    lines.push(
+      "It's a full moon: things peak and names get said. Notice what crested today; it was building for a while.",
+    );
+  } else if (phase === "new moon") {
+    lines.push(
+      "It's a new moon: the page is blank on purpose. Small intentions set now are easier to keep than large ones declared now.",
+    );
+  }
+
+  return lines.join(" ");
 }
 
 const ORDINALS = ["", "1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th", "11th", "12th"];

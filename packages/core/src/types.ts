@@ -120,6 +120,25 @@ export interface DailyReading {
   provenance: ReadingProvenance;
   /** Tied to birth-data precision; surfaced verbatim in the UI */
   uncertaintyNote: string;
+  /**
+   * Dive deeper v1 (ASH-249): per-event decode lines + a reflective
+   * lessons section. Present only when the provenance carries the events
+   * that produced the reading — never rendered without full provenance.
+   */
+  diveDeeper?: DiveDeeper;
+}
+
+export interface DiveDeeper {
+  /** One decode line per selected event, in provenance order. */
+  decoded: Array<{
+    event: ReadingProvenanceInput;
+    /** Plain-language explanation tracing to the event above. */
+    explanation: string;
+    /** The event's live geometry, stated plainly. */
+    geometry: string;
+  }>;
+  /** Reflective longer-form lessons of the day (copy.md dive register). */
+  lessons: string;
 }
 
 export interface CompatibilityReport {
