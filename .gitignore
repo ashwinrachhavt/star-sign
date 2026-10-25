@@ -17,4 +17,5 @@ test-results/
 supabase/.branches
 supabase/.temp
 .agents
+.claude/skills/
 design/reference/

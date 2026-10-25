@@ -17,7 +17,7 @@ export function ProfileHeader({
       {avatar && (
         <span className="ui-profile-header-avatar">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={avatar.src} alt={avatar.alt} className="ui-grain-image" width={88} height={88} />
+          <img src={avatar.src} alt={avatar.alt} className="ui-grain-image ui-celestial-mark" width={88} height={88} />
         </span>
       )}
       <h1 className="type-display t-28">{name}</h1>

@@ -284,12 +284,44 @@
   color: var(--ink-secondary);
 }
 
+/* ---- CelestialMark ---- */
+
+/* Icons are cut as off-white ink; invert in light mode so they read as
+   dark ink on the light ground (scheme-aware like every other token). */
+.ui-celestial-mark {
+  filter: invert(1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ui-celestial-mark {
+    filter: none;
+  }
+}
+
+:root[data-theme="dark"] .ui-celestial-mark {
+  filter: none;
+}
+
 /* ---- Glance ---- */
 
 .ui-glance {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  position: relative;
+}
+
+.ui-glance-mark {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  max-width: 88px;
+  opacity: 0.35;
+}
+
+.ui-glance-mark .ui-celestial-mark {
+  width: 100%;
+  height: auto;
 }
 
 .ui-glance-label {
