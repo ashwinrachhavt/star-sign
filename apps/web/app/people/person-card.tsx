@@ -118,8 +118,16 @@ export default async function PersonCard({ person }: { person: Person }) {
               </div>
             ))}
             <p className="type-micro-label t-11" style={{ color: "var(--ink-tertiary)" }}>
-              THESE PATTERNS DESCRIBE INTERACTION STYLES, NOT OUTCOMES. RULESET{" "}
-              {report.provenance.rulesetVersion}.
+              THESE PATTERNS DESCRIBE INTERACTION STYLES, NOT OUTCOMES.
+            </p>
+            <p style={{ marginTop: "var(--space-1)" }}>
+              <a
+                href={`/people/${person.id}/report`}
+                className="ui-focusable type-micro-label t-11"
+                style={{ color: "var(--ink)", textDecoration: "underline", textUnderlineOffset: 3 }}
+              >
+                Full report — scales & evidence →
+              </a>
             </p>
           </div>
         </details>
