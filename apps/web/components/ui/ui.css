@@ -73,6 +73,110 @@
   color: var(--ink);
 }
 
+/* ---- ChartGrid (paginated signs × planets × houses) ---- */
+
+.ui-chart-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.ui-chart-grid-table {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.ui-chart-grid-axis {
+  color: var(--ink-tertiary);
+  writing-mode: vertical-rl;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ui-chart-grid-axis-flipped {
+  transform: rotate(180deg);
+}
+
+.ui-chart-grid-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hairline 3-column grid: sign / occupants / serif house numeral.
+   Row heights adapt to occupant count so each occupied sign gets a
+   proportional band, like the reference table. */
+.ui-chart-grid-row {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr auto;
+  align-items: stretch;
+  border: 1px solid var(--hairline);
+  border-top: none;
+}
+
+.ui-chart-grid-row:first-child {
+  border-top: 1px solid var(--hairline);
+}
+
+.ui-chart-grid-row > [role="cell"] {
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.ui-chart-grid-row > [role="cell"]:not(:last-child) {
+  border-right: 1px solid var(--hairline);
+}
+
+.ui-chart-grid-occupants {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.ui-chart-grid-occupant {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.ui-chart-grid-house {
+  text-align: center;
+}
+
+.ui-chart-grid-dots {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+}
+
+.ui-chart-grid-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ink-tertiary);
+}
+
+.ui-chart-grid-dot[data-active="true"] {
+  background: var(--ink);
+}
+
+.ui-chart-grid-dot-button {
+  background: none;
+  border: none;
+  padding: var(--space-2);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* ---- PlacementCard ---- */
 
 .ui-placement-card {
@@ -180,12 +284,44 @@
   color: var(--ink-secondary);
 }
 
+/* ---- CelestialMark ---- */
+
+/* Icons are cut as off-white ink; invert in light mode so they read as
+   dark ink on the light ground (scheme-aware like every other token). */
+.ui-celestial-mark {
+  filter: invert(1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ui-celestial-mark {
+    filter: none;
+  }
+}
+
+:root[data-theme="dark"] .ui-celestial-mark {
+  filter: none;
+}
+
 /* ---- Glance ---- */
 
 .ui-glance {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  position: relative;
+}
+
+.ui-glance-mark {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  max-width: 88px;
+  opacity: 0.35;
+}
+
+.ui-glance-mark .ui-celestial-mark {
+  width: 100%;
+  height: auto;
 }
 
 .ui-glance-label {

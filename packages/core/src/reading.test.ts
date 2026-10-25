@@ -64,6 +64,22 @@ describe("generateDailyReading", () => {
     expect(r.lifeAreas.length).toBeGreaterThan(0);
   });
 
+  it("(ASH-268) life areas carry a valid temperature", () => {
+    for (const date of ["2026-10-24", "2026-03-01", "2026-06-15"]) {
+      const r = generateDailyReading({ ...base, forDate: date });
+      expect(r.lifeAreas.length).toBeGreaterThan(0);
+      for (const la of r.lifeAreas) {
+        expect(["hot", "warm", "quiet"]).toContain(la.temperature);
+      }
+    }
+  });
+
+  it("(ASH-268) temperatures are deterministic per (chart, date)", () => {
+    const a = generateDailyReading(base);
+    const b = generateDailyReading(base);
+    expect(a.lifeAreas).toEqual(b.lifeAreas);
+  });
+
   it("(3.1 #1) two different charts on the same day get different life-area rankings", () => {
     const chartB: BirthProfile = {
       birthDate: "1985-11-30",

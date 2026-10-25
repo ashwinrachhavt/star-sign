@@ -36,6 +36,14 @@ const AREA_LABELS: Record<string, string> = {
   self: "Self",
 };
 
+const TEMPERATURE_LABEL: Record<string, string> = {
+  hot: "Hot",
+  warm: "Warm",
+  quiet: "Quiet",
+  // Pre-2026-10.3 rows never stored a temperature — the honest dash.
+  legacy: "—",
+};
+
 export default function Day() {
   const insets = useSafeAreaInsets();
   const [reading, setReading] = useState<DailyReading | null>(null);
@@ -142,8 +150,12 @@ export default function Day() {
       </View>
 
       <View style={styles.lifeAreas}>
-        {reading.lifeAreas.map((area) => (
-          <LifeAreaRow key={area} area={AREA_LABELS[area] ?? area} state="—" />
+        {reading.lifeAreas.map(({ area, temperature }) => (
+          <LifeAreaRow
+            key={area}
+            area={AREA_LABELS[area] ?? area}
+            state={TEMPERATURE_LABEL[temperature] ?? "—"}
+          />
         ))}
       </View>
 
