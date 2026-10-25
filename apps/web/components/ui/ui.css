@@ -239,6 +239,13 @@
   color: var(--ink-secondary);
 }
 
+.ui-transit-event-card-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--ink-secondary);
+}
+
 /* ---- FriendRow ---- */
 
 .ui-friend-row {

@@ -25,6 +25,7 @@ const MIGRATIONS = [
   "0004_ruleset_version_bump_v2026_10_2.sql",
   "0005_sky_events.sql",
   "0005_structured_event_persistence.sql",
+  "0006_connections.sql",
   "0006_notifications.sql",
 ];
 
@@ -67,6 +68,10 @@ async function installShims(sql: TestDb) {
     -- Note: roles are NOT granted to postgres (superuser) — Supabase keeps
     -- them separate, and superuser membership would bypass REVOKE/RLS.
     grant usage on schema public to authenticated, anon, service_role;
+    -- Supabase grants authenticated/anon usage on the auth schema (needed
+    -- by trigger functions and policies calling auth.uid() outside pure
+    -- RLS-policy context).
+    grant usage on schema auth to authenticated, anon, service_role;
     grant select, insert, update, delete on all tables in schema public
       to authenticated, anon, service_role;
     alter default privileges in schema public

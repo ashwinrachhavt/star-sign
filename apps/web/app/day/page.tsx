@@ -184,6 +184,59 @@ export default async function DayPage() {
             ))}
           </ul>
 
+          {reading.diveDeeper.recommendations &&
+            reading.diveDeeper.recommendations.length > 0 && (
+              <>
+                <p
+                  className={`type-micro-label t-11 ${fontMono.className}`}
+                  style={{
+                    color: "var(--ink-tertiary)",
+                    margin: "var(--space-5) 0 var(--space-2)",
+                  }}
+                >
+                  For you today
+                </p>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                  {reading.diveDeeper.recommendations.map((rec, i) => (
+                    <li
+                      key={i}
+                      style={{
+                        borderTop: "1px solid var(--hairline)",
+                        padding: "var(--space-3) 0",
+                      }}
+                    >
+                      <p
+                        className={`type-mono t-11 ${fontMono.className}`}
+                        style={{
+                          color: "var(--ink-tertiary)",
+                          margin: 0,
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        {rec.kind}
+                      </p>
+                      <a
+                        href={rec.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="type-prose t-15"
+                        style={{ color: "var(--ink)" }}
+                      >
+                        {rec.title}
+                      </a>
+                      <span className="type-prose t-13" style={{ color: "var(--ink-tertiary)" }}>
+                        {" "}
+                        — {rec.creator}
+                      </span>
+                      <p className="type-prose t-13" style={{ margin: "var(--space-1) 0 0" }}>
+                        {rec.blurb}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+
           <details style={{ marginTop: "var(--space-3)" }}>
             <summary
               className={`type-micro-label t-11 ${fontMono.className}`}

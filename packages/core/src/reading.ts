@@ -7,6 +7,7 @@ import {
   scoreTransitEvents,
   type TransitEvent,
 } from "./ruleset";
+import { recommendForEvents } from "./recommendations";
 import type {
   BirthProfile,
   DailyReading,
@@ -241,7 +242,7 @@ export function generateDailyReading(
   // provenance records — no dive content exists without full provenance
   // (criterion 3). On quiet days (no events) the section is omitted
   // entirely rather than filled with generic content.
-  const diveDeeper = buildDiveDeeper(selectedEvents, phase);
+  const diveDeeper = buildDiveDeeper(selectedEvents, phase, seed);
 
   return {
     id: `${forDate}`,
@@ -266,6 +267,7 @@ export function generateDailyReading(
 function buildDiveDeeper(
   events: TransitEvent[],
   phase: string,
+  seed: number,
 ): DiveDeeper | undefined {
   if (events.length === 0) return undefined;
 
@@ -278,7 +280,17 @@ function buildDiveDeeper(
   }));
 
   const lessons = lessonsFor(events, phase);
-  return { decoded, lessons };
+  // "For you today" (ASH-264): theme-matched only — absent when nothing
+  // in the dataset matches (never filler, criterion 2).
+  const recommendations = recommendForEvents(events, seed, 3).map((r) => ({
+    kind: r.item.kind,
+    title: r.item.title,
+    creator: r.item.creator,
+    blurb: r.item.blurb,
+    url: r.item.url,
+    matchedEvent: r.matchedEvent,
+  }));
+  return { decoded, lessons, ...(recommendations.length > 0 ? { recommendations } : {}) };
 }
 
 /**
