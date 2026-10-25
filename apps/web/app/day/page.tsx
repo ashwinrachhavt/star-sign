@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrCreateDailyReading } from "@/lib/readings";
+import { splitReadingForTier, defaultEntitlements } from "@star-sign/core";
 import { computeNatalChart, type DailyReading } from "@star-sign/core";
 import { redirect } from "next/navigation";
 import SignOutButton from "./signout-button";
@@ -45,7 +46,10 @@ export default async function DayPage() {
   const result = await getOrCreateDailyReading(supabase, userId, forDate);
 
   if ("error" in result) redirect("/onboarding");
-  const reading = result as DailyReading;
+  // Entitlement gate (7.3): the free slice is computed server-side so
+  // premium content never reaches a free client. v1: everyone is free —
+  // the gate exists and is exercised, billing provider deferred.
+  const reading = splitReadingForTier(result as DailyReading, defaultEntitlements());
 
   // Stored events from the DB row (3.6b/c): the persisted facts the reading
   // was built from. Read, never recomputed.
