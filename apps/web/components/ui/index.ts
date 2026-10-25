@@ -3,6 +3,8 @@ export { TabBar } from "./TabBar";
 export { PlacementCard } from "./PlacementCard";
 export { CardFooterLink } from "./CardFooterLink";
 export { ChartTable } from "./ChartTable";
+export { ChartGrid } from "./ChartGrid";
+export { ChartGridPager } from "./ChartGridPager";
 export { ProfileHeader } from "./ProfileHeader";
 export { Glance } from "./Glance";
 export { DosDonts } from "./DosDonts";
