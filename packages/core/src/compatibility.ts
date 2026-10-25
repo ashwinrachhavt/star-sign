@@ -5,6 +5,7 @@ import type {
   BirthProfile,
   CompatibilityReport,
   NatalChart,
+  Planet,
 } from "./types";
 
 /**
@@ -119,21 +120,34 @@ export function generateCompatibilityReport(args: CompatibilityArgs): Compatibil
   const sunB = placementsB.get("sun")!;
   const moonB = placementsB.get("moon")!;
 
+  // 6.1a: full cross-chart aspect grid — every planet in A against every
+  // planet in B, on engine-accurate charts. `aspectsBetween` computes the
+  // aspect family + orb for any placement pair; feeding it one placement
+  // from each chart yields the synastry grid. (6.1c: no duplicate math —
+  // this is the same engine path the natal chart uses.)
+  const synastryAspects: Array<Aspect & { a: Planet; b: Planet }> = [];
+  for (const pa of chartA.placements) {
+    for (const pb of chartB.placements) {
+      for (const aspect of aspectsBetween([pa, pb])) {
+        synastryAspects.push({ ...aspect, a: pa.planet, b: pb.planet });
+      }
+    }
+  }
+
   const dimensions = (
     Object.entries(DIMENSION_ASPECTS) as Array<
       [CompatibilityReport["dimensions"][number]["area"], typeof DIMENSION_ASPECTS["communication"]]
     >
   ).map(([area, spec]) => {
-    // Cross-chart: A's planets against B's planets, using synastry midpoint longitudes.
-    const crossAspects: Aspect[] = [];
-    for (const [pa, pb] of spec.pairs) {
-      const a = placementsA.get(pa as never) ?? chartA.placements.find((p) => p.planet === pa);
-      const b = placementsB.get(pb as never) ?? chartB.placements.find((p) => p.planet === pb);
-      if (!a || !b) continue;
-      const aspects = aspectsBetween([a, b]);
-      crossAspects.push(...aspects);
-    }
-    const tone = toneFrom(crossAspects);
+    // 6.1b: score per domain from the aspects that involve the domain's
+    // planet pairs, traced to the grid (criterion 2).
+    const contributing = synastryAspects.filter((as) =>
+      spec.pairs.some(
+        ([x, y]) =>
+          (as.a === x && as.b === y) || (as.a === y && as.b === x),
+      ),
+    );
+    const tone = toneFrom(contributing);
     return { area, summary: COPY[area][tone], tone };
   });
 
@@ -142,11 +156,19 @@ export function generateCompatibilityReport(args: CompatibilityArgs): Compatibil
     b: { userId: args.b.userId, displayName: args.b.displayName, sun: sunB.sign, moon: moonB.sign },
     dimensions,
     provenance: {
-      rulesetVersion: "synastry-2026-10.1",
-      copyVersion: "2026-10.1",
+      rulesetVersion: "synastry-2026-10.2",
+      copyVersion: "2026-10.2",
       ephemerisName: EPHEMERIS_NAME,
       ephemerisVersion: EPHEMERIS_VERSION,
-      selectedEvents: [],
+      // 6.1b criterion 2: the aspects that produced each domain score are
+      // recorded as provenance inputs (cross-chart transits).
+      selectedEvents: synastryAspects.map((as) => ({
+        kind: "transit" as const,
+        planet: as.a,
+        sign: "aries" as const,
+        natal: as.b,
+        aspect: as.type,
+      })),
       calculatedAt: (args.now ?? new Date()).toISOString(),
       inputs: [
         { kind: "natal_placement", planet: "sun", sign: sunA.sign },
