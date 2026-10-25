@@ -5,6 +5,7 @@
  * handlers stay skinny: parse → guard → operation → serialize.
  */
 import { createClient } from "@/lib/supabase/server";
+import { resolveActor } from "@/lib/auth/bridge";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -98,8 +99,10 @@ export async function parseBody<S extends z.ZodTypeAny>(
 }
 
 /**
- * requireActor: verifies the Supabase session (which in turn verifies the
- * identity token) and returns the actor's id + scoped client. 401 when
+ * requireActor: resolves the actor through the auth bridge (ASH-231).
+ * With Clerk configured: verified Clerk session → profile UUID via the
+ * clerk_subject mapping. Without it: the pre-existing Supabase session
+ * path (password users, local stack, tests) — no lockout. 401 when
  * missing/invalid. Never trusts a client-supplied user id.
  */
 export async function requireActor(
@@ -107,15 +110,14 @@ export async function requireActor(
 ): Promise<
   { ok: true; userId: string; supabase: Awaited<ReturnType<typeof createClient>> } | { ok: false; response: NextResponse }
 > {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
-  if (!data.user) {
+  const actor = await resolveActor();
+  if (!actor) {
     return {
       ok: false,
       response: jsonError(401, "unauthenticated", "Sign in required.", reqId),
     };
   }
-  return { ok: true, userId: data.user.id, supabase };
+  return { ok: true, userId: actor.userId, supabase: actor.supabase };
 }
 
 /**
