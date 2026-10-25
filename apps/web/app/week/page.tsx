@@ -2,7 +2,19 @@ import { createClient } from "@/lib/supabase/server";
 import { computeWeekAhead } from "@star-sign/core";
 import { redirect } from "next/navigation";
 import { ScreenHeader, TransitEventCard } from "@/components/ui";
+import { dateRangeLabel } from "@/components/ui/glyphs";
 import { fontMono } from "@/app/fonts";
+
+/** Structural mirror of core's TransitEvent (ruleset.ts not re-exported). */
+interface WeekEvent {
+  transit: string;
+  natal: string;
+  type: string;
+  orb: number;
+  retrograde: boolean;
+  areas: readonly string[];
+  score: number;
+}
 
 const PLANET_GLYPHS: Record<string, string> = {
   sun: "☉", moon: "☽", mercury: "☿", venus: "♀", mars: "♂",
@@ -16,6 +28,28 @@ const ASPECT_WORDS: Record<string, string> = {
   trine: "trines",
   sextile: "sextiles",
 };
+
+const AREA_LABELS: Record<string, string> = {
+  love: "love", work: "work", money: "money", home: "home",
+  family: "family", friends: "friends", self: "self",
+};
+
+function cap(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/**
+ * Prose strictly derived from the event's data (ASH-254 AC3) — no invented
+ * explanation. Every clause traces to a field of the TransitEvent.
+ */
+function eventProse(e: WeekEvent): string {
+  const parts: string[] = [];
+  if (e.retrograde) parts.push("Retrograde.");
+  parts.push(`Orb ${e.orb.toFixed(1)}°.`);
+  const areas = e.areas.map((a) => AREA_LABELS[a] ?? a);
+  if (areas.length > 0) parts.push(`Touches ${areas.join(", ")}.`);
+  return parts.join(" ");
+}
 
 export default async function WeekPage() {
   const supabase = await createClient();
@@ -78,26 +112,39 @@ export default async function WeekPage() {
             marginTop: "var(--space-5)",
           }}
         >
-          {week.days.map((day) => {
+          {week.days.map((day, i) => {
             if (day.events.length === 0) return null;
-            const dateLabel = new Date(day.date + "T12:00:00").toLocaleDateString(
-              "en-US",
-              { weekday: "long", month: "long", day: "numeric" },
-            );
             return (
               <section key={day.date}>
+                {i > 0 && (
+                  <hr
+                    style={{
+                      border: "none",
+                      borderTop: "1px solid var(--hairline)",
+                      marginBottom: "var(--space-5)",
+                    }}
+                  />
+                )}
                 <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
                   {day.events.map((e) => (
                     <TransitEventCard
                       key={`${day.date}-${e.transit}-${e.type}-${e.natal}`}
-                      dateRange={dateLabel.toUpperCase()}
-                      title={`${PLANET_GLYPHS[e.transit]} ${e.transit.charAt(0).toUpperCase() + e.transit.slice(1)} ${ASPECT_WORDS[e.type]} natal ${e.natal.charAt(0).toUpperCase() + e.natal.slice(1)}`}
+                      dateRange={dateRangeLabel(day.date)}
+                      transit={e.transit}
+                      aspect={e.type}
+                      natal={e.natal}
+                      title={`${cap(e.transit)} ${ASPECT_WORDS[e.type]} natal ${cap(e.natal)}`}
+                      footer={
+                        <span>
+                          {PLANET_GLYPHS[e.transit]} {cap(e.transit)} · score{" "}
+                          {e.score.toFixed(1)}
+                        </span>
+                      }
                     >
-                      {e.retrograde ? "Retrograde. " : ""}
-                      Orb {e.orb.toFixed(1)}° · touches{" "}
-                      {e.areas.join(", ")}
+                      {eventProse(e)}
                     </TransitEventCard>
-                  ))}                </div>
+                  ))}
+                </div>
               </section>
             );
           })}
