@@ -27,6 +27,7 @@ const MIGRATIONS = [
   "0005_structured_event_persistence.sql",
   "0006_connections.sql",
   "0006_notifications.sql",
+  "0007_share_scope.sql",
 ];
 
 export async function createHarnessDb(): Promise<TestDb> {
