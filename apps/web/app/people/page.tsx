@@ -54,6 +54,7 @@ export default async function PeoplePage() {
           { id: "day", label: "My Day", href: "/day" },
           { id: "week", label: "Week", href: "/week" },
           { id: "people", label: "People", href: "/people" },
+          { id: "you", label: "You", href: "/you" },
         ]}
         activeTab="people"
       />
