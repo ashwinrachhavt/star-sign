@@ -24,11 +24,11 @@ const MIGRATIONS = [
   "0003_job_pattern.sql",
   "0004_ruleset_version_bump_v2026_10_2.sql",
   "0005_sky_events.sql",
-  "0005_structured_event_persistence.sql",
-  "0006_connections.sql",
-  "0006_notifications.sql",
-  "0007_clerk_identity_bridge.sql",
-  "0007_share_scope.sql",
+  "0006_structured_event_persistence.sql",
+  "0007_connections.sql",
+  "0008_notifications.sql",
+  "0009_clerk_identity_bridge.sql",
+  "0010_share_scope.sql",
 ];
 
 export async function createHarnessDb(): Promise<TestDb> {
