@@ -5,7 +5,7 @@
  * lookups only where documented; every mutation goes through the API.
  */
 import { supabase } from "./supabase";
-import type { DailyReading } from "@star-sign/core";
+import type { ConnectionView, DailyReading } from "@star-sign/core";
 
 function apiBaseUrl(): string {
   const fromEnv = process.env.EXPO_PUBLIC_API_BASE_URL;
@@ -92,4 +92,82 @@ export async function getOrCreateDailyReadingApi(): Promise<DailyReading> {
     throw new ApiError(res.status, res.error?.code ?? "internal_error", res.error?.message ?? "Request failed");
   }
   return res.data;
+}
+
+/* ---- Connections (ASH-259 / 5.4) — same REST handlers as web (api.md §7).
+   Shared contracts from @star-sign/core; no mobile-only shapes. ---- */
+
+/** GET /api/connections — the actor's connections, both directions. */
+export async function listConnectionsApi(): Promise<ConnectionView[]> {
+  const res = await apiFetch<ConnectionView[]>("/api/connections");
+  if (!res.data || res.error) {
+    throw new ApiError(res.status, res.error?.code ?? "internal_error", "Could not load connections.");
+  }
+  return res.data;
+}
+
+/** POST /api/connections — request a connection by user id. */
+export async function requestConnectionApi(addresseeId: string): Promise<ConnectionView> {
+  const res = await apiFetch<ConnectionView>("/api/connections", {
+    method: "POST",
+    body: JSON.stringify({ addresseeId }),
+  });
+  if (res.status === 409) {
+    throw new ApiError(409, res.error?.code ?? "conflict", res.error?.message ?? "An active connection already exists.");
+  }
+  if (res.status === 404) {
+    throw new ApiError(404, "not_found", "No one with that id.");
+  }
+  if (!res.data || res.error) {
+    throw new ApiError(res.status, res.error?.code ?? "internal_error", "Could not send request.");
+  }
+  return res.data;
+}
+
+/** PUT /api/connections/{id} — recipient accepts. Idempotent per api.md §8. */
+export async function acceptConnectionApi(id: string): Promise<ConnectionView> {
+  const res = await apiFetch<ConnectionView>(`/api/connections/${id}`, {
+    method: "PUT",
+    body: JSON.stringify({}),
+  });
+  if (!res.data || (res.error && res.status !== 200)) {
+    throw new ApiError(res.status, res.error?.code ?? "internal_error", res.error?.message ?? "Could not accept.");
+  }
+  return res.data;
+}
+
+/** DELETE /api/connections/{id} — revoke/decline/disconnect, unilateral + immediate. */
+export async function revokeConnectionApi(id: string): Promise<void> {
+  const res = await apiFetch(`/api/connections/${id}`, { method: "DELETE" });
+  if (res.status !== 204 && res.error) {
+    throw new ApiError(res.status, res.error.code, res.error.message ?? "Could not end connection.");
+  }
+}
+
+/** Partner chart projection (ASH-257 / 5.2) as served by the API. */
+export interface PartnerChartProjection {
+  connectionId: string;
+  state: string;
+  placements?: { planet: string; sign: string; house?: number }[];
+  consentNote: string;
+}
+
+/** GET /api/connections/{id}/chart — the consent-scoped partner chart. */
+export async function getPartnerChartApi(id: string): Promise<PartnerChartProjection> {
+  const res = await apiFetch<PartnerChartProjection>(`/api/connections/${id}/chart`);
+  if (!res.data || res.error) {
+    throw new ApiError(res.status, res.error?.code ?? "internal_error", "Could not load chart.");
+  }
+  return res.data;
+}
+
+/** GET /api/people — display names to label connections (owner's own people list). */
+export interface ApiPersonRow {
+  id: string;
+  display_name: string;
+}
+
+export async function listPeopleApi(): Promise<ApiPersonRow[]> {
+  const res = await apiFetch<{ data: ApiPersonRow[] }>("/api/people");
+  return res.data?.data ?? ([] as ApiPersonRow[]);
 }
