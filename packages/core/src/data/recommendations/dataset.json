@@ -1,0 +1,113 @@
+{
+  "datasetVersion": "2026-10.1",
+  "items": [
+    {
+      "id": "book-meditations",
+      "kind": "read",
+      "title": "Meditations",
+      "creator": "Marcus Aurelius",
+      "blurb": "A emperor's private notes on doing the next right thing under pressure. Short entries; open anywhere.",
+      "url": "https://www.gutenberg.org/ebooks/2680",
+      "themes": { "planets": ["saturn"], "aspects": ["square", "opposition"], "moods": ["steadying"] }
+    },
+    {
+      "id": "book-aeneid",
+      "kind": "read",
+      "title": "The Aeneid",
+      "creator": "Virgil",
+      "blurb": "Duty, detours, and the long way home. For days when the road refuses to be straight.",
+      "url": "https://www.gutenberg.org/ebooks/228",
+      "themes": { "planets": ["jupiter", "saturn"], "aspects": ["opposition"], "moods": ["steadying"] }
+    },
+    {
+      "id": "book-spring-and-fall",
+      "kind": "read",
+      "title": "Poems of Gerard Manley Hopkins",
+      "creator": "Gerard Manley Hopkins",
+      "blurb": "Sprung rhythm and bright contraries — poems that treat change as the honest subject.",
+      "url": "https://www.gutenberg.org/ebooks/1451",
+      "themes": { "planets": ["mercury", "uranus"], "aspects": ["conjunction", "sextile"], "moods": ["awake"] }
+    },
+    {
+      "id": "film-metropolis",
+      "kind": "watch",
+      "title": "Metropolis (1927)",
+      "creator": "Fritz Lang",
+      "blurb": "Machines, hearts, and the price of both. A silent epic that still argues with the present.",
+      "url": "https://archive.org/details/Metropolis1927_201706",
+      "themes": { "planets": ["mars", "saturn"], "aspects": ["square", "conjunction"], "moods": ["intense"] }
+    },
+    {
+      "id": "film-astronomer-dream",
+      "kind": "watch",
+      "title": "A Trip to the Moon (1902)",
+      "creator": "Georges Méliès",
+      "blurb": "The first science-fiction film: playful, handmade wonder aimed straight at the sky.",
+      "url": "https://archive.org/details/LeVoyageDansLaLune",
+      "themes": { "planets": ["moon", "jupiter"], "aspects": ["trine", "sextile"], "moods": ["awake", "warm"] }
+    },
+    {
+      "id": "film-intolerance",
+      "kind": "watch",
+      "title": "Intolerance (1916)",
+      "creator": "D. W. Griffith",
+      "blurb": "Four eras, one argument about patience and its absence. Long, but it earns its length.",
+      "url": "https://archive.org/details/intolerance_1916",
+      "themes": { "planets": ["saturn"], "aspects": ["opposition", "square"], "moods": ["intense"] }
+    },
+    {
+      "id": "music-venus-holst",
+      "kind": "listen",
+      "title": "The Planets — Venus, the Bringer of Peace",
+      "creator": "Gustav Holst (perf. Public Domain)",
+      "blurb": "Fifteen minutes of unhurried warmth. Let the day's volume drop a register.",
+      "url": "https://musopen.org/music/832-the-planets-op-32/",
+      "themes": { "planets": ["venus", "moon"], "aspects": ["trine", "sextile"], "moods": ["warm", "steadying"] }
+    },
+    {
+      "id": "music-mars-holst",
+      "kind": "listen",
+      "title": "The Planets — Mars, the Bringer of War",
+      "creator": "Gustav Holst (perf. Public Domain)",
+      "blurb": "For friction days: name the pressure, give it a rhythm, let it move through you.",
+      "url": "https://musopen.org/music/832-the-planets-op-32/",
+      "themes": { "planets": ["mars"], "aspects": ["square", "conjunction"], "moods": ["intense"] }
+    },
+    {
+      "id": "music-saturn-holst",
+      "kind": "listen",
+      "title": "The Planets — Saturn, the Bringer of Old Age",
+      "creator": "Gustav Holst (perf. Public Domain)",
+      "blurb": "Time, considered kindly. For days that ask what lasts.",
+      "url": "https://musopen.org/music/832-the-planets-op-32/",
+      "themes": { "planets": ["saturn"], "aspects": ["opposition"], "moods": ["steadying"] }
+    },
+    {
+      "id": "music-nocturnes-field",
+      "kind": "listen",
+      "title": "Nocturnes",
+      "creator": "John Field",
+      "blurb": "Quiet piano for late thinking. The original nocturnes, before the word meant romance.",
+      "url": "https://musopen.org/music/2571-nocturnes/",
+      "themes": { "planets": ["moon", "venus"], "aspects": ["trine", "sextile"], "moods": ["warm", "steadying"] }
+    },
+    {
+      "id": "book-origins-of-species",
+      "kind": "read",
+      "title": "On the Origin of Species",
+      "creator": "Charles Darwin",
+      "blurb": "Patient observation changing everything. For slow-transit days that reward looking again.",
+      "url": "https://www.gutenberg.org/ebooks/1228",
+      "themes": { "planets": ["mercury", "saturn"], "aspects": ["conjunction"], "moods": ["awake"] }
+    },
+    {
+      "id": "film-orpheus",
+      "kind": "watch",
+      "title": "Orphic hymns, read aloud (archive recordings)",
+      "creator": "Various, trans. public domain",
+      "blurb": "Ancient addresses to the planets themselves — the sky, spoken to directly.",
+      "url": "https://archive.org/details/orphichymns",
+      "themes": { "planets": ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn"], "aspects": ["conjunction", "opposition", "square", "trine", "sextile"], "moods": ["awake", "warm", "steadying", "intense"] }
+    }
+  ]
+}

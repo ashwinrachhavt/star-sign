@@ -11,6 +11,7 @@ export default function RootLayout() {
         <Stack.Screen name="login" />
         <Stack.Screen name="onboarding" />
         <Stack.Screen name="day" />
+        <Stack.Screen name="week" />
       </Stack>
       <StatusBar style="light" />
     </ThemeProvider>

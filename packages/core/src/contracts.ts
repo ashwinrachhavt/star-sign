@@ -77,3 +77,36 @@ export const dailyReadingRequestSchema = z
   .strict();
 
 export const uuidSchema = z.string().uuid();
+
+/* ---- Connections (ASH-256 / 5.1) — additive; existing schemas untouched ---- */
+
+export const connectionStateSchema = z.enum([
+  "requested",
+  "accepted",
+  "revoked",
+  "disconnected",
+]);
+
+export type ConnectionState = z.infer<typeof connectionStateSchema>;
+
+/** POST /api/connections — request a connection with someone by user id. */
+export const connectionRequestSchema = z
+  .object({
+    addresseeId: uuidSchema,
+  })
+  .strict();
+
+export type ConnectionRequestInput = z.infer<typeof connectionRequestSchema>;
+
+/** Serialized connection row as returned by all connection routes. */
+export const connectionViewSchema = z.object({
+  id: uuidSchema,
+  requesterId: uuidSchema,
+  addresseeId: uuidSchema,
+  state: connectionStateSchema,
+  requestedAt: z.string(),
+  respondedAt: z.string().nullable(),
+  endedAt: z.string().nullable(),
+});
+
+export type ConnectionView = z.infer<typeof connectionViewSchema>;
