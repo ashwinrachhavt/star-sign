@@ -15,3 +15,4 @@ export { ProvenanceBlock } from "./ProvenanceBlock";
 export { Button } from "./Button";
 export { Input } from "./Input";
 export { GrainImage } from "./GrainImage";
+export { CelestialMark } from "./CelestialMark";

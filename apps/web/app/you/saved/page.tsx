@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { ScreenHeader, PlacementCard } from "@/components/ui";
+import { ScreenHeader, PlacementCard, CelestialMark } from "@/components/ui";
 import { fontMono } from "@/app/fonts";
 
 export const dynamic = "force-dynamic";
@@ -60,15 +60,23 @@ export default async function YouSavedPage() {
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
             {readings!.map((r) => (
-              <PlacementCard key={r.id} title={r.headline}>
-                <p
-                  className={`type-micro-label t-11 ${fontMono.className}`}
-                  style={{ color: "var(--ink-tertiary)" }}
+              <div key={r.id} style={{ position: "relative" }}>
+                <span
+                  style={{ position: "absolute", top: "var(--space-5)", right: "var(--space-5)" }}
+                  aria-hidden="true"
                 >
-                  {r.for_date}
-                </p>
-                <p className="type-prose t-15">{r.explanation}</p>
-              </PlacementCard>
+                  <CelestialMark seed={`saved:${r.id}`} size={48} style={{ opacity: 0.85 }} />
+                </span>
+                <PlacementCard title={r.headline}>
+                  <p
+                    className={`type-micro-label t-11 ${fontMono.className}`}
+                    style={{ color: "var(--ink-tertiary)" }}
+                  >
+                    {r.for_date}
+                  </p>
+                  <p className="type-prose t-15">{r.explanation}</p>
+                </PlacementCard>
+              </div>
             ))}
           </div>
         )}

@@ -8,7 +8,7 @@ import {
 } from "@star-sign/core";
 import { bodyGlyph } from "@/components/ui/glyphs";
 import { ChartGridPager, PlacementCard, ProfileHeader, ScreenHeader } from "@/components/ui";
-import { grainPlateDataUri } from "@/lib/grain-plates";
+import { CelestialMark } from "@/components/ui";
 import { rowToBirthProfile } from "@/lib/readings";
 import { fontMono } from "@/app/fonts";
 
@@ -102,7 +102,7 @@ export default async function YouChartPage() {
           `${profile.birthPlace.lat.toFixed(2)}°, ${profile.birthPlace.lon.toFixed(2)}°`
         }
         signLine={signLine}
-        avatar={{ src: grainPlateDataUri("sun"), alt: "" }}
+        avatar={{ src: "/celestial/icon-27.png", alt: "" }}
       />
 
       <section style={{ marginTop: "var(--space-6)" }} aria-label="Chart table">
@@ -148,15 +148,10 @@ export default async function YouChartPage() {
               }}
               aria-hidden="true"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={grainPlateDataUri(card.planet ?? "ascendant")}
-                alt=""
-                width={140}
-                height={140}
-                className="ui-grain-image"
-                loading="lazy"
-                decoding="async"
+              <CelestialMark
+                seed={`placement:${card.planet}:${card.sign}`}
+                size={120}
+                style={{ opacity: 0.92 }}
               />
             </div>
           </div>

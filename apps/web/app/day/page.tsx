@@ -129,7 +129,9 @@ export default async function DayPage() {
           {dateLine}
         </p>
         <div style={{ marginTop: "var(--space-4)" }}>
-          <Glance headline={reading.headline}>{reading.explanation}</Glance>
+          <Glance headline={reading.headline} markSeed={reading.forDate}>
+            {reading.explanation}
+          </Glance>
         </div>
       </section>
 
