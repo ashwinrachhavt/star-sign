@@ -141,6 +141,20 @@ export interface DiveDeeper {
   }>;
   /** Reflective longer-form lessons of the day (copy.md dive register). */
   lessons: string;
+  /**
+   * "For you today" (ASH-264): theme-matched curated recs. Each rec
+   * carries the event that matched it; empty/absent when nothing matches
+   * — never filler.
+   */
+  recommendations?: Array<{
+    kind: "read" | "watch" | "listen";
+    title: string;
+    creator: string;
+    blurb: string;
+    url: string;
+    /** The transit event that matched this rec's theme. */
+    matchedEvent: ReadingProvenanceInput;
+  }>;
 }
 
 export interface CompatibilityReport {
