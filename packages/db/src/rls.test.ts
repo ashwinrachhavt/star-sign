@@ -67,6 +67,8 @@ describe("migration discipline", () => {
     const [col] = await sql`
       select column_default from information_schema.columns
       where table_name = 'daily_readings' and column_name = 'ruleset_version'`;
+    // Current ruleset version (0002 set 2026-10.1; 0004 bumped to 2026-10.2
+    // when interpretation moved to scored transit events).
     expect(col.column_default).toContain("2026-10.2");
     const rows = await sql`
       select count(*)::int as n from daily_readings
