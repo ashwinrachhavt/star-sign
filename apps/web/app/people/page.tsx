@@ -21,6 +21,7 @@ export default async function PeoplePage() {
         title="People"
         tabs={[
           { id: "day", label: "My Day", href: "/day" },
+          { id: "week", label: "Week", href: "/week" },
           { id: "people", label: "People", href: "/people" },
         ]}
         activeTab="people"
