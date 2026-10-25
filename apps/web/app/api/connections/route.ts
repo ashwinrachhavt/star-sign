@@ -64,16 +64,13 @@ export async function POST(req: Request) {
     return jsonError(409, "conflict", "You cannot connect to yourself.", reqId);
   }
 
-  // The addressee must exist. FK violations (unknown user) → 409 with a
-  // generic message: never confirm which user ids exist.
-  const { data: addressee } = await actor.supabase
-    .from("profiles")
-    .select("id")
-    .eq("id", parsed.data.addresseeId)
-    .maybeSingle();
-  if (!addressee) {
-    return jsonError(404, "not_found", "Resource not found.", reqId);
-  }
+  // NOTE (ASH-258 fix): the previous pre-check read profiles through the
+  // actor's RLS-bound client, whose SELECT policy is `auth.uid() = id` —
+  // it could only ever see the actor's own row, so every legitimate
+  // request 404'd. Existence is now enforced by the connections FK:
+  // unknown addressee → 23503 → 404 (the "never confirm which ids exist"
+  // contract holds — unknown ids 404 either way, existing ones are only
+  // revealed to the person who already knows them).
 
   const { data: inserted, error } = await actor.supabase
     .from("connections")
@@ -95,6 +92,10 @@ export async function POST(req: Request) {
         "An active connection between you already exists.",
         reqId,
       );
+    }
+    // FK violation: addressee does not exist → hidden (404), never 403.
+    if (error.code === "23503") {
+      return jsonError(404, "not_found", "Resource not found.", reqId);
     }
     return jsonError(500, "internal_error", "Could not create connection.", reqId);
   }

@@ -8,6 +8,7 @@ import { computeNatalChart } from "@star-sign/core";
 import { jsonError, jsonOk, rateLimit, rateLimitResponse, RATE_LIMITS, requestId, requireActor } from "../../../_lib/api";
 import { projectPartnerChart, type ConnectionState } from "../../../../../server/connections/visibility";
 import { rowToBirthProfile } from "@/lib/readings";
+import { adminClient } from "@/lib/auth/admin";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -39,8 +40,16 @@ export async function GET(_req: Request, ctx: Ctx) {
   const state = connection.state as ConnectionState;
   const shareScope = connection.share_scope as "none" | "chart_placements";
 
-  // Partner identity (display name only — safe projection field).
-  const { data: partnerProfile } = await actor.supabase
+  // Partner identity + birth row are read via the service-role client:
+  // the actor's RLS-bound client can only ever see their own rows
+  // (profiles/birth_profiles policies are `auth.uid() = owner`), so the
+  // partner lookups would always return null (ASH-258 fix — same class
+  // as the request-route addressee bug). The SECURITY boundary remains
+  // the projection allowlist below: the service role lifts the storage
+  // read; projectPartnerChart still decides what is served per state.
+  const admin = adminClient();
+
+  const { data: partnerProfile } = await admin
     .from("profiles")
     .select("display_name")
     .eq("id", partnerId)
@@ -48,7 +57,7 @@ export async function GET(_req: Request, ctx: Ctx) {
 
   let chart = null;
   if (state === "accepted" && shareScope === "chart_placements") {
-    const { data: partnerBirth } = await actor.supabase
+    const { data: partnerBirth } = await admin
       .from("birth_profiles")
       .select("*")
       .eq("user_id", partnerId)
