@@ -213,12 +213,20 @@ export function checkStructure(r: DailyReading): EvalFailure[] {
     });
   }
   for (const a of r.lifeAreas) {
-    if (!KNOWN.has(a)) {
+    const name = typeof a === "string" ? a : a?.area;
+    if (!KNOWN.has(name)) {
       out.push({
         rule: "structure-limits",
         field: "lifeAreas",
-        text: a,
+        text: String(name),
         detail: "unknown life area name",
+      });
+    } else if (typeof a === "object" && !["hot", "warm", "quiet"].includes(a.temperature)) {
+      out.push({
+        rule: "structure-limits",
+        field: "lifeAreas",
+        text: String(name),
+        detail: "unknown life-area temperature (ASH-268)",
       });
     }
   }

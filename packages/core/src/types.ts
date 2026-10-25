@@ -118,7 +118,7 @@ export interface DailyReading {
   explanation: string;
   dos: string[];
   donts: string[];
-  lifeAreas: LifeArea[];
+  lifeAreas: Array<{ area: LifeArea; temperature: "hot" | "warm" | "quiet" }>;
   provenance: ReadingProvenance;
   /** Tied to birth-data precision; surfaced verbatim in the UI */
   uncertaintyNote: string;
