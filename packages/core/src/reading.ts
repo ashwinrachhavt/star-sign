@@ -140,6 +140,7 @@ function eventToInput(e: TransitEvent): ReadingProvenanceInput {
     sign: e.transitSign ?? "aries",
     natal: e.natal,
     aspect: e.type,
+    orb: e.orb,
   };
 }
 

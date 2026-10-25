@@ -80,6 +80,8 @@ export type ReadingProvenanceInput =
       natal: Planet;
       /** Aspect family of the event; present from ruleset 2026-10.2 (ASH-246). */
       aspect?: Aspect["type"];
+      /** Orb in degrees at generation time; present from 2026-10.2 (ASH-251 follow-up). */
+      orb?: number;
     }
   | { kind: "lunar_phase"; phase: string };
 
