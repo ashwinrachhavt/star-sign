@@ -1,0 +1,130 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ASH-262 golden-set eval (CI gate, same gate as readings) > snapshot baseline (AC 3 — update only with owner review) 1`] = `
+[
+  {
+    "dimensions": [
+      {
+        "area": "communication",
+        "summary": 25,
+        "tone": 2,
+      },
+      {
+        "area": "emotional",
+        "summary": 25,
+        "tone": 4,
+      },
+      {
+        "area": "attraction",
+        "summary": 25,
+        "tone": 3,
+      },
+      {
+        "area": "friction",
+        "summary": 25,
+        "tone": 2,
+      },
+      {
+        "area": "longterm",
+        "summary": 25,
+        "tone": 3,
+      },
+    ],
+    "eventCount": 25,
+    "pairId": "P1xP2",
+  },
+  {
+    "dimensions": [
+      {
+        "area": "communication",
+        "summary": 22,
+        "tone": 3,
+      },
+      {
+        "area": "emotional",
+        "summary": 22,
+        "tone": 4,
+      },
+      {
+        "area": "attraction",
+        "summary": 22,
+        "tone": 3,
+      },
+      {
+        "area": "friction",
+        "summary": 22,
+        "tone": 2,
+      },
+      {
+        "area": "longterm",
+        "summary": 22,
+        "tone": 4,
+      },
+    ],
+    "eventCount": 22,
+    "pairId": "P3xP4",
+  },
+  {
+    "dimensions": [
+      {
+        "area": "communication",
+        "summary": 26,
+        "tone": 4,
+      },
+      {
+        "area": "emotional",
+        "summary": 26,
+        "tone": 4,
+      },
+      {
+        "area": "attraction",
+        "summary": 26,
+        "tone": 4,
+      },
+      {
+        "area": "friction",
+        "summary": 26,
+        "tone": 3,
+      },
+      {
+        "area": "longterm",
+        "summary": 26,
+        "tone": 4,
+      },
+    ],
+    "eventCount": 26,
+    "pairId": "P5xP6",
+  },
+  {
+    "dimensions": [
+      {
+        "area": "communication",
+        "summary": 31,
+        "tone": 2,
+      },
+      {
+        "area": "emotional",
+        "summary": 31,
+        "tone": 3,
+      },
+      {
+        "area": "attraction",
+        "summary": 31,
+        "tone": 3,
+      },
+      {
+        "area": "friction",
+        "summary": 31,
+        "tone": 2,
+      },
+      {
+        "area": "longterm",
+        "summary": 31,
+        "tone": 3,
+      },
+    ],
+    "eventCount": 31,
+    "pairId": "P2xP4",
+  },
+]
+`;
