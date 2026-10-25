@@ -2,6 +2,14 @@
 
 Append-only record of shipped changes. Format per `.agents/workflows.md`.
 
+## 2026-10-25 — Transit notifications: preferences-first + dispatch job + push adapter (ASH-263)
+
+- Change: Migration `0006_notifications.sql` — `notification_preferences` (per-event-type opt-ins all defaulting FALSE, per-user quiet-hours window, IANA zone, push token; user-owned RLS) and `notification_dispatch_log` (unique `(user, event_kind, event_key, for_date)` idempotency ledger; deny-all client RLS, job-written only). `job_notification_dispatch` (0.4 pattern): reads stored `sky_events` within ±2 days, filters by opt-in + quiet hours in the user's zone, insert-or-skip into the ledger. Route handlers `GET/PUT /api/me/notification-preferences` (defaults created on first read; user can change/stop everything anytime). Push adapter port + `ExpoPushAdapter` (fetch against Expo's API, no SDK in core) + `NullPushAdapter` for tests/dry-run in `apps/web/server/notifications/`. 7 harness tests cover criteria 1-4.
+- Migration: `supabase/migrations/0006_notifications.sql`
+- Rollback: header note (drop both tables + job function).
+- Risk: dispatch job reads sky_events — if the 4.2 scan job hasn't seeded events, dispatch finds nothing (fail-quiet, no false sends). The actual push delivery is adapter-side; the job records intent only, so a ledger row without a delivered push is possible if the worker dies between insert and send — at-least-once from the worker's perspective, never double (ledger unique).
+- Decisions: quiet-hours wrap-around handled (22→8 spans midnight); event_key includes the exact event instant so a re-seeded identical event doesn't re-notify; weekly digest deferred to its own opt-in flag but the dispatch loop currently covers moon events only (digest job lands with its content source) — flagged in ticket.
+
 ## 2026-10-24 — Structured event persistence (ASH-251)
 
 - Change: `selected_events` becomes a database-enforced contract. Migration 0005 adds `daily_readings_selected_events_shape` — a CHECK constraint (via immutable helper `valid_selected_events(jsonb)`) validating every persisted event: transit events must carry transiting planet, natal planet, aspect family, and sign; natal placements and lunar-phase inputs validated; zero-event rows stay valid (≥0 per AC1). Postgres CHECKs can't contain subqueries, and OR-chained arms don't reliably short-circuit before the set-returning `jsonb_array_elements` (it errors on non-array input), so the helper guards it behind a CASE. Day page ProvenanceBlock ("Why this reading?") now renders the stored events from the DB row — the facts behind the prose, read not recomputed (3.6b/c). New `packages/db/src/events.test.ts`: persisted-row shape (AC1), malformed rejection (unknown aspect/planet, non-array), determinism across 10 dates (AC3), and prose-traceability (AC4). Harness MIGRATIONS list extended to 0004/0005; `@star-sign/core` added as db dev-dependency for event-shape fixtures.
