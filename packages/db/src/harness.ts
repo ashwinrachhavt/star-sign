@@ -24,6 +24,7 @@ const MIGRATIONS = [
   "0003_job_pattern.sql",
   "0004_ruleset_version_bump_v2026_10_2.sql",
   "0005_sky_events.sql",
+  "0005_structured_event_persistence.sql",
 ];
 
 export async function createHarnessDb(): Promise<TestDb> {
