@@ -31,8 +31,10 @@ test("golden path: signup → onboarding → verify → day page", async ({ page
   // Default precision is "exact" → a time is required.
   await page.getByLabel("Time", { exact: true }).fill("09:30");
   await page.getByLabel("Time zone at birth").fill("America/New_York");
-  await page.getByLabel("Latitude").fill("40.7128");
-  await page.getByLabel("Longitude").fill("-74.006");
+  // Geocoded place (owner request): type the place, coordinates resolve
+  // server-side — no manual lat/lon entry.
+  await page.getByLabel("Birth place").fill("New York");
+  await page.getByText(/New York.*— -?\d+\.\d+°/).waitFor({ timeout: 15_000 });
   await page.getByRole("button", { name: /continue/i }).click();
 
   // Chart verification screen (ASH-248): factual summary before any

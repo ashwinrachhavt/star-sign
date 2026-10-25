@@ -6,7 +6,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button, Input } from "@/components/ui";
-import { fontSerif } from "@/app/fonts";
+import { fontMono, fontSerif } from "@/app/fonts";
 
 const COMMON_ZONES = [
   "America/New_York",
@@ -42,8 +42,14 @@ function OnboardingForm() {
     Intl.DateTimeFormat().resolvedOptions().timeZone,
   );
   const [placeLabel, setPlaceLabel] = useState("");
-  const [lat, setLat] = useState("");
-  const [lon, setLon] = useState("");
+  const [place, setPlace] = useState<{
+    lat: number;
+    lon: number;
+    resolvedName: string;
+    country: string | null;
+    timezone: string | null;
+  } | null>(null);
+  const [placeBusy, setPlaceBusy] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -74,20 +80,86 @@ function OnboardingForm() {
       setBirthTime(row.birth_time ?? "");
       setTimeZone(row.iana_timezone ?? row.birth_time_zone ?? "");
       setPlaceLabel(row.birth_place_label ?? "");
-      setLat(row.birth_lat != null ? String(row.birth_lat) : "");
-      setLon(row.birth_lon != null ? String(row.birth_lon) : "");
+      if (row.birth_lat != null && row.birth_lon != null) {
+        setPlace({
+          lat: row.birth_lat,
+          lon: row.birth_lon,
+          resolvedName: row.birth_place_label ?? "",
+          country: null,
+          timezone: null,
+        });
+      }
     })();
   }, [isEdit, supabase]);
 
   const precisionChip =
     timeKnown === "yes" ? "Exact" : timeKnown === "approx" ? "Approximate" : "Unknown";
 
-  function useMyLocation() {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition((pos) => {
-      setLat(pos.coords.latitude.toFixed(4));
-      setLon(pos.coords.longitude.toFixed(4));
-    });
+  // Geocode on place edits (debounced): the user types a place name and
+  // the server resolves coordinates — no manual lat/lon entry (owner
+  // request, 2026-10-25).
+  useEffect(() => {
+    const query = placeLabel.trim();
+    if (query.length < 2) {
+      setPlace(null);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setPlaceBusy(true);
+      try {
+        const res = await fetch("/api/geocode", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query }),
+        });
+        if (res.ok) {
+          const body = await res.json();
+          setPlace({
+            lat: body.data.lat,
+            lon: body.data.lon,
+            resolvedName: body.data.resolvedName ?? query,
+            country: body.data.country ?? null,
+            timezone: body.data.timezone ?? null,
+          });
+          // Adopt the provider's IANA zone suggestion when we have one.
+          if (body.data.timezone) setTimeZone(body.data.timezone);
+        } else {
+          setPlace(null);
+        }
+      } catch {
+        setPlace(null);
+      } finally {
+        setPlaceBusy(false);
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [placeLabel]);
+
+  // Onboarding tracking (owner request): record who is onboarding and
+  // everything entered, updated as the flow progresses.
+  async function trackOnboarding(
+    userData: { id: string; email?: string },
+    completed: boolean,
+  ) {
+    try {
+      await fetch("/api/onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          birthDate: birthDate || null,
+          birthTime: timeKnown === "no" ? null : birthTime || null,
+          birthTimePrecision:
+            timeKnown === "yes" ? "exact" : timeKnown === "approx" ? "approximate" : "unknown",
+          birthTimeZone: timeZone,
+          birthPlaceLabel: placeLabel || null,
+          birthLat: place?.lat ?? null,
+          birthLon: place?.lon ?? null,
+          completed,
+        }),
+      });
+    } catch {
+      // Tracking is observability — never block the flow on it.
+    }
   }
 
   async function submit(e: React.FormEvent) {
@@ -98,6 +170,12 @@ function OnboardingForm() {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) {
       router.push("/login");
+      return;
+    }
+
+    if (!place) {
+      setBusy(false);
+      setError("Pick a birth place from the list — we resolve the coordinates for you.");
       return;
     }
 
@@ -113,16 +191,21 @@ function OnboardingForm() {
         birth_time_precision: precision,
         birth_time_zone: timeZone,
         iana_timezone: timeZone,
-        birth_lat: parseFloat(lat),
-        birth_lon: parseFloat(lon),
+        birth_lat: place.lat,
+        birth_lon: place.lon,
         birth_place_label: placeLabel || null,
       });
 
-    setBusy(false);
     if (upsertErr) {
+      setBusy(false);
       setError(upsertErr.message);
       return;
     }
+
+    // Completed onboarding record.
+    await trackOnboarding({ id: userData.user.id, email: userData.user.email }, true);
+
+    setBusy(false);
     // First-run goes through chart verification (ASH-248); edits return
     // to the verification screen for a re-check.
     router.push("/verify");
@@ -225,52 +308,32 @@ function OnboardingForm() {
 
           <Input
             id="pl"
-            label="Birth place (optional label)"
+            label="Birth place"
             type="text"
-            placeholder="e.g. New York, NY"
+            placeholder="e.g. Pune, India"
             value={placeLabel}
             onChange={(e) => setPlaceLabel(e.target.value)}
+            required
+            autoComplete="off"
           />
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "var(--space-4)",
-            }}
-          >
-            <Input
-              id="lat"
-              label="Latitude"
-              type="number"
-              step="any"
-              min="-90"
-              max="90"
-              required
-              value={lat}
-              onChange={(e) => setLat(e.target.value)}
-            />
-            <Input
-              id="lon"
-              label="Longitude"
-              type="number"
-              step="any"
-              min="-180"
-              max="180"
-              required
-              value={lon}
-              onChange={(e) => setLon(e.target.value)}
-            />
-          </div>
-
-          <button
-            type="button"
-            onClick={useMyLocation}
-            className="ui-button-link ui-focusable type-micro-label t-13"
-            style={{ width: "fit-content" }}
-          >
-            Use my current location
-          </button>
+          {placeBusy && (
+            <p
+              className={`type-mono t-11 ${fontMono.className}`}
+              style={{ color: "var(--ink-tertiary)", margin: "calc(-1 * var(--space-3)) 0 0" }}
+            >
+              Resolving…
+            </p>
+          )}
+          {!placeBusy && place && (
+            <p
+              className={`type-mono t-11 ${fontMono.className}`}
+              style={{ color: "var(--ink-tertiary)", margin: "calc(-1 * var(--space-3)) 0 0" }}
+            >
+              {place.resolvedName}
+              {place.country ? `, ${place.country}` : ""} — {place.lat.toFixed(2)}°,{" "}
+              {place.lon.toFixed(2)}°
+            </p>
+          )}
 
           {error && <p className="form-error type-prose t-15">{error}</p>}
 

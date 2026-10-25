@@ -29,6 +29,7 @@ const MIGRATIONS = [
   "0008_notifications.sql",
   "0009_clerk_identity_bridge.sql",
   "0010_share_scope.sql",
+  "0011_onboarding_and_places.sql",
 ];
 
 export async function createHarnessDb(): Promise<TestDb> {

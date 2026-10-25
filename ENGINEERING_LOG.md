@@ -2,6 +2,14 @@
 
 Append-only record of shipped changes. Format per `.agents/workflows.md`.
 
+## 2026-10-25 — Geocoded birth place + onboarding tracking (owner request)
+
+- Change: Migration `0011_onboarding_and_places.sql` — `onboarding_profiles` (one row per account: clerk_subject + auth_provider, email/display, every birth field entered, started/completed timestamps; user-owned RLS) and `places` (geocode cache keyed by normalized label; authenticated-read). New `POST /api/geocode`: place label → lat/lon via Open-Meteo's free geocoding API (no key), server-side only, cached in `places`; without a service-role key the lookup works with caching disabled (graceful degradation). New `POST /api/onboarding`: upserts the user's onboarding record (Clerk subject recorded when active; tracking never blocks the flow). Onboarding form reworked: type a place name → debounced server geocode → resolved name + coordinates shown as confirmation + provider's IANA timezone adopted automatically; manual lat/lon inputs and the geolocation button removed (owner request: "I don't need to put that"). e2e golden path updated to the geocode flow.
+- Migration: `supabase/migrations/0011_onboarding_and_places.sql`
+- Rollback: drop both tables (header note).
+- Risk: geocode depends on a third-party free API at onboarding time — provider outage degrades to "place not found" messaging and the user can retry; cached places keep working offline-of-provider. Email stored in onboarding_profiles is PII — the row is user-owned via RLS and cascades on account deletion.
+- Decisions: Open-Meteo over Nominatim/Google (no key, no billing, permissive use); cache keyed on normalized label (case/whitespace-insensitive); coordinates resolved server-side only (client never hits the provider — one place to rate-limit and cache); onboarding_profiles is observability, not auth — identity resolution stays with profiles.clerk_subject.
+
 ## 2026-10-25 — Transit notifications: preferences-first + dispatch job + push adapter (ASH-263)
 
 - Change: Migration `0006_notifications.sql` — `notification_preferences` (per-event-type opt-ins all defaulting FALSE, per-user quiet-hours window, IANA zone, push token; user-owned RLS) and `notification_dispatch_log` (unique `(user, event_kind, event_key, for_date)` idempotency ledger; deny-all client RLS, job-written only). `job_notification_dispatch` (0.4 pattern): reads stored `sky_events` within ±2 days, filters by opt-in + quiet hours in the user's zone, insert-or-skip into the ledger. Route handlers `GET/PUT /api/me/notification-preferences` (defaults created on first read; user can change/stop everything anytime). Push adapter port + `ExpoPushAdapter` (fetch against Expo's API, no SDK in core) + `NullPushAdapter` for tests/dry-run in `apps/web/server/notifications/`. 7 harness tests cover criteria 1-4.

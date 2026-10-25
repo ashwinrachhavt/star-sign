@@ -108,7 +108,7 @@ export async function parseBody<S extends z.ZodTypeAny>(
 export async function requireActor(
   reqId: string,
 ): Promise<
-  { ok: true; userId: string; supabase: Awaited<ReturnType<typeof createClient>> } | { ok: false; response: NextResponse }
+  { ok: true; userId: string; clerkSubject: string | null; supabase: Awaited<ReturnType<typeof createClient>> } | { ok: false; response: NextResponse }
 > {
   const actor = await resolveActor();
   if (!actor) {
@@ -117,7 +117,12 @@ export async function requireActor(
       response: jsonError(401, "unauthenticated", "Sign in required.", reqId),
     };
   }
-  return { ok: true, userId: actor.userId, supabase: actor.supabase };
+  return {
+    ok: true,
+    userId: actor.userId,
+    clerkSubject: actor.clerkSubject ?? null,
+    supabase: actor.supabase,
+  };
 }
 
 /**
