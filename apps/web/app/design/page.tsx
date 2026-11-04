@@ -109,6 +109,11 @@ export default function DesignPage() {
           <DosDonts
             dos={["Lead with the ask, not the apology", "Take the meeting you dread"]}
             donts={["Reopen closed loops", "Answer messages before coffee"]}
+            // W2b proof lines: the grounding line names each pair's transit.
+            proofs={[
+              "Mars trine natal Sun — friction that feeds the fire, not fights it",
+              "Venus square natal Saturn — connection wants patience, not proof",
+            ]}
           />
         </Section>
 
@@ -128,10 +133,16 @@ export default function DesignPage() {
 
         <Section title="LifeAreaRow (product contract)">
           <div>
-            <LifeAreaRow area="Love" state="Steady" />
-            <LifeAreaRow area="Work" state="Surge" />
-            <LifeAreaRow area="Home" state="Quiet" />
-            <LifeAreaRow area="Friends" state="Active" />
+            {/* The W2b four-state scale (charged/warm/steady/strained) plus
+                the two real legacy scales: ash-268 interim names render
+                under their own names; pre-2026-10.3 rows get the dash. */}
+            <LifeAreaRow area="Love" state="Charged" />
+            <LifeAreaRow area="Work" state="Warm" />
+            <LifeAreaRow area="Home" state="Steady" />
+            <LifeAreaRow area="Friends" state="Strained" />
+            <LifeAreaRow area="Self" state="Hot" />
+            <LifeAreaRow area="Money" state="Quiet" />
+            <LifeAreaRow area="Family" state="—" />
           </div>
         </Section>
 
