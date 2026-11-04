@@ -115,7 +115,7 @@ export default async function YouChartPage() {
             className={`type-micro-label t-11 ${fontMono.className}`}
             style={{ color: "var(--ink-tertiary)", marginTop: "var(--space-3)", textAlign: "center" }}
           >
-            HOUSES AND RISING SIGN OMITTED — BIRTH TIME NOT EXACT
+            HOUSES AND RISING SIGN OMITTED. BIRTH TIME NOT EXACT
           </p>
         )}
       </section>

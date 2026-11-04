@@ -14,7 +14,7 @@ export function CardFooterLink({
       <span aria-hidden="true">{glyph}</span>
       <a href={href} className="ui-focusable">
         {label}
-        <span aria-hidden="true">→</span>
+        <span aria-hidden="true" className="ui-arrow-chevron" />
       </a>
     </footer>
   );

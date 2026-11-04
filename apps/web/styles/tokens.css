@@ -1,3 +1,6 @@
+/* Hallmark · built: the project · redesign: polish · shape: app screen · genre: atmospheric · scope: app */
+
+
 /* Star Sign design tokens — single source (`.agents/design-system.md` §2–4, §8).
    Mobile mirror: apps/mobile/theme/tokens.ts must stay value-identical. */
 
@@ -6,7 +9,7 @@
   --bg: #0d0d0d;             /* near-black, slightly warm */
   --ink: #e8e6e1;            /* off-white primary text */
   --ink-secondary: #8f8d88;  /* inactive nav, secondary */
-  --ink-tertiary: #5a5854;   /* provenance, timestamps */
+  --ink-tertiary: #807e7a;   /* provenance, timestamps — ≥4.5:1 on --bg (gate 40) */
   --hairline: #2e2d2b;       /* card borders, dividers */
   --card-bg: transparent;    /* cards are bordered, not filled */
   --danger: #b3401f;
@@ -33,7 +36,7 @@
     --bg: #f7f6f3;
     --ink: #111110;
     --ink-secondary: #6d6b66;
-    --ink-tertiary: #a3a19c;
+    --ink-tertiary: #6f6d6a;
     --hairline: #d8d6d1;
   }
 }

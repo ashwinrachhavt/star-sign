@@ -104,10 +104,13 @@ export default async function PersonCard({ person }: { person: Person }) {
               <div key={d.area}>
                 <p className="type-micro-label t-11">
                   {AREA_LABELS[d.area].toUpperCase()}{" "}
-                  <span style={{ color: "var(--ink-tertiary)" }}>
-                    {"●".repeat(d.tone)}
-                    {"○".repeat(5 - d.tone)}
-                  </span>
+                  <span
+                  style={{ color: "var(--ink-tertiary)" }}
+                  aria-label={`${AREA_LABELS[d.area]} tone ${d.tone} of 5`}
+                >
+                  {"●".repeat(d.tone)}
+                  {"○".repeat(5 - d.tone)}
+                </span>
                 </p>
                 <p
                   className="type-prose t-15"
@@ -126,7 +129,7 @@ export default async function PersonCard({ person }: { person: Person }) {
                 className="ui-focusable type-micro-label t-11"
                 style={{ color: "var(--ink)", textDecoration: "underline", textUnderlineOffset: 3 }}
               >
-                Full report — scales & evidence →
+                Full report: scales and evidence
               </a>
             </p>
           </div>

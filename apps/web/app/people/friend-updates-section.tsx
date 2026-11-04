@@ -77,7 +77,7 @@ export default function FriendUpdatesSection() {
         style={{ color: "var(--ink-secondary)", marginBottom: "var(--space-4)" }}
       >
         Today&apos;s theme for the people who share their daily updates with
-        you — the theme only, never their birth details.
+        you: the theme only, never their birth details.
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
         {updates.map((u) => (
@@ -93,7 +93,7 @@ export default function FriendUpdatesSection() {
                 </span>
               )}
             </div>
-            <p className="type-display t-20" style={{ margin: "var(--space-3) 0 var(--space-2)" }}>
+            <p className="type-display t-22" style={{ margin: "var(--space-3) 0 var(--space-2)" }}>
               {u.headline}
             </p>
             {u.lifeAreas.map((a) => (

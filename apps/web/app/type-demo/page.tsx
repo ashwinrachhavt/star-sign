@@ -17,7 +17,7 @@ export default function TypeDemoPage() {
     <main className="demo">
       <header className="demo-header">
         <h1 className="type-display t-36">Type system</h1>
-        <p className="type-micro-label t-11">Three voices — strict roles</p>
+        <p className="type-micro-label t-11">Three voices, strict roles</p>
       </header>
 
       <section className="demo-card">
@@ -25,17 +25,17 @@ export default function TypeDemoPage() {
         <p className="type-prose t-17">
           Pluto stays in each sign for up to thirty years, meaning it rules a
           generation more than a person. It rules power, intensity, obsession,
-          and control. Your Pluto is in Sagittarius, meaning your generation's
+          and control. Your Pluto is in Sagittarius, meaning your generation’s
           psyche is comparatively positive, free-spirited, curious, optimistic,
           forward-looking, independent, and confident.
         </p>
         <p className="type-prose t-17">
-          It's in your sixth house, meaning you personally are transforming
+          It’s in your sixth house, meaning you personally are transforming
           outdated approaches to day-to-day experiences of work, routines, and
           bodily health.
         </p>
         <footer className="type-mono t-13 demo-footer">
-          ♇ PLUTO — <span className="demo-link">SIMILAR CHARTS →</span>
+          ♇ PLUTO · <span className="demo-link">SIMILAR CHARTS</span>
         </footer>
       </section>
 
@@ -61,7 +61,7 @@ export default function TypeDemoPage() {
       </section>
 
       <section className="demo-card">
-        <p className="type-micro-label t-11">Scale — 11 / 13 / 15 / 17 / 22 / 28 / 36</p>
+        <p className="type-micro-label t-11">Scale: 11 / 13 / 15 / 17 / 22 / 28 / 36</p>
         <div className="demo-scale">
           <span className="type-mono t-11">11 mono caps label</span>
           <span className="type-mono t-13">13 mono data line</span>

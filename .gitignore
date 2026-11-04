@@ -18,4 +18,5 @@ supabase/.branches
 supabase/.temp
 .agents
 .claude/skills/
-design/reference/
+.hallmark/
+design/reference/node_modules.rootsnap-*/

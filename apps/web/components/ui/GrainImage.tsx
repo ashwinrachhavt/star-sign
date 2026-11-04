@@ -17,7 +17,6 @@ export function GrainImage({
       width={width}
       height={height}
       className="ui-grain-image"
-      loading="lazy"
       decoding="async"
     />
   );

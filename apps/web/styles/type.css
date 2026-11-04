@@ -1,3 +1,6 @@
+/* Hallmark · built: the project · redesign: polish · shape: app screen · genre: atmospheric · scope: app */
+
+
 /* Type system — three voices, strict roles (design-system.md §3).
    Any UI element is exactly one of: .type-display (serif), .type-prose (sans),
    .type-mono / .type-micro-label (mono). A card title is never mono; a label
@@ -10,6 +13,7 @@
   font-weight: 400;
   font-style: normal;
   letter-spacing: normal;
+  text-wrap: balance;
 }
 
 .type-prose {

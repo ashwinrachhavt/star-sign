@@ -20,9 +20,7 @@ export function FriendRow({
           {signLine}
         </span>
       </span>
-      <span className="ui-friend-row-arrow" aria-hidden="true">
-        →
-      </span>
+      <span className="ui-friend-row-arrow" aria-hidden="true" />
     </a>
   );
 }

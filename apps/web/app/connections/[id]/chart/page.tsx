@@ -1,12 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import { ScreenHeader } from "@/components/ui";
+import { bodyGlyph } from "@/components/ui/glyphs";
 import { fontMono, fontSerif } from "@/app/fonts";
-
-const PLANET_GLYPHS: Record<string, string> = {
-  sun: "☉", moon: "☽", mercury: "☿", venus: "♀", mars: "♂",
-  jupiter: "♃", saturn: "♄", uranus: "♅", neptune: "♆", pluto: "♇",
-};
 
 interface Projection {
   connectionId: string;
@@ -116,7 +112,7 @@ export default async function PartnerChartPage({
               className={`type-micro-label t-11 ${fontMono.className}`}
               style={{ color: "var(--ink-tertiary)", marginBottom: "var(--space-3)" }}
             >
-              CHART PLACEMENTS — SHARED BY CHOICE
+              CHART PLACEMENTS, SHARED BY CHOICE
             </p>
             <div style={{ display: "flex", flexDirection: "column" }}>
               {projection.placements.map((p) => (
@@ -132,7 +128,7 @@ export default async function PartnerChartPage({
                     borderBottom: "1px solid var(--hairline)",
                   }}
                 >
-                  <span aria-hidden="true">{PLANET_GLYPHS[p.planet] ?? "•"}</span>
+                  <span aria-hidden="true">{bodyGlyph(p.planet)}</span>
                   <span className={`type-mono t-13 ${fontMono.className}`}>
                     {p.planet.toUpperCase()}
                   </span>
@@ -175,7 +171,7 @@ export default async function PartnerChartPage({
           >
             {projection.state === "requested"
               ? "Chart sharing starts once you're both connected. Nothing is visible yet."
-              : "This connection has ended. Nothing is visible — immediately."}
+              : "This connection has ended. Nothing is visible, immediately."}
           </p>
           <div style={{ marginTop: "var(--space-5)" }}>
             <a

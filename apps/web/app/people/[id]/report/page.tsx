@@ -10,23 +10,8 @@ import {
   ProvenanceBlock,
   ScreenHeader,
 } from "@/components/ui";
+import { aspectGlyph, bodyGlyph } from "@/components/ui/glyphs";
 import { fontMono } from "@/app/fonts";
-
-/* Local glyph maps until PR #28 (glyphs.ts) merges — swap to
-   @/components/ui/glyphs then. Kept value-identical to that module. */
-const BODY_GLYPHS: Record<string, string> = {
-  sun: "☉", moon: "☽", mercury: "☿", venus: "♀", mars: "♂",
-  jupiter: "♃", saturn: "♄", uranus: "♅", neptune: "♆", pluto: "♇",
-};
-const ASPECT_GLYPHS: Record<string, string> = {
-  conjunction: "☌", opposition: "☍", square: "□", trine: "△", sextile: "⚹",
-};
-function bodyGlyph(p: string): string {
-  return BODY_GLYPHS[p] ?? "•";
-}
-function aspectGlyph(a: string): string {
-  return ASPECT_GLYPHS[a] ?? "·";
-}
 
 const AREA_LABELS: Record<string, string> = {
   communication: "Communication",
@@ -119,7 +104,7 @@ export default async function ReportPage({
           activeTab="people"
         />
         <p className="type-prose t-15" style={{ color: "var(--ink-secondary)", marginTop: "var(--space-5)" }}>
-          This report needs their birth details — add date, time zone, and
+          This report needs their birth details: add date, time zone, and
           place on the People screen to generate it.
         </p>
       </main>
@@ -198,7 +183,7 @@ export default async function ReportPage({
       </p>
 
       <p className="type-prose t-15" style={{ color: "var(--ink-secondary)", marginTop: "var(--space-3)" }}>
-        A reflection on interaction styles — how two charts tend to move
+        A reflection on interaction styles: how two charts tend to move
         together. Patterns, not outcomes; you decide what they mean.
       </p>
 
