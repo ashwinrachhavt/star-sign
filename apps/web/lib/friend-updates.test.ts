@@ -75,7 +75,9 @@ describe("deriveFriendUpdate", () => {
     const update = derive(EXACT_ROW);
     expect(update.lifeAreas.length).toBeGreaterThan(0);
     for (const area of update.lifeAreas) {
-      expect(["hot", "warm", "quiet"]).toContain(area.state);
+      // The pipeline's rank vocabulary went four-state in W2b
+      // (charged/warm/steady/strained) — friend updates reuse it.
+      expect(["charged", "warm", "steady", "strained"]).toContain(area.state);
       expect(typeof area.area).toBe("string");
     }
   });

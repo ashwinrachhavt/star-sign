@@ -28,10 +28,15 @@ const AREA_LABELS: Record<string, string> = {
 };
 
 const TEMPERATURE_LABEL: Record<string, string> = {
-  hot: "Hot",
+  charged: "Charged",
   warm: "Warm",
+  steady: "Steady",
+  strained: "Strained",
+  // ash-268 interim rows (hot/warm/quiet) — real persisted states, each
+  // renders under its own name. Pre-2026-10.3 rows never stored a
+  // temperature — the honest dash.
+  hot: "Hot",
   quiet: "Quiet",
-  // Pre-2026-10.3 rows never stored a temperature — the honest dash.
   legacy: "—",
 };
 
@@ -136,7 +141,15 @@ export default async function DayPage() {
       </section>
 
       <section className="card" style={{ marginTop: "var(--space-5)" }}>
-        <DosDonts dos={reading.dos} donts={reading.donts} doLabel="Dos" dontLabel="Don'ts" />
+        <DosDonts
+          dos={reading.dos}
+          donts={reading.donts}
+          // W2b proof lines: each pair expands to its named transit.
+          // Absent on the free-tier split or quiet days — never faked.
+          proofs={reading.diveDeeper?.guidance?.map((g) => g.grounding)}
+          doLabel="Dos"
+          dontLabel="Don'ts"
+        />
       </section>
 
       <section className="card" style={{ marginTop: "var(--space-4)" }}>

@@ -204,12 +204,12 @@ export function checkStructure(r: DailyReading): EvalFailure[] {
   const KNOWN = new Set([
     "love", "work", "money", "home", "family", "friends", "self",
   ]);
-  if (r.lifeAreas.length < 1 || r.lifeAreas.length > 3) {
+  if (r.lifeAreas.length !== 7) {
     out.push({
       rule: "structure-limits",
       field: "lifeAreas",
       text: r.lifeAreas.join(", ") || "(empty)",
-      detail: `expected 1–3 life areas, got ${r.lifeAreas.length}`,
+      detail: `expected the full 7-area set, got ${r.lifeAreas.length}`,
     });
   }
   for (const a of r.lifeAreas) {
@@ -221,12 +221,15 @@ export function checkStructure(r: DailyReading): EvalFailure[] {
         text: String(name),
         detail: "unknown life area name",
       });
-    } else if (typeof a === "object" && !["hot", "warm", "quiet"].includes(a.temperature)) {
+    } else if (
+      typeof a === "object" &&
+      !["charged", "warm", "steady", "strained"].includes(a.temperature)
+    ) {
       out.push({
         rule: "structure-limits",
         field: "lifeAreas",
         text: String(name),
-        detail: "unknown life-area temperature (ASH-268)",
+        detail: "unknown life-area temperature (spec W2b)",
       });
     }
   }

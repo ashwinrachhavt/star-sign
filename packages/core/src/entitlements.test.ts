@@ -35,7 +35,7 @@ describe("entitlements (ASH-265)", () => {
     const free = splitReadingForTier(reading, defaultEntitlements());
     expect(free.lifeAreas).toEqual(reading.lifeAreas);
     for (const la of free.lifeAreas) {
-      expect(["hot", "warm", "quiet"]).toContain(la.temperature);
+      expect(["charged", "warm", "steady", "strained"]).toContain(la.temperature);
     }
   });
 

@@ -64,17 +64,20 @@ describe("generateDailyReading", () => {
     expect(r.lifeAreas.length).toBeGreaterThan(0);
   });
 
-  it("(ASH-268) life areas carry a valid temperature", () => {
+  it("(W2b) life areas carry a valid temperature over the FULL area set", () => {
     for (const date of ["2026-10-24", "2026-03-01", "2026-06-15"]) {
       const r = generateDailyReading({ ...base, forDate: date });
-      expect(r.lifeAreas.length).toBeGreaterThan(0);
+      // Full set: every area answers every day — no omissions.
+      expect(r.lifeAreas.map((la) => la.area).sort()).toEqual(
+        ["family", "friends", "home", "love", "money", "self", "work"],
+      );
       for (const la of r.lifeAreas) {
-        expect(["hot", "warm", "quiet"]).toContain(la.temperature);
+        expect(["charged", "warm", "steady", "strained"]).toContain(la.temperature);
       }
     }
   });
 
-  it("(ASH-268) temperatures are deterministic per (chart, date)", () => {
+  it("(W2b) temperatures are deterministic per (chart, date)", () => {
     const a = generateDailyReading(base);
     const b = generateDailyReading(base);
     expect(a.lifeAreas).toEqual(b.lifeAreas);
@@ -124,7 +127,7 @@ describe("generateDailyReading", () => {
 
   it("(3.1 #3) ruleset version recorded; version bump changes the reading", () => {
     const r = generateDailyReading(base);
-    expect(r.provenance.rulesetVersion).toBe("2026-10.2");
+    expect(r.provenance.rulesetVersion).toBe("2026-11.1");
   });
 
   it("surfaces uncertainty honestly for approximate and unknown times", () => {
@@ -145,7 +148,9 @@ describe("generateDailyReading", () => {
   // ASH-247 — headline quality bar: transit-driven, ≤12 words.
 
   const sweepProfiles = [exactProfile, approxProfile, unknownProfile];
-  const sweepDates = Array.from({ length: 20 }, (_, i) => {
+  // 60 days: the valence-balance test needs at least one all-harmonious
+  // day in the sweep; 20 was too narrow to guarantee one exists.
+  const sweepDates = Array.from({ length: 60 }, (_, i) => {
     const d = new Date(Date.UTC(2026, 9, 1 + i));
     return d.toISOString().slice(0, 10);
   });
@@ -253,3 +258,197 @@ describe("generateCompatibilityReport", () => {
     );
   });
 });
+
+/**
+ * W2b acceptance criteria (spec §4.7): the operationalized pro-tier bar.
+ */
+describe("W2b pro-tier criteria", () => {
+  const base = { profile: exactProfile, forDate: "2026-10-24" };
+  // 60 days: the valence-balance test needs at least one all-harmonious
+  // day in the sweep; 20 was too narrow to guarantee one exists.
+  const sweepDates = Array.from({ length: 60 }, (_, i) => {
+    const d = new Date(Date.UTC(2026, 9, 1 + i));
+    return d.toISOString().slice(0, 10);
+  });
+  const sweepCharts: BirthProfile[] = [
+    exactProfile,
+    {
+      birthDate: "1985-11-30",
+      birthTime: "14:45",
+      birthTimePrecision: "exact",
+      birthTimeZone: "Asia/Kolkata",
+      birthPlace: { lat: 19.076, lon: 72.8777 },
+    },
+  ];
+
+  it("two fixture charts get different temperature vectors on the same date", () => {
+    // The spec criterion: vectors differ between two fixture charts on a
+    // shared date. A rare coincidence day is sky-legitimate (both charts
+    // genuinely quiet), so we assert they differ on a majority of dates —
+    // personalization, not a per-date guarantee.
+    let differing = 0;
+    for (const forDate of sweepDates) {
+      const a = generateDailyReading({ profile: sweepCharts[0], forDate });
+      const b = generateDailyReading({ profile: sweepCharts[1], forDate });
+      if (JSON.stringify(a.lifeAreas) !== JSON.stringify(b.lifeAreas)) differing++;
+    }
+    expect(differing, "dates where the two charts differ").toBeGreaterThan(sweepDates.length / 2);
+  });
+
+  it("one chart's temperature vector varies across dates", () => {
+    const vectors = new Set<string>();
+    for (const forDate of sweepDates) {
+      vectors.add(JSON.stringify(generateDailyReading({ ...base, forDate }).lifeAreas));
+    }
+    // The sky moves day to day; the vector must move with it.
+    expect(vectors.size).toBeGreaterThan(1);
+  });
+
+  it("every do/don't pair traces to ONE event recorded in selectedEvents", () => {
+    for (const profile of sweepCharts) {
+      for (const forDate of sweepDates) {
+        const r = generateDailyReading({ profile, forDate });
+        expect(r.dos).toHaveLength(r.donts.length);
+        if (!r.diveDeeper?.guidance) continue;
+        const keys = new Set(
+          r.provenance.selectedEvents
+            .filter((e) => e.kind === "transit")
+            .map((e) => JSON.stringify(e)),
+        );
+        for (const g of r.diveDeeper.guidance) {
+          // The pair's event IS a selected event (traceability).
+          expect(keys.has(JSON.stringify(g.event))).toBe(true);
+        }
+        // The payload's dos/donts carry the same pairs in order.
+        for (let i = 0; i < r.diveDeeper.guidance.length; i++) {
+          expect(r.dos[i]).toBe(r.diveDeeper.guidance[i].do);
+          expect(r.donts[i]).toBe(r.diveDeeper.guidance[i].dont);
+        }
+      }
+    }
+  });
+
+  it("headline proof line names the event that produced the headline", () => {
+    const withTransit = sweepDates
+      .map((forDate) => generateDailyReading({ profile: exactProfile, forDate }))
+      .filter((r) => r.provenance.selectedEvents.length > 0);
+    expect(withTransit.length).toBeGreaterThan(0);
+    for (const r of withTransit) {
+      expect(r.diveDeeper).toBeDefined();
+      const grounding = r.diveDeeper?.headlineGrounding;
+      expect(grounding).toBeDefined();
+      expect(JSON.stringify(grounding?.event)).toBe(
+        JSON.stringify(r.provenance.selectedEvents[0]),
+      );
+      expect(grounding?.meaning.length ?? 0).toBeGreaterThan(0);
+    }
+  });
+
+  it("guidance grounding names the transit (proof line, show-your-work)", () => {
+    const withGuidance = sweepDates
+      .map((forDate) => generateDailyReading({ profile: exactProfile, forDate }))
+      .filter((r) => (r.diveDeeper?.guidance?.length ?? 0) > 0);
+    expect(withGuidance.length).toBeGreaterThan(0);
+    for (const r of withGuidance) {
+      for (const g of r.diveDeeper?.guidance ?? []) {
+        if (g.event.kind !== "transit") continue;
+        // Grounding NAMES the transiting planet and the natal target —
+        // the proof requirement is the named transit, not a sentence shape.
+        expect(g.grounding).toMatch(new RegExp(`\\b${capPlanet(g.event.planet)}\\b`));
+        expect(g.grounding).toMatch(new RegExp(`\\bnatal ${capPlanet(g.event.natal)}\\b`));
+      }
+    }
+  });
+
+  it("tone pass: zero hedging stock phrases over generated interpretive copy", () => {
+    // copy.md voice rule enforced by filter, not guidance (spec W2b).
+    const HEDGES = [
+      /\bmight\b/i, /\bmaybe\b/i, /\bperhaps\b/i, /\bpossibly\b/i,
+      /\bit seems\b/i, /\bseems\b/i, /\bsort of\b/i, /\bkind of\b/i,
+      /\btry to\b/i, /\bhopefully\b/i, /\bi think\b/i, /\byou may\b/i,
+      /\bjust\b/i, /\bcould\b/i, /\bprobably\b/i,
+    ];
+    for (const profile of sweepCharts) {
+      for (const forDate of sweepDates) {
+        const r = generateDailyReading({ profile, forDate });
+        const interpretive = [
+          r.headline,
+          r.explanation,
+          ...r.dos,
+          ...r.donts,
+          r.diveDeeper?.lessons ?? "",
+          ...(r.diveDeeper?.decoded.map((d) => d.explanation) ?? []),
+          ...(r.diveDeeper?.guidance?.map((g) => g.grounding) ?? []),
+        ].join(" \n ");
+        for (const hedge of HEDGES) {
+          expect(hedge.test(interpretive), `${hedge} in reading for ${forDate}: "${interpretive}"`).toBe(false);
+        }
+      }
+    }
+  });
+
+  it("valence balance: a friction-free day never reads strained", () => {
+    // A transits-good day = no square or opposition among the selected
+    // events. Conjunctions intensify without straining; trines/sextiles
+    // flow. On such a day no area may read strained — the doom-skew guard
+    // the spec asserts (criterion 7).
+    const goodDays = sweepDates
+      .map((forDate) => generateDailyReading({ profile: exactProfile, forDate }))
+      .filter(
+        (r) =>
+          r.provenance.selectedEvents.length > 0 &&
+          r.provenance.selectedEvents
+            .filter((e) => e.kind === "transit" && "aspect" in e)
+            .every(
+              (e) =>
+                e.kind === "transit" &&
+                e.aspect !== "square" &&
+                e.aspect !== "opposition",
+            ),
+      );
+    // The sweep must contain at least one such day, or this check proves
+    // nothing.
+    expect(goodDays.length).toBeGreaterThan(0);
+    for (const r of goodDays) {
+      for (const la of r.lifeAreas) {
+        expect(la.temperature, `${r.forDate}: ${la.area}`).not.toBe("strained");
+      }
+    }
+  });
+
+  it("valence balance: no doom lexicon anywhere in generated copy", () => {
+    const DOOM = /\b(doom|disaster|awful|terrible|horrible|catastroph\w*|ruin\w*)\b/i;
+    for (const profile of sweepCharts) {
+      for (const forDate of sweepDates) {
+        const r = generateDailyReading({ profile, forDate });
+        const all = [
+          r.headline, r.explanation, ...r.dos, ...r.donts,
+          r.diveDeeper?.lessons ?? "",
+        ].join(" ");
+        expect(DOOM.test(all), `${forDate}: "${all}"`).toBe(false);
+      }
+    }
+  });
+
+  it("deeper decode: lessons carry the strongest event's aspect-family line", () => {
+    const FAMILY_OPENERS = [
+      "A conjunction concentrates",
+      "A sextile is the smallest real door",
+      "A trine runs without friction",
+      "A square is a corner, not a wall",
+      "An opposition sets two people",
+    ];
+    for (const forDate of sweepDates) {
+      const r = generateDailyReading({ ...base, forDate });
+      if (!r.diveDeeper) continue; // quiet day — no dive section at all
+      const top = r.provenance.selectedEvents[0];
+      if (top.kind !== "transit" || !("aspect" in top) || !top.aspect) continue;
+      const openerIdx = { conjunction: 0, sextile: 1, trine: 2, square: 3, opposition: 4 }[top.aspect];
+      expect(r.diveDeeper.lessons).toContain(FAMILY_OPENERS[openerIdx]);
+    }
+  });
+});
+
+function capPlanet(p: string): string {
+  return p.charAt(0).toUpperCase() + p.slice(1);
+}

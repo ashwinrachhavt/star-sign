@@ -2,7 +2,23 @@ import { describe, expect, it } from "vitest";
 import { parseLifeAreas } from "./readings";
 
 describe("parseLifeAreas (ASH-268)", () => {
-  it("parses the new {area, temperature} shape", () => {
+  it("parses the new {area, temperature} shape (W2b four-state scale)", () => {
+    expect(
+      parseLifeAreas([
+        { area: "work", temperature: "charged" },
+        { area: "love", temperature: "strained" },
+        { area: "money", temperature: "warm" },
+        { area: "self", temperature: "steady" },
+      ]),
+    ).toEqual([
+      { area: "work", temperature: "charged" },
+      { area: "love", temperature: "strained" },
+      { area: "money", temperature: "warm" },
+      { area: "self", temperature: "steady" },
+    ]);
+  });
+
+  it("still parses ash-268 historical rows (hot/quiet were real persisted states)", () => {
     expect(
       parseLifeAreas([
         { area: "work", temperature: "hot" },

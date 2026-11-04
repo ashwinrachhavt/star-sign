@@ -45,7 +45,12 @@ export function parseLifeAreas(raw: unknown): ParsedLifeArea[] {
       typeof (entry as { temperature: unknown }).temperature === "string"
     ) {
       const t = (entry as { temperature: string }).temperature;
-      if (t === "hot" || t === "warm" || t === "quiet") {
+      // Current scale (spec W2b) + the ash-268 interim scale: both were
+      // real persisted states — each renders under its own name.
+      if (
+        t === "charged" || t === "warm" || t === "steady" || t === "strained" ||
+        t === "hot" || t === "quiet"
+      ) {
         out.push({
           area: (entry as { area: string }).area,
           temperature: t,
