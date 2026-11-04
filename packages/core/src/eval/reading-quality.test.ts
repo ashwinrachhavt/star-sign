@@ -100,9 +100,18 @@ describe("ASH-250 rule checks fire on crafted bad readings (AC 2, 3)", () => {
 
   it("R6: unknown life area and over-long dos fail structure", () => {
     const failures = checkStructure(
-      withFields({ lifeAreas: ["career" as never, "love"] }),
+      withFields({ lifeAreas: [{ area: "career" as never, temperature: "hot" as const }] }),
     );
     expect(failures.some((f) => f.rule === "structure-limits" && f.text === "career")).toBe(true);
+  });
+
+  it("R6b: invalid life-area temperature fails structure (ASH-268)", () => {
+    const failures = checkStructure(
+      withFields({
+        lifeAreas: [{ area: "work", temperature: "scorching" as never }],
+      }),
+    );
+    expect(failures.some((f) => f.rule === "structure-limits" && f.detail.includes("temperature"))).toBe(true);
   });
 });
 

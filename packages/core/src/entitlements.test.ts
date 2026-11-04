@@ -30,6 +30,15 @@ describe("entitlements (ASH-265)", () => {
     expect(free.diveDeeper).toBeUndefined();
   });
 
+  it("life-area temperatures pass through the free-tier split (ASH-268)", () => {
+    const reading = generateDailyReading({ profile, forDate: "2026-10-24" });
+    const free = splitReadingForTier(reading, defaultEntitlements());
+    expect(free.lifeAreas).toEqual(reading.lifeAreas);
+    for (const la of free.lifeAreas) {
+      expect(["hot", "warm", "quiet"]).toContain(la.temperature);
+    }
+  });
+
   it("premium tier keeps dive deeper", () => {
     const reading = generateDailyReading({ profile, forDate: "2026-10-24" });
     const premium = splitReadingForTier(reading, { tier: "premium" });

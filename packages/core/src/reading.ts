@@ -19,7 +19,9 @@ import type {
 } from "./types";
 
 export const RULESET_VERSION = "2026-10.2";
-export const COPY_VERSION = "2026-10.2";
+// ASH-268: life_areas payload shape changed ({area, temperature}) — new
+// copy pack version so persisted provenance distinguishes old rows.
+export const COPY_VERSION = "2026-10.3";
 export const EPHEMERIS_NAME = "astronomy-engine";
 export const EPHEMERIS_VERSION = "2.1.19";
 
@@ -206,9 +208,13 @@ export function generateDailyReading(
   if (sunExplanation) themes.push(sunExplanation);
 
   // Life areas: ranked hot/warm/quiet from summed event scores, not sun
-  // signs (criterion 1: different charts → different rankings).
+  // signs (criterion 1: different charts → different rankings). The
+  // temperature persists with the area (ASH-268); the raw score stays
+  // internal to the ruleset, never in the payload.
   const ranked = rankLifeAreas(events);
-  const areaList = ranked.slice(0, 3).map((r) => r.area);
+  const areaList = ranked
+    .slice(0, 3)
+    .map((r) => ({ area: r.area, temperature: r.temperature }));
 
   // 3.1b: dos/don'ts are selected by event themes — every item traces to
   // a real event in selectedEvents (criterion 2). On quiet days the lists

@@ -106,6 +106,38 @@ export async function getOrCreateDailyReading(
   return { reading: rowToReading(inserted), error: null };
 }
 
+/**
+ * life_areas is {area, temperature} since COPY_VERSION 2026-10.3 (ASH-268).
+ * Rows written before that store plain area names — parse tolerantly and
+ * mark them "legacy" so the UI renders the honest "—" (their real
+ * temperature was never persisted; pretending "quiet" would be a
+ * fabrication). No migration; provenance honesty.
+ */
+type ParsedLifeArea = DailyReading["lifeAreas"][number] | { area: string; temperature: "legacy" };
+
+function parseLifeAreas(raw: unknown): ParsedLifeArea[] {
+  if (!Array.isArray(raw)) return [];
+  const out: ParsedLifeArea[] = [];
+  for (const entry of raw) {
+    if (typeof entry === "string") {
+      out.push({ area: entry, temperature: "legacy" });
+    } else if (
+      entry &&
+      typeof entry === "object" &&
+      "area" in entry &&
+      "temperature" in entry &&
+      typeof (entry as { area: unknown }).area === "string" &&
+      typeof (entry as { temperature: unknown }).temperature === "string"
+    ) {
+      const t = (entry as { temperature: string }).temperature;
+      if (t === "hot" || t === "warm" || t === "quiet") {
+        out.push({ area: (entry as { area: string }).area, temperature: t } as ParsedLifeArea);
+      }
+    }
+  }
+  return out;
+}
+
 function rowToReading(row: Record<string, unknown>): DailyReading {
   return {
     id: row.id as string,
@@ -114,7 +146,7 @@ function rowToReading(row: Record<string, unknown>): DailyReading {
     explanation: row.explanation as string,
     dos: row.dos as string[],
     donts: row.donts as string[],
-    lifeAreas: row.life_areas as DailyReading["lifeAreas"],
+    lifeAreas: parseLifeAreas(row.life_areas) as DailyReading["lifeAreas"],
     provenance: row.provenance as DailyReading["provenance"],
     uncertaintyNote: row.uncertainty_note as string,
   };

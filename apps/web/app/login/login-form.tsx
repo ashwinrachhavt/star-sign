@@ -78,12 +78,26 @@ export default function LoginForm() {
 export function Brand() {
   return (
     <>
-      <h1
-        className={`type-display t-36 ${fontSerif.className}`}
-        style={{ margin: "var(--space-8) 0 var(--space-2)" }}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "var(--space-3)",
+          margin: "var(--space-8) 0 var(--space-2)",
+        }}
       >
-        Star Sign
-      </h1>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/celestial/icon-16.png"
+          alt=""
+          aria-hidden="true"
+          width={44}
+          height={44}
+          className="ui-celestial-mark"
+          style={{ objectFit: "contain" }}
+        />
+        <h1 className={`type-display t-36 ${fontSerif.className}`}>Star Sign</h1>
+      </div>
       <p
         className={`type-mono t-13 ${fontMono.className}`}
         style={{ color: "var(--ink-secondary)", marginBottom: "var(--space-6)" }}
