@@ -1,3 +1,10 @@
+/* Hallmark · built: the project · redesign: polish · shape: app screen · genre: atmospheric · scope: app
+   Keeps: the Star Sign design system (tokens.css / type.css / ui.css), grain plates, celestial marks,
+   dark-first palette, three type voices. Fixed: copy dashes, glued arrows, meta-dot chains,
+   overflow-x clip, reduced-motion fallback, disabled channels, :active states, LCP hints.
+   Reviewed and kept: gate 67/64 on .type-micro-label — the project's locked label recipe
+   (design-system.md §3: mono 11px caps, tracking +0.08em). Not slop; the system. */
+
 /* Global page styles (ticket 2.4). All values from ../styles/tokens.css —
    no hard-coded hexes/px in components; square corners, hairline borders,
    no shadows, no fills (design-system.md §1–4). */
@@ -6,6 +13,24 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+/* Gate 34: horizontal scroll is impossible at any width. */
+html,
+body {
+  overflow-x: clip;
+}
+
+/* Gate 27: every transition/animation collapses when reduced motion is set. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 body {

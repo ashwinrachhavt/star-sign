@@ -257,7 +257,7 @@ export default async function DayPage() {
                       </a>
                       <span className="type-prose t-13" style={{ color: "var(--ink-tertiary)" }}>
                         {" "}
-                        — {rec.creator}
+                        by {rec.creator}
                       </span>
                       <p className="type-prose t-13" style={{ margin: "var(--space-1) 0 0" }}>
                         {rec.blurb}
@@ -299,15 +299,17 @@ export default async function DayPage() {
                   className={`type-mono t-13 ${fontMono.className}`}
                   style={{ color: "var(--ink-secondary)" }}
                 >
-                  {cap(e.planet)} {e.aspect} natal {cap(e.natal)} — orb{" "}
+                  {cap(e.planet)} {e.aspect} natal {cap(e.natal)}, orb{" "}
                   {typeof e.orb === "number" ? e.orb.toFixed(2) : "—"}
                 </p>
               ))}
             </div>
           )}
           <p>
-            Ruleset {reading.provenance.rulesetVersion} · copy{" "}
-            {reading.provenance.copyVersion} ·{" "}
+            Ruleset {reading.provenance.rulesetVersion}
+            <br />
+            Copy {reading.provenance.copyVersion}
+            <br />
             {reading.provenance.inputs.length} astronomical inputs
           </p>
           <p>{reading.uncertaintyNote}</p>

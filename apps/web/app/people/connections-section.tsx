@@ -144,7 +144,7 @@ export default function ConnectionsSection({
     if (!res.ok) {
       setHandleError(
         res.status === 409
-          ? "That handle is taken — try another."
+          ? "That handle is taken. Try another."
           : (json?.error?.message ?? "Could not update your handle."),
       );
       return;
@@ -166,7 +166,7 @@ export default function ConnectionsSection({
         className="type-prose t-15"
         style={{ color: "var(--ink-secondary)", marginBottom: "var(--space-4)" }}
       >
-        A connection lets you both see each other's chart — nothing more.
+        A connection lets you both see each other’s chart: nothing more.
         Only your connected person sees your chart, and either of you can
         end it at any time.
       </p>
@@ -178,7 +178,7 @@ export default function ConnectionsSection({
         onToggle={(e) => setHandleOpen((e.target as HTMLDetailsElement).open)}
       >
         <summary className="ui-focusable type-micro-label t-11" style={{ color: "var(--ink-tertiary)" }}>
-          YOUR HANDLE{myHandle ? ` — @${myHandle}` : ""}
+          YOUR HANDLE{myHandle ? `, @${myHandle}` : ""}
         </summary>
         <form onSubmit={saveHandle} style={{ marginTop: "var(--space-3)" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
@@ -197,7 +197,7 @@ export default function ConnectionsSection({
               }}
             />
             <p className="type-micro-label t-11" style={{ color: "var(--ink-tertiary)" }}>
-              LOWERCASE LETTERS, DIGITS, AND DASHES. THIS IS HOW PEOPLE FIND YOU —
+              LOWERCASE LETTERS, DIGITS, AND DASHES. THIS IS HOW PEOPLE FIND YOU.
               EXACT MATCH ONLY, NO SEARCH DIRECTORY.
             </p>
             {handleError && <p className="form-error type-prose t-15">{handleError}</p>}
@@ -235,7 +235,7 @@ export default function ConnectionsSection({
             }}
           />
           <p className="type-micro-label t-11" style={{ color: "var(--ink-tertiary)" }}>
-            EXACT HANDLE ONLY — NO SEARCHING PEOPLE. A CONNECTION CODE STILL
+            EXACT HANDLE ONLY. NO SEARCHING PEOPLE. A CONNECTION CODE STILL
             WORKS. SHARE YOURS ONLY WITH SOMEONE YOU TRUST.
           </p>
           {notFoundHandle && (
@@ -243,8 +243,8 @@ export default function ConnectionsSection({
               No one on Star Sign uses @{notFoundHandle} yet. You can still{" "}
               <a href="#add-person" className="ui-button-link ui-focusable">
                 add them manually below
-              </a>{" "}
-              — free, and private to you.
+              </a>,{" "}
+              free and private to you.
             </p>
           )}
           {error && <p className="form-error type-prose t-15">{error}</p>}
@@ -268,7 +268,7 @@ export default function ConnectionsSection({
               <div key={c.id} className="card" style={{ marginBottom: 0 }}>
                 <p className="type-prose t-15">{c.otherName}</p>
                 <p className="type-micro-label t-11" style={{ color: "var(--ink-secondary)", marginTop: "var(--space-1)" }}>
-                  WANTS TO SEE YOUR CHART — AND SHARE THEIRS
+                  WANTS TO SEE YOUR CHART AND SHARE THEIRS
                 </p>
                 <div style={{ display: "flex", gap: "var(--space-5)", marginTop: "var(--space-3)" }}>
                   <Button variant="link" href={`/connections/${c.id}`} onClick={undefined}>
@@ -295,7 +295,7 @@ export default function ConnectionsSection({
                     {c.otherName}
                   </span>
                   <span className={`type-micro-label t-11 ${fontMono.className}`} style={{ color: "var(--ink-secondary)" }}>
-                    REQUEST SENT — THEY HAVEN&apos;T ANSWERED YET
+                    REQUEST SENT. THEY HAVEN&apos;T ANSWERED YET
                   </span>
                 </span>
                 <button
@@ -335,7 +335,7 @@ export default function ConnectionsSection({
                     href={`/connections/${c.id}/chart`}
                     className="ui-button-link ui-focusable type-micro-label t-11"
                   >
-                    View chart ›
+                    View chart
                   </a>
                   <button
                     className="ui-button-link ui-focusable type-micro-label t-11"
@@ -371,7 +371,7 @@ export default function ConnectionsSection({
           <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)", marginTop: "var(--space-3)" }}>
             {ended.map((c) => (
               <p key={c.id} className="type-prose t-15" style={{ color: "var(--ink-tertiary)" }}>
-                {c.otherName} — {c.state === "revoked" ? "declined or withdrawn" : "disconnected"}
+                {c.otherName},{" "}{c.state === "revoked" ? "declined or withdrawn" : "disconnected"}
               </p>
             ))}
           </div>

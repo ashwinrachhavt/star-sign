@@ -52,7 +52,6 @@ export function CelestialMark({
       height={size}
       className={`ui-celestial-mark${className ? ` ${className}` : ""}`}
       style={{ objectFit: "contain", pointerEvents: "none", ...style }}
-      loading="lazy"
       decoding="async"
     />
   );

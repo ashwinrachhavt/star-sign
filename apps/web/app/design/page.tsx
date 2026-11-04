@@ -100,7 +100,7 @@ export default function DesignPage() {
 
         <Section title="Glance (product contract)">
           <Glance headline="A slow morning earns its keep">
-            The Moon trines your natal Sun before noon — the day opens with quiet
+            The Moon trines your natal Sun before noon. The day opens with quiet
             momentum. Spend it on the thing you keep postponing.
           </Glance>
         </Section>

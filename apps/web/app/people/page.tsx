@@ -85,7 +85,7 @@ export default async function PeoplePage() {
           style={{ color: "var(--ink-secondary)", marginBottom: "var(--space-4)" }}
         >
           Privately add people you care about. Their data is visible only to
-          you — this list is never shared.
+          you; this list is never shared.
         </p>
         <AddPersonForm />
         <div

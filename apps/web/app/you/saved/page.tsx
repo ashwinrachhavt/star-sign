@@ -91,7 +91,7 @@ export default async function YouSavedPage() {
         </p>
         {(reflections?.length ?? 0) === 0 ? (
           <p className="type-prose t-15" style={{ color: "var(--ink-secondary)" }}>
-            Nothing saved yet. Reflections you write are private — only you can read
+            Nothing saved yet. Reflections you write are private: only you can read
             them, ever.
           </p>
         ) : (
@@ -118,7 +118,7 @@ export default async function YouSavedPage() {
           className={`type-micro-label t-11 ${fontMono.className}`}
           style={{ color: "var(--ink-tertiary)", marginTop: "var(--space-7)", textAlign: "center" }}
         >
-          SAVED CONTENT STAYS ON YOUR ACCOUNT — EXPORT ANY TIME FROM SETTINGS
+          SAVED CONTENT STAYS ON YOUR ACCOUNT. EXPORT ANY TIME FROM SETTINGS
         </p>
       )}
     </main>
