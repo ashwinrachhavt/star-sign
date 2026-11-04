@@ -8,11 +8,12 @@
  * (criterion 3): requester may withdraw/disconnect, addressee may
  * decline/disconnect.
  */
-import { connectionViewSchema, uuidSchema } from "@star-sign/core";
+import { connectionGrantUpdateSchema, connectionViewSchema, uuidSchema } from "@star-sign/core";
 import {
   jsonError,
   jsonOk,
   notFoundIfForeign,
+  parseBody,
   rateLimit,
   rateLimitResponse,
   RATE_LIMITS,
@@ -115,6 +116,59 @@ export async function PUT(req: Request, ctx: Ctx) {
     return jsonError(409, "conflict", "Accept failed; state may have changed.", reqId);
   }
   return jsonOk(toView(updated), reqId);
+}
+
+/** PATCH /api/connections/{id} — the daily-updates grant toggle (W2).
+ *
+ * Each party flips ONLY their own grant column (their sharing of their
+ * daily updates with the other person); the migration-0015 trigger
+ * enforces ownership and the accepted-state precondition at the table —
+ * the handler just maps the violation to 409. Cross-user ids → 404.
+ */
+export async function PATCH(req: Request, ctx: Ctx) {
+  const reqId = requestId();
+  const { id } = await ctx.params;
+  if (!uuidSchema.safeParse(id).success) {
+    return jsonError(400, "validation_failed", "Invalid id.", reqId);
+  }
+
+  const actor = await requireActor(reqId);
+  if (!actor.ok) return actor.response;
+  const limit = rateLimit(`general:${actor.userId}`, RATE_LIMITS.general);
+  if (!limit.allowed) return rateLimitResponse(limit.retryAfterSeconds, reqId);
+
+  const result = await loadParticipant(id, reqId);
+  if (!result.ok) return result.response;
+  if (!result.row) return jsonError(404, "not_found", "Resource not found.", reqId);
+  if (result.row.state !== "accepted") {
+    return jsonError(
+      409,
+      "conflict",
+      `Connection is ${result.row.state}; nothing to share.`,
+      reqId,
+    );
+  }
+
+  const parsed = await parseBody(req, connectionGrantUpdateSchema, reqId);
+  if (!parsed.ok) return parsed.response;
+
+  // The actor's own grant column — never the other party's.
+  const column =
+    result.row.requester_id === result.userId
+      ? "daily_updates_requester"
+      : "daily_updates_addressee";
+  const { error } = await result.supabase
+    .from("connections")
+    .update({ [column]: parsed.data.shareDailyUpdates })
+    .eq("id", id);
+
+  if (error) {
+    return jsonError(409, "conflict", "Could not update sharing.", reqId);
+  }
+  return jsonOk(
+    { id: result.row.id, shareDailyUpdates: parsed.data.shareDailyUpdates },
+    reqId,
+  );
 }
 
 /** DELETE /api/connections/{id} — revoke/disconnect, unilateral + immediate. */
