@@ -1,8 +1,7 @@
 import { computeNatalChart, computeTransits } from "./chart";
 import {
-  dontsForEvents,
-  dosForEvents,
   explanationForEvent,
+  guidancePairsForEvents,
   rankLifeAreas,
   scoreTransitEvents,
   type TransitEvent,
@@ -17,9 +16,14 @@ import type {
   ReadingProvenance,
   ReadingProvenanceInput,
 } from "./types";
+import { LIFE_AREAS } from "./types";
 
-export const RULESET_VERSION = "2026-10.2";
-export const COPY_VERSION = "2026-10.2";
+// Spec W2b: the temperature scale went four-state (charged/warm/steady/
+// strained), the full 7-area vector replaced the top-3, do/don't pairs
+// became same-event, and proof lines joined the payload. Both versions
+// bump so persisted rows trace to the exact rule+copy set.
+export const RULESET_VERSION = "2026-11.1";
+export const COPY_VERSION = "2026-11.1";
 export const EPHEMERIS_NAME = "astronomy-engine";
 export const EPHEMERIS_VERSION = "2.1.19";
 
@@ -205,17 +209,25 @@ export function generateDailyReading(
   }
   if (sunExplanation) themes.push(sunExplanation);
 
-  // Life areas: ranked hot/warm/quiet from summed event scores, not sun
-  // signs (criterion 1: different charts → different rankings).
+  // Life areas: the FULL area set (spec W2b) — every area answers every
+  // day. Active areas carry ranked charged/strained/warm from summed event
+  // scores; areas no event touches are honestly steady, not omitted. The
+  // raw score stays internal to the ruleset, never in the payload.
   const ranked = rankLifeAreas(events);
-  const areaList = ranked.slice(0, 3).map((r) => r.area);
+  const rankedTemp = new Map(ranked.map((r) => [r.area, r.temperature]));
+  const areaList = LIFE_AREAS.map((area) => ({
+    area,
+    temperature: rankedTemp.get(area) ?? ("steady" as const),
+  }));
 
-  // 3.1b: dos/don'ts are selected by event themes — every item traces to
-  // a real event in selectedEvents (criterion 2). On quiet days the lists
-  // are intentionally shorter; no generic padding breaks traceability.
+  // 3.1b + W2b pairing rule: dos/don'ts are selected per event — pair i
+  // both trace to the same transit event, recorded in selectedEvents
+  // (criterion 2). On quiet days the lists are intentionally shorter; no
+  // generic padding breaks traceability.
   const selectedEvents = events.slice(0, 5);
-  const dos = dosForEvents(selectedEvents).slice(0, 3);
-  const donts = dontsForEvents(selectedEvents).slice(0, 3);
+  const pairs = guidancePairsForEvents(selectedEvents).slice(0, 3);
+  const dos = pairs.map((p) => p.do);
+  const donts = pairs.map((p) => p.dont);
 
   const explanation = themes.slice(1).join(" ") || DEFAULT_HEADLINES[0];
 
@@ -238,11 +250,16 @@ export function generateDailyReading(
     inputs,
   };
 
-  // Dive deeper v1 (ASH-249): built from the same selected events the
-  // provenance records — no dive content exists without full provenance
-  // (criterion 3). On quiet days (no events) the section is omitted
-  // entirely rather than filled with generic content.
-  const diveDeeper = buildDiveDeeper(selectedEvents, phase, seed);
+  // Dive deeper v1 (ASH-249) + W2b proof lines: built from the same
+  // selected events the provenance records — no dive content exists
+  // without full provenance (criterion 3). On quiet days (no events) the
+  // section is omitted entirely rather than filled with generic content.
+  const diveDeeper = buildDiveDeeper(
+    selectedEvents,
+    phase,
+    seed,
+    chosen ? themes[0] : undefined,
+  );
 
   return {
     id: `${forDate}`,
@@ -259,15 +276,19 @@ export function generateDailyReading(
 }
 
 /**
- * Decode-the-day + lessons (ASH-249). Every decode line pairs the stored
- * provenance input with its plain-language explanation and live geometry
- * (aspect + orb + retrograde phase — criterion 1). Lessons are reflective,
- * longer-form, and invite returning (criterion 2, copy.md dive register).
+ * Decode-the-day + lessons (ASH-249, grown by W2b). Every decode line
+ * pairs the stored provenance input with its plain-language explanation
+ * and live geometry (aspect + orb + retrograde phase — criterion 1).
+ * W2b proof lines: headlineGrounding names the event behind the headline;
+ * guidance carries each same-event do/don't pair with its grounding
+ * transit. Lessons are reflective, longer-form, and invite returning
+ * (criterion 2, copy.md dive register).
  */
 function buildDiveDeeper(
   events: TransitEvent[],
   phase: string,
   seed: number,
+  headlineMeaning?: string,
 ): DiveDeeper | undefined {
   if (events.length === 0) return undefined;
 
@@ -277,6 +298,15 @@ function buildDiveDeeper(
     geometry:
       `${cap(e.transit)}${e.retrograde ? " retrograde" : ""} ` +
       `${e.type} natal ${cap(e.natal)}, orb ${e.orb.toFixed(1)}°`,
+  }));
+
+  // Same-event do/don't pairs, each with its named grounding transit
+  // (spec W2b: the proof layer — "show your work" as brand trust).
+  const guidance = guidancePairsForEvents(events).slice(0, 3).map((p) => ({
+    do: p.do,
+    dont: p.dont,
+    event: eventToInput(p.event),
+    grounding: explanationForEvent(p.event),
   }));
 
   const lessons = lessonsFor(events, phase);
@@ -290,12 +320,22 @@ function buildDiveDeeper(
     url: r.item.url,
     matchedEvent: r.matchedEvent,
   }));
-  return { decoded, lessons, ...(recommendations.length > 0 ? { recommendations } : {}) };
+  return {
+    decoded,
+    ...(headlineMeaning && events[0]
+      ? { headlineGrounding: { event: eventToInput(events[0]), meaning: headlineMeaning } }
+      : {}),
+    ...(guidance.length > 0 ? { guidance } : {}),
+    lessons,
+    ...(recommendations.length > 0 ? { recommendations } : {}),
+  };
 }
 
 /**
  * Lessons of the day: reflective, grounded in the day's actual event
  * mix — never predictive, never certain (copy.md). Invites returning.
+ * W2b: a per-family line on the strongest event's aspect shape deepens
+ * the decode; the register stays blunt, second person, zero hedging.
  */
 function lessonsFor(events: TransitEvent[], phase: string): string {
   const harmonious = events.filter((e) => e.type === "trine" || e.type === "sextile").length;
@@ -307,7 +347,7 @@ function lessonsFor(events: TransitEvent[], phase: string): string {
 
   if (frictional > harmonious) {
     lines.push(
-      "Today leans toward friction, and friction is information. The places that snag are usually the ones asking a question you've been deferring — not to answer it all at once, but to notice you were asked.",
+      "Today leans toward friction, and friction is information. The places that snag are the ones asking a question you've been deferring — not to answer it all at once, but to notice you were asked.",
     );
   } else if (harmonious > 0) {
     lines.push(
@@ -318,6 +358,8 @@ function lessonsFor(events: TransitEvent[], phase: string): string {
       "The sky is quiet today, and quiet is not empty. Days like this are where the slower material settles — what moved last week keeps moving inside you at its own pace.",
     );
   }
+
+  lines.push(FAMILY_LESSON[strongest.type]);
 
   if (retrogrades > 0) {
     lines.push(
@@ -340,6 +382,24 @@ function lessonsFor(events: TransitEvent[], phase: string): string {
 
   return lines.join(" ");
 }
+
+/**
+ * One reflective line per aspect family (W2b deeper decode): the shape
+ * of the day's strongest event, expanded a register. Original writing —
+ * versioned with COPY_VERSION.
+ */
+const FAMILY_LESSON: Record<TransitEvent["type"], string> = {
+  conjunction:
+    "A conjunction concentrates: everything the touching planet carries lands in one place at once. Concentration is power with a narrowing effect — spend it on one aim, not five.",
+  sextile:
+    "A sextile is the smallest real door in astrology. It opens only if you push; it rewards the person who treats a nudge as an invitation and moves within the day.",
+  trine:
+    "A trine runs without friction, which is also its risk. What flows today arrives unearned — bank it while it moves, and let the ease show you the direction, not only the comfort.",
+  square:
+    "A square is a corner, not a wall. The tension has a shape: two demands at right angles. Name both, and one of them will tell you which to pay first.",
+  opposition:
+    "An opposition sets two people — or two halves of you — across a table. The move today is the meeting itself: hear the other side all the way out before you answer it.",
+};
 
 const ORDINALS = ["", "1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th", "11th", "12th"];
 function ordinal(n: number): string {

@@ -8,25 +8,265 @@ exports[`ASH-250 golden-set eval (CI gate) > stores the snapshot baseline (AC 4 
     "dosCount": 3,
     "headline": "Pay attention to what repeats.",
     "lifeAreas": [
-      "self",
-      "friends",
-      "work",
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "charged",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "charged",
+      },
+      {
+        "area": "self",
+        "temperature": "charged",
+      },
     ],
     "profileId": "G01",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2026-06-15",
-    "dontsCount": 2,
+    "dontsCount": 3,
     "dosCount": 3,
-    "headline": "Pick your moment and move.",
+    "headline": "The door is open. Walk through it.",
     "lifeAreas": [
-      "work",
-      "friends",
-      "self",
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "charged",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "charged",
+      },
+      {
+        "area": "self",
+        "temperature": "charged",
+      },
     ],
     "profileId": "G01",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
+  },
+  {
+    "date": "2026-08-20",
+    "dontsCount": 3,
+    "dosCount": 3,
+    "headline": "Small moves compound today.",
+    "lifeAreas": [
+      {
+        "area": "love",
+        "temperature": "strained",
+      },
+      {
+        "area": "work",
+        "temperature": "strained",
+      },
+      {
+        "area": "money",
+        "temperature": "strained",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "strained",
+      },
+      {
+        "area": "self",
+        "temperature": "charged",
+      },
+    ],
+    "profileId": "G01",
+    "rulesetVersion": "2026-11.1",
+  },
+  {
+    "date": "2026-10-24",
+    "dontsCount": 3,
+    "dosCount": 3,
+    "headline": "Small moves compound today.",
+    "lifeAreas": [
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "strained",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "charged",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
+    ],
+    "profileId": "G01",
+    "rulesetVersion": "2026-11.1",
+  },
+  {
+    "date": "2027-01-05",
+    "dontsCount": 3,
+    "dosCount": 3,
+    "headline": "Small moves compound today.",
+    "lifeAreas": [
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "charged",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "charged",
+      },
+      {
+        "area": "self",
+        "temperature": "charged",
+      },
+    ],
+    "profileId": "G01",
+    "rulesetVersion": "2026-11.1",
+  },
+  {
+    "date": "2026-03-01",
+    "dontsCount": 3,
+    "dosCount": 3,
+    "headline": "The sky is quiet. Make your own weather.",
+    "lifeAreas": [
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "warm",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "warm",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
+    ],
+    "profileId": "G02",
+    "rulesetVersion": "2026-11.1",
+  },
+  {
+    "date": "2026-06-15",
+    "dontsCount": 3,
+    "dosCount": 3,
+    "headline": "Give the affection you've been saving.",
+    "lifeAreas": [
+      {
+        "area": "love",
+        "temperature": "charged",
+      },
+      {
+        "area": "work",
+        "temperature": "warm",
+      },
+      {
+        "area": "money",
+        "temperature": "charged",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "strained",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
+    ],
+    "profileId": "G02",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2026-08-20",
@@ -34,25 +274,75 @@ exports[`ASH-250 golden-set eval (CI gate) > stores the snapshot baseline (AC 4 
     "dosCount": 3,
     "headline": "The sky is quiet. Make your own weather.",
     "lifeAreas": [
-      "self",
-      "friends",
-      "money",
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "strained",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "charged",
+      },
+      {
+        "area": "self",
+        "temperature": "charged",
+      },
     ],
-    "profileId": "G01",
-    "rulesetVersion": "2026-10.2",
+    "profileId": "G02",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2026-10-24",
     "dontsCount": 3,
     "dosCount": 3,
-    "headline": "Pay attention to what repeats.",
+    "headline": "The sky is quiet. Make your own weather.",
     "lifeAreas": [
-      "work",
-      "friends",
-      "self",
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "charged",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "charged",
+      },
+      {
+        "area": "self",
+        "temperature": "charged",
+      },
     ],
-    "profileId": "G01",
-    "rulesetVersion": "2026-10.2",
+    "profileId": "G02",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2027-01-05",
@@ -60,12 +350,37 @@ exports[`ASH-250 golden-set eval (CI gate) > stores the snapshot baseline (AC 4 
     "dosCount": 3,
     "headline": "The sky is quiet. Make your own weather.",
     "lifeAreas": [
-      "self",
-      "work",
-      "friends",
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "strained",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "strained",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
     ],
-    "profileId": "G01",
-    "rulesetVersion": "2026-10.2",
+    "profileId": "G02",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2026-03-01",
@@ -73,90 +388,75 @@ exports[`ASH-250 golden-set eval (CI gate) > stores the snapshot baseline (AC 4 
     "dosCount": 3,
     "headline": "Pay attention to what repeats.",
     "lifeAreas": [
-      "self",
-      "friends",
-      "work",
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "warm",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "strained",
+      },
+      {
+        "area": "family",
+        "temperature": "strained",
+      },
+      {
+        "area": "friends",
+        "temperature": "warm",
+      },
+      {
+        "area": "self",
+        "temperature": "charged",
+      },
     ],
-    "profileId": "G02",
-    "rulesetVersion": "2026-10.2",
+    "profileId": "G03",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2026-06-15",
     "dontsCount": 3,
     "dosCount": 3,
-    "headline": "Pleasure is on the schedule today.",
+    "headline": "The sky is quiet. Make your own weather.",
     "lifeAreas": [
-      "self",
-      "money",
-      "love",
-    ],
-    "profileId": "G02",
-    "rulesetVersion": "2026-10.2",
-  },
-  {
-    "date": "2026-08-20",
-    "dontsCount": 3,
-    "dosCount": 3,
-    "headline": "Pay attention to what repeats.",
-    "lifeAreas": [
-      "self",
-      "work",
-      "friends",
-    ],
-    "profileId": "G02",
-    "rulesetVersion": "2026-10.2",
-  },
-  {
-    "date": "2026-10-24",
-    "dontsCount": 3,
-    "dosCount": 3,
-    "headline": "Small moves compound today.",
-    "lifeAreas": [
-      "self",
-      "work",
-      "friends",
-    ],
-    "profileId": "G02",
-    "rulesetVersion": "2026-10.2",
-  },
-  {
-    "date": "2027-01-05",
-    "dontsCount": 3,
-    "dosCount": 3,
-    "headline": "Small moves compound today.",
-    "lifeAreas": [
-      "self",
-      "work",
-      "friends",
-    ],
-    "profileId": "G02",
-    "rulesetVersion": "2026-10.2",
-  },
-  {
-    "date": "2026-03-01",
-    "dontsCount": 3,
-    "dosCount": 3,
-    "headline": "Small moves compound today.",
-    "lifeAreas": [
-      "self",
-      "family",
-      "home",
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "strained",
+      },
+      {
+        "area": "money",
+        "temperature": "strained",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "warm",
+      },
+      {
+        "area": "self",
+        "temperature": "warm",
+      },
     ],
     "profileId": "G03",
-    "rulesetVersion": "2026-10.2",
-  },
-  {
-    "date": "2026-06-15",
-    "dontsCount": 3,
-    "dosCount": 3,
-    "headline": "Pay attention to what repeats.",
-    "lifeAreas": [
-      "work",
-      "money",
-      "self",
-    ],
-    "profileId": "G03",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2026-08-20",
@@ -164,51 +464,151 @@ exports[`ASH-250 golden-set eval (CI gate) > stores the snapshot baseline (AC 4 
     "dosCount": 3,
     "headline": "The sky is quiet. Make your own weather.",
     "lifeAreas": [
-      "money",
-      "work",
-      "love",
+      {
+        "area": "love",
+        "temperature": "strained",
+      },
+      {
+        "area": "work",
+        "temperature": "strained",
+      },
+      {
+        "area": "money",
+        "temperature": "charged",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "warm",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
     ],
     "profileId": "G03",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2026-10-24",
     "dontsCount": 3,
     "dosCount": 3,
-    "headline": "The resistance is the workout.",
+    "headline": "Stand your ground without raising your voice.",
     "lifeAreas": [
-      "work",
-      "self",
-      "money",
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "strained",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "warm",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
     ],
     "profileId": "G03",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2027-01-05",
     "dontsCount": 3,
     "dosCount": 3,
-    "headline": "The resistance is the workout.",
+    "headline": "Stand your ground without raising your voice.",
     "lifeAreas": [
-      "work",
-      "self",
-      "family",
+      {
+        "area": "love",
+        "temperature": "steady",
+      },
+      {
+        "area": "work",
+        "temperature": "strained",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "charged",
+      },
+      {
+        "area": "family",
+        "temperature": "charged",
+      },
+      {
+        "area": "friends",
+        "temperature": "warm",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
     ],
     "profileId": "G03",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2026-03-01",
     "dontsCount": 3,
     "dosCount": 3,
-    "headline": "Small moves compound today.",
+    "headline": "The sky is quiet. Make your own weather.",
     "lifeAreas": [
-      "self",
-      "work",
-      "friends",
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "charged",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "warm",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
     ],
     "profileId": "G04",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2026-06-15",
@@ -216,38 +616,113 @@ exports[`ASH-250 golden-set eval (CI gate) > stores the snapshot baseline (AC 4 
     "dosCount": 3,
     "headline": "Push, but pick the door that opens.",
     "lifeAreas": [
-      "self",
-      "work",
-      "friends",
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "strained",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "strained",
+      },
+      {
+        "area": "self",
+        "temperature": "charged",
+      },
     ],
     "profileId": "G04",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2026-08-20",
     "dontsCount": 3,
     "dosCount": 3,
-    "headline": "The sky is quiet. Make your own weather.",
+    "headline": "Small moves compound today.",
     "lifeAreas": [
-      "self",
-      "family",
-      "home",
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "warm",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "charged",
+      },
+      {
+        "area": "family",
+        "temperature": "charged",
+      },
+      {
+        "area": "friends",
+        "temperature": "warm",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
     ],
     "profileId": "G04",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2026-10-24",
-    "dontsCount": 2,
+    "dontsCount": 3,
     "dosCount": 3,
     "headline": "Pick your moment and move.",
     "lifeAreas": [
-      "self",
-      "money",
-      "work",
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "strained",
+      },
+      {
+        "area": "money",
+        "temperature": "charged",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "strained",
+      },
+      {
+        "area": "self",
+        "temperature": "charged",
+      },
     ],
     "profileId": "G04",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2027-01-05",
@@ -255,12 +730,37 @@ exports[`ASH-250 golden-set eval (CI gate) > stores the snapshot baseline (AC 4 
     "dosCount": 3,
     "headline": "Small moves compound today.",
     "lifeAreas": [
-      "self",
-      "money",
-      "friends",
+      {
+        "area": "love",
+        "temperature": "strained",
+      },
+      {
+        "area": "work",
+        "temperature": "strained",
+      },
+      {
+        "area": "money",
+        "temperature": "strained",
+      },
+      {
+        "area": "home",
+        "temperature": "charged",
+      },
+      {
+        "area": "family",
+        "temperature": "charged",
+      },
+      {
+        "area": "friends",
+        "temperature": "strained",
+      },
+      {
+        "area": "self",
+        "temperature": "charged",
+      },
     ],
     "profileId": "G04",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2026-03-01",
@@ -268,38 +768,113 @@ exports[`ASH-250 golden-set eval (CI gate) > stores the snapshot baseline (AC 4 
     "dosCount": 3,
     "headline": "Let yourself be seen today.",
     "lifeAreas": [
-      "self",
-      "money",
-      "work",
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "warm",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "warm",
+      },
+      {
+        "area": "self",
+        "temperature": "charged",
+      },
     ],
     "profileId": "G05",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2026-06-15",
     "dontsCount": 3,
     "dosCount": 3,
-    "headline": "The sky is quiet. Make your own weather.",
+    "headline": "Pay attention to what repeats.",
     "lifeAreas": [
-      "self",
-      "money",
-      "love",
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "warm",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "warm",
+      },
+      {
+        "area": "self",
+        "temperature": "charged",
+      },
     ],
     "profileId": "G05",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2026-08-20",
     "dontsCount": 3,
     "dosCount": 3,
-    "headline": "The sky is quiet. Make your own weather.",
+    "headline": "Small moves compound today.",
     "lifeAreas": [
-      "self",
-      "work",
-      "money",
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "warm",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "warm",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
     ],
     "profileId": "G05",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2026-10-24",
@@ -307,142 +882,417 @@ exports[`ASH-250 golden-set eval (CI gate) > stores the snapshot baseline (AC 4 
     "dosCount": 3,
     "headline": "Wanting and having argue. Don't referee.",
     "lifeAreas": [
-      "self",
-      "love",
-      "money",
+      {
+        "area": "love",
+        "temperature": "charged",
+      },
+      {
+        "area": "work",
+        "temperature": "warm",
+      },
+      {
+        "area": "money",
+        "temperature": "strained",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "warm",
+      },
+      {
+        "area": "self",
+        "temperature": "charged",
+      },
     ],
     "profileId": "G05",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2027-01-05",
-    "dontsCount": 3,
-    "dosCount": 3,
-    "headline": "The sky is quiet. Make your own weather.",
-    "lifeAreas": [
-      "self",
-      "friends",
-      "love",
-    ],
-    "profileId": "G05",
-    "rulesetVersion": "2026-10.2",
-  },
-  {
-    "date": "2026-03-01",
-    "dontsCount": 3,
-    "dosCount": 3,
-    "headline": "The sky is quiet. Make your own weather.",
-    "lifeAreas": [
-      "self",
-      "friends",
-      "work",
-    ],
-    "profileId": "G06",
-    "rulesetVersion": "2026-10.2",
-  },
-  {
-    "date": "2026-06-15",
-    "dontsCount": 3,
-    "dosCount": 3,
-    "headline": "Pay attention to what repeats.",
-    "lifeAreas": [
-      "self",
-      "friends",
-      "work",
-    ],
-    "profileId": "G06",
-    "rulesetVersion": "2026-10.2",
-  },
-  {
-    "date": "2026-08-20",
-    "dontsCount": 3,
-    "dosCount": 3,
-    "headline": "The sky is quiet. Make your own weather.",
-    "lifeAreas": [
-      "self",
-      "friends",
-      "money",
-    ],
-    "profileId": "G06",
-    "rulesetVersion": "2026-10.2",
-  },
-  {
-    "date": "2026-10-24",
-    "dontsCount": 3,
-    "dosCount": 3,
-    "headline": "The message can wait until it's right.",
-    "lifeAreas": [
-      "work",
-      "self",
-      "friends",
-    ],
-    "profileId": "G06",
-    "rulesetVersion": "2026-10.2",
-  },
-  {
-    "date": "2027-01-05",
-    "dontsCount": 2,
-    "dosCount": 3,
-    "headline": "Pay attention to what repeats.",
-    "lifeAreas": [
-      "self",
-      "friends",
-      "work",
-    ],
-    "profileId": "G06",
-    "rulesetVersion": "2026-10.2",
-  },
-  {
-    "date": "2026-03-01",
-    "dontsCount": 3,
-    "dosCount": 3,
-    "headline": "The door is open. Walk through it.",
-    "lifeAreas": [
-      "self",
-      "family",
-      "home",
-    ],
-    "profileId": "G07",
-    "rulesetVersion": "2026-10.2",
-  },
-  {
-    "date": "2026-06-15",
     "dontsCount": 3,
     "dosCount": 3,
     "headline": "Small moves compound today.",
     "lifeAreas": [
-      "self",
-      "friends",
-      "money",
+      {
+        "area": "love",
+        "temperature": "charged",
+      },
+      {
+        "area": "work",
+        "temperature": "warm",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "strained",
+      },
+      {
+        "area": "self",
+        "temperature": "charged",
+      },
     ],
-    "profileId": "G07",
-    "rulesetVersion": "2026-10.2",
+    "profileId": "G05",
+    "rulesetVersion": "2026-11.1",
+  },
+  {
+    "date": "2026-03-01",
+    "dontsCount": 3,
+    "dosCount": 3,
+    "headline": "The sky is quiet. Make your own weather.",
+    "lifeAreas": [
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "strained",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "strained",
+      },
+      {
+        "area": "family",
+        "temperature": "strained",
+      },
+      {
+        "area": "friends",
+        "temperature": "charged",
+      },
+      {
+        "area": "self",
+        "temperature": "charged",
+      },
+    ],
+    "profileId": "G06",
+    "rulesetVersion": "2026-11.1",
+  },
+  {
+    "date": "2026-06-15",
+    "dontsCount": 3,
+    "dosCount": 3,
+    "headline": "The sky is quiet. Make your own weather.",
+    "lifeAreas": [
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "strained",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "charged",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
+    ],
+    "profileId": "G06",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2026-08-20",
     "dontsCount": 3,
     "dosCount": 3,
-    "headline": "The sky is quiet. Make your own weather.",
+    "headline": "Pay attention to what repeats.",
     "lifeAreas": [
-      "self",
-      "work",
-      "friends",
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "strained",
+      },
+      {
+        "area": "money",
+        "temperature": "strained",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "charged",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
     ],
-    "profileId": "G07",
-    "rulesetVersion": "2026-10.2",
+    "profileId": "G06",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2026-10-24",
     "dontsCount": 3,
     "dosCount": 3,
-    "headline": "Pay attention to what repeats.",
+    "headline": "The message can wait until it's right.",
     "lifeAreas": [
-      "self",
-      "money",
-      "love",
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "charged",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "strained",
+      },
+      {
+        "area": "family",
+        "temperature": "strained",
+      },
+      {
+        "area": "friends",
+        "temperature": "charged",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
+    ],
+    "profileId": "G06",
+    "rulesetVersion": "2026-11.1",
+  },
+  {
+    "date": "2027-01-05",
+    "dontsCount": 3,
+    "dosCount": 3,
+    "headline": "The sky is quiet. Make your own weather.",
+    "lifeAreas": [
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "charged",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "charged",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
+    ],
+    "profileId": "G06",
+    "rulesetVersion": "2026-11.1",
+  },
+  {
+    "date": "2026-03-01",
+    "dontsCount": 3,
+    "dosCount": 3,
+    "headline": "Pick your moment and move.",
+    "lifeAreas": [
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "warm",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "warm",
+      },
+      {
+        "area": "self",
+        "temperature": "charged",
+      },
     ],
     "profileId": "G07",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
+  },
+  {
+    "date": "2026-06-15",
+    "dontsCount": 3,
+    "dosCount": 3,
+    "headline": "The sky is quiet. Make your own weather.",
+    "lifeAreas": [
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "warm",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "warm",
+      },
+      {
+        "area": "self",
+        "temperature": "charged",
+      },
+    ],
+    "profileId": "G07",
+    "rulesetVersion": "2026-11.1",
+  },
+  {
+    "date": "2026-08-20",
+    "dontsCount": 3,
+    "dosCount": 3,
+    "headline": "Pay attention to what repeats.",
+    "lifeAreas": [
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "warm",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "warm",
+      },
+      {
+        "area": "self",
+        "temperature": "charged",
+      },
+    ],
+    "profileId": "G07",
+    "rulesetVersion": "2026-11.1",
+  },
+  {
+    "date": "2026-10-24",
+    "dontsCount": 3,
+    "dosCount": 3,
+    "headline": "Small moves compound today.",
+    "lifeAreas": [
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "warm",
+      },
+      {
+        "area": "money",
+        "temperature": "charged",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "warm",
+      },
+      {
+        "area": "self",
+        "temperature": "charged",
+      },
+    ],
+    "profileId": "G07",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2027-01-05",
@@ -450,25 +1300,75 @@ exports[`ASH-250 golden-set eval (CI gate) > stores the snapshot baseline (AC 4 
     "dosCount": 3,
     "headline": "Pay attention to what repeats.",
     "lifeAreas": [
-      "self",
-      "work",
-      "friends",
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "warm",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "warm",
+      },
+      {
+        "area": "self",
+        "temperature": "charged",
+      },
     ],
     "profileId": "G07",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2026-03-01",
     "dontsCount": 3,
     "dosCount": 3,
-    "headline": "The message can wait until it's right.",
+    "headline": "Re-read before you hit send.",
     "lifeAreas": [
-      "self",
-      "money",
-      "work",
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "charged",
+      },
+      {
+        "area": "money",
+        "temperature": "charged",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "warm",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
     ],
     "profileId": "G08",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2026-06-15",
@@ -476,12 +1376,37 @@ exports[`ASH-250 golden-set eval (CI gate) > stores the snapshot baseline (AC 4 
     "dosCount": 3,
     "headline": "The wrong words cost more than silence today.",
     "lifeAreas": [
-      "work",
-      "self",
-      "friends",
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "strained",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "charged",
+      },
+      {
+        "area": "self",
+        "temperature": "charged",
+      },
     ],
     "profileId": "G08",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2026-08-20",
@@ -489,12 +1414,37 @@ exports[`ASH-250 golden-set eval (CI gate) > stores the snapshot baseline (AC 4 
     "dosCount": 3,
     "headline": "Small moves compound today.",
     "lifeAreas": [
-      "work",
-      "self",
-      "friends",
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "strained",
+      },
+      {
+        "area": "money",
+        "temperature": "strained",
+      },
+      {
+        "area": "home",
+        "temperature": "charged",
+      },
+      {
+        "area": "family",
+        "temperature": "charged",
+      },
+      {
+        "area": "friends",
+        "temperature": "strained",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
     ],
     "profileId": "G08",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2026-10-24",
@@ -502,90 +1452,75 @@ exports[`ASH-250 golden-set eval (CI gate) > stores the snapshot baseline (AC 4 
     "dosCount": 3,
     "headline": "Small moves compound today.",
     "lifeAreas": [
-      "work",
-      "self",
-      "friends",
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "charged",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "charged",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
     ],
     "profileId": "G08",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2027-01-05",
     "dontsCount": 3,
     "dosCount": 3,
-    "headline": "Let yourself be seen today.",
+    "headline": "What you want is closer than it looks.",
     "lifeAreas": [
-      "work",
-      "self",
-      "friends",
+      {
+        "area": "love",
+        "temperature": "strained",
+      },
+      {
+        "area": "work",
+        "temperature": "strained",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "charged",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
     ],
     "profileId": "G08",
-    "rulesetVersion": "2026-10.2",
-  },
-  {
-    "date": "2026-03-01",
-    "dontsCount": 3,
-    "dosCount": 3,
-    "headline": "The sky is quiet. Make your own weather.",
-    "lifeAreas": [
-      "self",
-      "work",
-      "friends",
-    ],
-    "profileId": "G09",
-    "rulesetVersion": "2026-10.2",
-  },
-  {
-    "date": "2026-06-15",
-    "dontsCount": 3,
-    "dosCount": 3,
-    "headline": "The sky is quiet. Make your own weather.",
-    "lifeAreas": [
-      "self",
-      "money",
-      "love",
-    ],
-    "profileId": "G09",
-    "rulesetVersion": "2026-10.2",
-  },
-  {
-    "date": "2026-08-20",
-    "dontsCount": 3,
-    "dosCount": 3,
-    "headline": "The sky is quiet. Make your own weather.",
-    "lifeAreas": [
-      "self",
-      "family",
-      "home",
-    ],
-    "profileId": "G09",
-    "rulesetVersion": "2026-10.2",
-  },
-  {
-    "date": "2026-10-24",
-    "dontsCount": 3,
-    "dosCount": 3,
-    "headline": "Let yourself be seen today.",
-    "lifeAreas": [
-      "self",
-      "friends",
-      "work",
-    ],
-    "profileId": "G09",
-    "rulesetVersion": "2026-10.2",
-  },
-  {
-    "date": "2027-01-05",
-    "dontsCount": 3,
-    "dosCount": 3,
-    "headline": "Let yourself be seen today.",
-    "lifeAreas": [
-      "self",
-      "money",
-      "love",
-    ],
-    "profileId": "G09",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2026-03-01",
@@ -593,12 +1528,227 @@ exports[`ASH-250 golden-set eval (CI gate) > stores the snapshot baseline (AC 4 
     "dosCount": 3,
     "headline": "Pay attention to what repeats.",
     "lifeAreas": [
-      "self",
-      "work",
-      "family",
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "charged",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "warm",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
+    ],
+    "profileId": "G09",
+    "rulesetVersion": "2026-11.1",
+  },
+  {
+    "date": "2026-06-15",
+    "dontsCount": 3,
+    "dosCount": 3,
+    "headline": "The sky is quiet. Make your own weather.",
+    "lifeAreas": [
+      {
+        "area": "love",
+        "temperature": "charged",
+      },
+      {
+        "area": "work",
+        "temperature": "strained",
+      },
+      {
+        "area": "money",
+        "temperature": "charged",
+      },
+      {
+        "area": "home",
+        "temperature": "charged",
+      },
+      {
+        "area": "family",
+        "temperature": "charged",
+      },
+      {
+        "area": "friends",
+        "temperature": "charged",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
+    ],
+    "profileId": "G09",
+    "rulesetVersion": "2026-11.1",
+  },
+  {
+    "date": "2026-08-20",
+    "dontsCount": 3,
+    "dosCount": 3,
+    "headline": "Pay attention to what repeats.",
+    "lifeAreas": [
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "warm",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "charged",
+      },
+      {
+        "area": "family",
+        "temperature": "charged",
+      },
+      {
+        "area": "friends",
+        "temperature": "warm",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
+    ],
+    "profileId": "G09",
+    "rulesetVersion": "2026-11.1",
+  },
+  {
+    "date": "2026-10-24",
+    "dontsCount": 3,
+    "dosCount": 3,
+    "headline": "What you want is closer than it looks.",
+    "lifeAreas": [
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "warm",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "strained",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
+    ],
+    "profileId": "G09",
+    "rulesetVersion": "2026-11.1",
+  },
+  {
+    "date": "2027-01-05",
+    "dontsCount": 3,
+    "dosCount": 3,
+    "headline": "What you want is closer than it looks.",
+    "lifeAreas": [
+      {
+        "area": "love",
+        "temperature": "charged",
+      },
+      {
+        "area": "work",
+        "temperature": "warm",
+      },
+      {
+        "area": "money",
+        "temperature": "charged",
+      },
+      {
+        "area": "home",
+        "temperature": "charged",
+      },
+      {
+        "area": "family",
+        "temperature": "charged",
+      },
+      {
+        "area": "friends",
+        "temperature": "warm",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
+    ],
+    "profileId": "G09",
+    "rulesetVersion": "2026-11.1",
+  },
+  {
+    "date": "2026-03-01",
+    "dontsCount": 3,
+    "dosCount": 3,
+    "headline": "Small moves compound today.",
+    "lifeAreas": [
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "warm",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "warm",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
     ],
     "profileId": "G10",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2026-06-15",
@@ -606,12 +1756,37 @@ exports[`ASH-250 golden-set eval (CI gate) > stores the snapshot baseline (AC 4 
     "dosCount": 3,
     "headline": "Friction is information. Adjust grip, not goal.",
     "lifeAreas": [
-      "self",
-      "money",
-      "love",
+      {
+        "area": "love",
+        "temperature": "charged",
+      },
+      {
+        "area": "work",
+        "temperature": "charged",
+      },
+      {
+        "area": "money",
+        "temperature": "charged",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "warm",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
     ],
     "profileId": "G10",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2026-08-20",
@@ -619,38 +1794,113 @@ exports[`ASH-250 golden-set eval (CI gate) > stores the snapshot baseline (AC 4 
     "dosCount": 3,
     "headline": "The sky is quiet. Make your own weather.",
     "lifeAreas": [
-      "money",
-      "love",
-      "self",
+      {
+        "area": "love",
+        "temperature": "charged",
+      },
+      {
+        "area": "work",
+        "temperature": "charged",
+      },
+      {
+        "area": "money",
+        "temperature": "charged",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "charged",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
     ],
     "profileId": "G10",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2026-10-24",
     "dontsCount": 3,
     "dosCount": 3,
-    "headline": "Re-read before you hit send.",
+    "headline": "Say it twice. Confirm it once more.",
     "lifeAreas": [
-      "work",
-      "self",
-      "family",
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "charged",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "warm",
+      },
+      {
+        "area": "self",
+        "temperature": "charged",
+      },
     ],
     "profileId": "G10",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
   },
   {
     "date": "2027-01-05",
     "dontsCount": 3,
     "dosCount": 3,
-    "headline": "The sky is quiet. Make your own weather.",
+    "headline": "Small moves compound today.",
     "lifeAreas": [
-      "self",
-      "work",
-      "love",
+      {
+        "area": "love",
+        "temperature": "warm",
+      },
+      {
+        "area": "work",
+        "temperature": "strained",
+      },
+      {
+        "area": "money",
+        "temperature": "warm",
+      },
+      {
+        "area": "home",
+        "temperature": "warm",
+      },
+      {
+        "area": "family",
+        "temperature": "warm",
+      },
+      {
+        "area": "friends",
+        "temperature": "warm",
+      },
+      {
+        "area": "self",
+        "temperature": "strained",
+      },
     ],
     "profileId": "G10",
-    "rulesetVersion": "2026-10.2",
+    "rulesetVersion": "2026-11.1",
   },
 ]
 `;

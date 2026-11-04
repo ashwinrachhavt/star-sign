@@ -21,6 +21,46 @@ export function rowToBirthProfile(row: BirthProfileRow) {
   };
 }
 
+/**
+ * life_areas is {area, temperature} since COPY_VERSION 2026-10.3 (ASH-268).
+ * Rows written before that store plain area names — parse tolerantly and
+ * mark them "legacy" so the UI renders the honest "—" (their real
+ * temperature was never persisted; pretending "quiet" would be a
+ * fabrication). No migration; provenance honesty.
+ */
+export type ParsedLifeArea = DailyReading["lifeAreas"][number] | { area: string; temperature: "legacy" };
+
+export function parseLifeAreas(raw: unknown): ParsedLifeArea[] {
+  if (!Array.isArray(raw)) return [];
+  const out: ParsedLifeArea[] = [];
+  for (const entry of raw) {
+    if (typeof entry === "string") {
+      out.push({ area: entry, temperature: "legacy" });
+    } else if (
+      entry &&
+      typeof entry === "object" &&
+      "area" in entry &&
+      typeof (entry as { area: unknown }).area === "string" &&
+      "temperature" in entry &&
+      typeof (entry as { temperature: unknown }).temperature === "string"
+    ) {
+      const t = (entry as { temperature: string }).temperature;
+      // Current scale (spec W2b) + the ash-268 interim scale: both were
+      // real persisted states — each renders under its own name.
+      if (
+        t === "charged" || t === "warm" || t === "steady" || t === "strained" ||
+        t === "hot" || t === "quiet"
+      ) {
+        out.push({
+          area: (entry as { area: string }).area,
+          temperature: t,
+        } as ParsedLifeArea);
+      }
+    }
+  }
+  return out;
+}
+
 export function readingFromRow(row: Record<string, unknown>): DailyReading {
   return {
     id: row.id as string,
@@ -29,7 +69,10 @@ export function readingFromRow(row: Record<string, unknown>): DailyReading {
     explanation: row.explanation as string,
     dos: row.dos as string[],
     donts: row.donts as string[],
-    lifeAreas: row.life_areas as never[],
+    // ParsedLifeArea includes the "legacy" marker for pre-2026-10.3 rows;
+    // DailyReading.lifeAreas is structurally satisfied (legacy rows carry
+    // a temperature value the UI maps to "—").
+    lifeAreas: parseLifeAreas(row.life_areas) as DailyReading["lifeAreas"],
     provenance: row.provenance as never,
     uncertaintyNote: row.uncertainty_note as string,
   };

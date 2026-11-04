@@ -159,7 +159,7 @@ export const friendUpdateSchema = z.object({
   lifeAreas: z.array(
     z.object({
       area: z.string(),
-      state: z.enum(["hot", "warm", "quiet"]),
+      state: z.enum(["charged", "warm", "steady", "strained"]),
     }),
   ),
   basis: z.object({

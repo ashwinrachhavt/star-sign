@@ -10,6 +10,7 @@
  * this file bumps RULESET_VERSION / COPY_VERSION in reading.ts.
  */
 import type {
+  AreaTemperature,
   Aspect,
   LifeArea,
   Planet,
@@ -114,38 +115,69 @@ export function scoreTransitEvents(
   return events.sort((x, y) => y.score - x.score);
 }
 
-export type AreaTemperature = "hot" | "warm" | "quiet";
-
 /**
- * Ranks life areas by summed event score into hot / warm / quiet
- * (copy.md: never percentages). Hot: clearly dominant; warm: active;
- * quiet: everything else. Ties broken deterministically by area name.
+ * Ranks life areas by summed event score into our own four states (spec
+ * W2b: charged / warm / steady / strained — never percentages). High
+ * activity resolves its valence from the area's actual aspect mix: a
+ * harmonious-leaning area reads charged, a friction-leaning one strained —
+ * so a transits-good day structurally cannot read strained. Mid activity
+ * is warm; everything else is steady. Ties broken deterministically by
+ * area name.
  */
 export function rankLifeAreas(
   events: TransitEvent[],
 ): Array<{ area: LifeArea; temperature: AreaTemperature; score: number }> {
   const scores = new Map<LifeArea, number>();
+  const harmonious = new Map<LifeArea, number>();
+  const frictional = new Map<LifeArea, number>();
   for (const e of events) {
     for (const area of e.areas) {
       scores.set(area, (scores.get(area) ?? 0) + e.score);
+      const side =
+        e.type === "trine" || e.type === "sextile" ? harmonious :
+        e.type === "square" || e.type === "opposition" ? frictional :
+        null; // conjunctions intensify; they carry no valence of their own
+      if (side) side.set(area, (side.get(area) ?? 0) + e.score);
     }
   }
   const ranked = [...scores.entries()]
     .sort((x, y) => y[1] - x[1] || (x[0] < y[0] ? -1 : 1))
     .map(([area, score]) => ({ area, score: Number(score.toFixed(3)) }));
 
+  const totals = new Map(scores);
   let hot = 0;
   return ranked.map((r, i) => {
     if (i === 0 && r.score >= 3) {
       hot = 1;
-      return { ...r, temperature: "hot" as const };
+      return { ...r, temperature: valenceOf(r.area, totals, harmonious, frictional) };
     }
     if (hot && r.score >= ranked[0].score * 0.6) {
-      return { ...r, temperature: "hot" as const };
+      return { ...r, temperature: valenceOf(r.area, totals, harmonious, frictional) };
     }
     if (r.score >= 1.5) return { ...r, temperature: "warm" as const };
-    return { ...r, temperature: "quiet" as const };
+    return { ...r, temperature: "steady" as const };
   });
+}
+
+/**
+ * Valence from the event mix itself, not a mood prior: friction must
+ * outweigh harmony for an area to read strained. Conjunctions count on
+ * neither side, so a conjunction-only day stays charged (activation).
+ */
+function valenceOf(
+  area: LifeArea,
+  totals: Map<LifeArea, number>,
+  harmonious: Map<LifeArea, number>,
+  frictional: Map<LifeArea, number>,
+): AreaTemperature {
+  const f = frictional.get(area) ?? 0;
+  const h = harmonious.get(area) ?? 0;
+  const neutral = (totals.get(area) ?? 0) - h - f;
+  // Strained only when friction dominates the area's WHOLE mix: it must
+  // outweigh harmony AND at least match the conjunction (neutral) share.
+  // A minority square beside a strong conjunction is a note, not the
+  // theme — the area reads charged (activation).
+  return f > h && f >= neutral && f > 0 ? "strained" : "charged";
 }
 
 /**
@@ -192,26 +224,44 @@ const DONT_RETROGRADE: Record<Planet, string[]> = {
   pluto: ["Don't dig up a settled grave."],
 };
 
-export function dosForEvents(events: TransitEvent[]): string[] {
-  const out: string[] = [];
-  for (const e of events) {
-    const opts = DOS_BY_TRANSIT_PLANET[e.transit];
-    if (opts?.length) out.push(opts[e.type.length % opts.length]);
-  }
-  return [...new Set(out)];
+/**
+ * Same-event-family pairing (spec W2b, the pairing rule): the Do leans
+ * into the event's theme; the Don't guards that event's failure mode.
+ * Both come from ONE event — index i of dos and donts always traces to
+ * the same transit — and retrograde events sharpen the don't with the
+ * planet's retrograde guard. Original writing for Star Sign.
+ */
+export interface GuidancePair {
+  do: string;
+  dont: string;
+  /** The single event both sides of the pair derive from. */
+  event: TransitEvent;
 }
 
-export function dontsForEvents(events: TransitEvent[]): string[] {
-  const out: string[] = [];
+export function guidancePairsForEvents(
+  events: TransitEvent[],
+): GuidancePair[] {
+  const seen = new Set<string>();
+  const out: GuidancePair[] = [];
   for (const e of events) {
-    // Retrograde sharpens the guidance: the planet-specific retro dont
-    // leads; the aspect-family dont backs it up.
-    const pool = e.retrograde && DONT_RETROGRADE[e.transit].length
-      ? [...DONT_RETROGRADE[e.transit], ...DONTS_BY_ASPECT[e.type]]
-      : DONTS_BY_ASPECT[e.type];
-    if (pool.length) out.push(pool[e.orb * 10 % pool.length | 0]);
+    const doOpts = DOS_BY_TRANSIT_PLANET[e.transit];
+    const dontPool =
+      e.retrograde && DONT_RETROGRADE[e.transit].length
+        ? [...DONT_RETROGRADE[e.transit], ...DONTS_BY_ASPECT[e.type]]
+        : DONTS_BY_ASPECT[e.type];
+    if (!doOpts?.length || !dontPool.length) continue;
+    const doText = doOpts[e.type.length % doOpts.length];
+    // Dedupe on the do: repeated events of the same theme family would
+    // otherwise produce identical pairs.
+    if (seen.has(doText)) continue;
+    seen.add(doText);
+    out.push({
+      do: doText,
+      dont: dontPool[e.orb * 10 % dontPool.length | 0],
+      event: e,
+    });
   }
-  return [...new Set(out)];
+  return out;
 }
 
 /**

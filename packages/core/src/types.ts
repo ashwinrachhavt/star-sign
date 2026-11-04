@@ -32,6 +32,19 @@ export const PLANETS: readonly Planet[] = [
 export type LifeArea =
   | "love" | "work" | "money" | "home" | "family" | "friends" | "self";
 
+/** Canonical area order for the full-set day-at-a-glance vector. */
+export const LIFE_AREAS: readonly LifeArea[] = [
+  "love", "work", "money", "home", "family", "friends", "self",
+] as const;
+
+/**
+ * Star Sign's own temperature scale (spec W2b): activity × valence, not
+ * percentages. charged = high activity leaning harmonious; strained =
+ * high activity leaning frictional; warm = active; steady = calm.
+ * Valence follows the aspect mix, so a harmonious sky cannot read strained.
+ */
+export type AreaTemperature = "charged" | "warm" | "steady" | "strained";
+
 export interface ChartPlacement {
   planet: Planet;
   sign: ZodiacSign;
@@ -118,7 +131,7 @@ export interface DailyReading {
   explanation: string;
   dos: string[];
   donts: string[];
-  lifeAreas: LifeArea[];
+  lifeAreas: Array<{ area: LifeArea; temperature: AreaTemperature }>;
   provenance: ReadingProvenance;
   /** Tied to birth-data precision; surfaced verbatim in the UI */
   uncertaintyNote: string;
@@ -138,6 +151,26 @@ export interface DiveDeeper {
     explanation: string;
     /** The event's live geometry, stated plainly. */
     geometry: string;
+  }>;
+  /**
+   * Proof line for the headline (spec W2b): the named event that produced
+   * it plus one plain-language meaning. Present whenever a transit drove
+   * the headline — never fabricated on natal-fallback days.
+   */
+  headlineGrounding?: {
+    event: ReadingProvenanceInput;
+    meaning: string;
+  };
+  /**
+   * Do/Don't proof (spec W2b): each pair derives from ONE event — the do
+   * leans into its theme, the don't guards its failure mode. grounding
+   * names the transit and states the meaning plainly ("show your work").
+   */
+  guidance?: Array<{
+    do: string;
+    dont: string;
+    event: ReadingProvenanceInput;
+    grounding: string;
   }>;
   /** Reflective longer-form lessons of the day (copy.md dive register). */
   lessons: string;

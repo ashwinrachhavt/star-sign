@@ -27,6 +27,19 @@ const AREA_LABELS: Record<string, string> = {
   self: "Self",
 };
 
+const TEMPERATURE_LABEL: Record<string, string> = {
+  charged: "Charged",
+  warm: "Warm",
+  steady: "Steady",
+  strained: "Strained",
+  // ash-268 interim rows (hot/warm/quiet) — real persisted states, each
+  // renders under its own name. Pre-2026-10.3 rows never stored a
+  // temperature — the honest dash.
+  hot: "Hot",
+  quiet: "Quiet",
+  legacy: "—",
+};
+
 export default async function DayPage() {
   const supabase = await createClient();
   const { data: userData } = await supabase.auth.getUser();
@@ -98,6 +111,7 @@ export default async function DayPage() {
           { id: "day", label: "My Day", href: "/day" },
           { id: "week", label: "Week", href: "/week" },
           { id: "people", label: "People", href: "/people" },
+          { id: "you", label: "You", href: "/you" },
         ]}
         activeTab="day"
       />
@@ -120,12 +134,22 @@ export default async function DayPage() {
           {dateLine}
         </p>
         <div style={{ marginTop: "var(--space-4)" }}>
-          <Glance headline={reading.headline}>{reading.explanation}</Glance>
+          <Glance headline={reading.headline} markSeed={reading.forDate}>
+            {reading.explanation}
+          </Glance>
         </div>
       </section>
 
       <section className="card" style={{ marginTop: "var(--space-5)" }}>
-        <DosDonts dos={reading.dos} donts={reading.donts} doLabel="Dos" dontLabel="Don'ts" />
+        <DosDonts
+          dos={reading.dos}
+          donts={reading.donts}
+          // W2b proof lines: each pair expands to its named transit.
+          // Absent on the free-tier split or quiet days — never faked.
+          proofs={reading.diveDeeper?.guidance?.map((g) => g.grounding)}
+          doLabel="Dos"
+          dontLabel="Don'ts"
+        />
       </section>
 
       <section className="card" style={{ marginTop: "var(--space-4)" }}>
@@ -135,8 +159,11 @@ export default async function DayPage() {
         >
           Life areas today
         </p>
-        {reading.lifeAreas.map((area) => (
-          <LifeAreaRow key={area} area={AREA_LABELS[area] ?? area} state="—" />
+        {reading.lifeAreas.map(({ area, temperature }) => (
+          <LifeAreaRow
+            key={area}
+            area={AREA_LABELS[area] ?? area}
+            state={TEMPERATURE_LABEL[temperature] ?? "—"}          />
         ))}
       </section>
 
