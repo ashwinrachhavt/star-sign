@@ -350,7 +350,13 @@ function cap(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-function resolveNoonLocal(timeZone: string, forDate: string): Date {
+/**
+ * Local noon (the reading's sky moment) for a zone + date, via two-pass
+ * offset resolution (mirrors chart.ts). Exported so adjacent derivations
+ * (friend updates) compute their areas from the same sky moment as the
+ * person's own reading instead of duplicating the tz math.
+ */
+export function resolveNoonLocal(timeZone: string, forDate: string): Date {
   const [y, m, d] = forDate.split("-").map(Number);
   // Local noon → UTC via two-pass offset resolution (mirrors chart.ts)
   const guess = Date.UTC(y, m - 1, d, 12, 0);

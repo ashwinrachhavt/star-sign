@@ -33,6 +33,9 @@ const MIGRATIONS = [
   // 0012 is reserved by the ash-268 life-area-temperatures branch (copy
   // version 2026-10.3); it lands here when that branch merges.
   "0013_rls_v3_clerk_subject.sql",
+  "0014_handles.sql",
+  "0015_daily_updates_grant.sql",
+  "0016_connections_grant_flip_updates.sql",
 ];
 
 export async function createHarnessDb(): Promise<TestDb> {

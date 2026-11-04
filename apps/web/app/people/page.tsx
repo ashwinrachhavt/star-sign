@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import AddPersonForm from "./add-person-form";
 import PersonCard from "./person-card";
 import ConnectionsSection from "./connections-section";
+import FriendUpdatesSection from "./friend-updates-section";
 import { ScreenHeader } from "@/components/ui";
 import { fontMono } from "@/app/fonts";
 
@@ -22,7 +23,9 @@ export default async function PeoplePage() {
   // Connections in any state involving the actor (RLS: participants only).
   const { data: connections } = await supabase
     .from("connections")
-    .select("id, requester_id, addressee_id, state, requested_at")
+    .select(
+      "id, requester_id, addressee_id, state, requested_at, daily_updates_requester, daily_updates_addressee",
+    )
     .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`)
     .order("requested_at", { ascending: false });
 
@@ -44,6 +47,13 @@ export default async function PeoplePage() {
       nameById.get(c.requester_id === userId ? c.addressee_id : c.requester_id) ??
       "Someone",
     otherId: c.requester_id === userId ? c.addressee_id : c.requester_id,
+    // The OTHER party's daily-updates grant toward the viewer (W2) —
+    // shown on accepted cards; the toggle itself lives on the consent page.
+    theirUpdatesShared:
+      c.state === "accepted" &&
+      (c.requester_id === userId
+        ? c.daily_updates_addressee
+        : c.daily_updates_requester),
   }));
 
   return (
@@ -58,9 +68,11 @@ export default async function PeoplePage() {
         activeTab="people"
       />
 
+      <FriendUpdatesSection />
+
       <ConnectionsSection connections={connectionViews} viewerId={userId} />
 
-      <section style={{ marginTop: "var(--space-6)" }}>
+      <section id="add-person" style={{ marginTop: "var(--space-6)" }}>
         <p
           className={`type-micro-label t-11 ${fontMono.className}`}
           style={{ color: "var(--ink-tertiary)", marginBottom: "var(--space-2)" }}

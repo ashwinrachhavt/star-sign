@@ -22,7 +22,9 @@ export default async function ConnectionConsentPage({
 
   const { data: connection } = await supabase
     .from("connections")
-    .select("id, requester_id, addressee_id, state, requested_at")
+    .select(
+      "id, requester_id, addressee_id, state, requested_at, daily_updates_requester, daily_updates_addressee",
+    )
     .eq("id", id)
     .maybeSingle();
 
@@ -101,6 +103,12 @@ export default async function ConnectionConsentPage({
               connectionId={connection.id}
               isRecipient={!outgoing}
               state={connection.state}
+              otherName={otherName}
+              shareDailyUpdates={
+                outgoing
+                  ? connection.daily_updates_requester
+                  : connection.daily_updates_addressee
+              }
             />
           </>
         ) : (
@@ -112,6 +120,12 @@ export default async function ConnectionConsentPage({
               connectionId={connection.id}
               isRecipient={!outgoing}
               state={connection.state}
+              otherName={otherName}
+              shareDailyUpdates={
+                outgoing
+                  ? connection.daily_updates_requester
+                  : connection.daily_updates_addressee
+              }
             />
           </>
         )}
