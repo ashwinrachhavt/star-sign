@@ -60,7 +60,12 @@ test("journey: onboard → today → connect by handle → accept → friend upd
 
   // --- Ari: stubbed Clerk session → onboarding through the real UI ---
   const ctxA = await browser.newContext({
-    recordVideo: { dir: "test-results/journey-videos" },
+    recordVideo: {
+      dir: "test-results/journey-videos",
+      // Playwright caps default video size at 800x450; QA evidence needs
+      // a ≥720px shorter edge.
+      size: { width: 1280, height: 720 },
+    },
   });
   await ctxA.addCookies([{ ...stubSessionCookie(ari.session), url: "http://localhost:3010" }]);
   const a = await ctxA.newPage();
@@ -128,7 +133,10 @@ test("journey: onboard → today → connect by handle → accept → friend upd
 
   // --- Maya: accept through the real consent surface ---
   const ctxB = await browser.newContext({
-    recordVideo: { dir: "test-results/journey-videos" },
+    recordVideo: {
+      dir: "test-results/journey-videos",
+      size: { width: 1280, height: 720 },
+    },
   });
   await ctxB.addCookies([{ ...stubSessionCookie(maya.session), url: "http://localhost:3010" }]);
   const b = await ctxB.newPage();
