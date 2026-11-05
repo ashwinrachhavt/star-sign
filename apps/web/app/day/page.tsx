@@ -28,10 +28,15 @@ const AREA_LABELS: Record<string, string> = {
 };
 
 const TEMPERATURE_LABEL: Record<string, string> = {
-  hot: "Hot",
+  charged: "Charged",
   warm: "Warm",
+  steady: "Steady",
+  strained: "Strained",
+  // ash-268 interim rows (hot/warm/quiet) — real persisted states, each
+  // renders under its own name. Pre-2026-10.3 rows never stored a
+  // temperature — the honest dash.
+  hot: "Hot",
   quiet: "Quiet",
-  // Pre-2026-10.3 rows never stored a temperature — the honest dash.
   legacy: "—",
 };
 
@@ -136,7 +141,15 @@ export default async function DayPage() {
       </section>
 
       <section className="card" style={{ marginTop: "var(--space-5)" }}>
-        <DosDonts dos={reading.dos} donts={reading.donts} doLabel="Dos" dontLabel="Don'ts" />
+        <DosDonts
+          dos={reading.dos}
+          donts={reading.donts}
+          // W2b proof lines: each pair expands to its named transit.
+          // Absent on the free-tier split or quiet days — never faked.
+          proofs={reading.diveDeeper?.guidance?.map((g) => g.grounding)}
+          doLabel="Dos"
+          dontLabel="Don'ts"
+        />
       </section>
 
       <section className="card" style={{ marginTop: "var(--space-4)" }}>
@@ -244,7 +257,7 @@ export default async function DayPage() {
                       </a>
                       <span className="type-prose t-13" style={{ color: "var(--ink-tertiary)" }}>
                         {" "}
-                        — {rec.creator}
+                        by {rec.creator}
                       </span>
                       <p className="type-prose t-13" style={{ margin: "var(--space-1) 0 0" }}>
                         {rec.blurb}
@@ -286,15 +299,17 @@ export default async function DayPage() {
                   className={`type-mono t-13 ${fontMono.className}`}
                   style={{ color: "var(--ink-secondary)" }}
                 >
-                  {cap(e.planet)} {e.aspect} natal {cap(e.natal)} — orb{" "}
+                  {cap(e.planet)} {e.aspect} natal {cap(e.natal)}, orb{" "}
                   {typeof e.orb === "number" ? e.orb.toFixed(2) : "—"}
                 </p>
               ))}
             </div>
           )}
           <p>
-            Ruleset {reading.provenance.rulesetVersion} · copy{" "}
-            {reading.provenance.copyVersion} ·{" "}
+            Ruleset {reading.provenance.rulesetVersion}
+            <br />
+            Copy {reading.provenance.copyVersion}
+            <br />
             {reading.provenance.inputs.length} astronomical inputs
           </p>
           <p>{reading.uncertaintyNote}</p>

@@ -22,7 +22,7 @@ const COMMON_ZONES = [
 
 const PRECISION_OPTIONS = [
   { value: "yes", label: "I know it exactly" },
-  { value: "approx", label: "Approximate — close enough" },
+  { value: "approx", label: "Approximate, close enough" },
   { value: "no", label: "I don't know it" },
 ] as const;
 
@@ -100,11 +100,14 @@ function OnboardingForm() {
   // request, 2026-10-25).
   useEffect(() => {
     const query = placeLabel.trim();
-    if (query.length < 2) {
-      setPlace(null);
-      return;
-    }
+    // All setState happens inside the debounced timer: calling it
+    // synchronously in the effect body triggers cascading renders
+    // (react-hooks setState-in-effect rule).
     const timer = setTimeout(async () => {
+      if (query.length < 2) {
+        setPlace(null);
+        return;
+      }
       setPlaceBusy(true);
       try {
         const res = await fetch("/api/geocode", {
@@ -175,7 +178,7 @@ function OnboardingForm() {
 
     if (!place) {
       setBusy(false);
-      setError("Pick a birth place from the list — we resolve the coordinates for you.");
+      setError("Pick a birth place from the list. We resolve the coordinates for you.");
       return;
     }
 
@@ -330,8 +333,8 @@ function OnboardingForm() {
               style={{ color: "var(--ink-tertiary)", margin: "calc(-1 * var(--space-3)) 0 0" }}
             >
               {place.resolvedName}
-              {place.country ? `, ${place.country}` : ""} — {place.lat.toFixed(2)}°,{" "}
-              {place.lon.toFixed(2)}°
+              {place.country ? `, ${place.country}` : ""} ({place.lat.toFixed(2)}°,{" "}
+              {place.lon.toFixed(2)}°)
             </p>
           )}
 

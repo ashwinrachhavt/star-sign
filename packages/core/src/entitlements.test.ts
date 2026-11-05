@@ -26,8 +26,9 @@ describe("entitlements (ASH-265)", () => {
     expect(free.explanation).toBeTruthy();
     expect(free.dos.length).toBeGreaterThan(0);
     expect(free.lifeAreas.length).toBeGreaterThan(0);
-    // Dive deeper stripped on free:
-    expect(free.diveDeeper).toBeUndefined();
+    // Dive deeper ships FREE (MVP spec W2b "Pro depth, free", art_g6VLL2Bx
+    // 2026-11-04 — supersedes the ASH-265 proposal that paywalled it):
+    expect(free.diveDeeper).toEqual(reading.diveDeeper);
   });
 
   it("life-area temperatures pass through the free-tier split (ASH-268)", () => {
@@ -35,7 +36,7 @@ describe("entitlements (ASH-265)", () => {
     const free = splitReadingForTier(reading, defaultEntitlements());
     expect(free.lifeAreas).toEqual(reading.lifeAreas);
     for (const la of free.lifeAreas) {
-      expect(["hot", "warm", "quiet"]).toContain(la.temperature);
+      expect(["charged", "warm", "steady", "strained"]).toContain(la.temperature);
     }
   });
 
@@ -48,17 +49,18 @@ describe("entitlements (ASH-265)", () => {
   });
 
   it("single gate pattern: features check allows(), not tiers (criterion 1)", () => {
-    // The recorded line (owner proposal on the ticket):
+    // The recorded line — dive_deeper moved to free per MVP spec W2b
+    // (art_g6VLL2Bx, 2026-11-04), superseding the 2026-10-25 proposal:
     expect(DEFAULT_FEATURE_TIERS.daily_reading).toBe("free");
     expect(DEFAULT_FEATURE_TIERS.notifications).toBe("free");
-    expect(DEFAULT_FEATURE_TIERS.dive_deeper).toBe("premium");
+    expect(DEFAULT_FEATURE_TIERS.dive_deeper).toBe("free");
     expect(DEFAULT_FEATURE_TIERS.week_ahead_full).toBe("premium");
     expect(DEFAULT_FEATURE_TIERS.compatibility_report).toBe("premium");
 
     const free = defaultEntitlements();
     expect(allows(free, "daily_reading")).toBe(true);
     expect(allows(free, "notifications")).toBe(true);
-    expect(allows(free, "dive_deeper")).toBe(false);
+    expect(allows(free, "dive_deeper")).toBe(true);
 
     const premium = { tier: "premium" as const };
     expect(allows(premium, "dive_deeper")).toBe(true);
@@ -71,7 +73,10 @@ describe("entitlements (ASH-265)", () => {
       featureOverrides: { week_ahead_full: "free" as const },
     };
     expect(allows(grandfathered, "week_ahead_full")).toBe(true);
-    expect(allows(grandfathered, "dive_deeper")).toBe(false);
+    // dive_deeper is free for everyone now (spec W2b) — no override needed:
+    expect(allows(grandfathered, "dive_deeper")).toBe(true);
+    // without the override, free tier stays locked out of premium features:
+    expect(allows({ tier: "free" as const }, "week_ahead_full")).toBe(false);
   });
 
   it("every feature has a recorded tier (no unguarded features)", () => {

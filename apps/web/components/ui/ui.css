@@ -1,4 +1,9 @@
-/* Star Sign v1 component styles (design-system.md §5).
+/* Hallmark · built: the project · redesign: polish · shape: app screen · genre: atmospheric · scope: app
+   waive 64 · the label voice is mono by design · glyphs-as-language is the locked theme material (design-system.md §1.6, §3)
+   Reviewed and kept: gate 67 fires on .type-micro-label — the project's locked label recipe
+   (mono 11px caps, tracking +0.08em, design-system.md §3). The locked system wins; not a tell.
+
+   Star Sign v1 component styles (design-system.md §5).
    All values from tokens.css / type.css — no hard-coded hexes, px sizes,
    durations, or easings here. Cards: 1px hairline border, no radius,
    no shadow, no fill. Interactive elements: 44px min target, 2px focus
@@ -404,8 +409,24 @@
   color: var(--ink-secondary);
 }
 
+/* Disclosure chevron (gate 63): a drawn mark, not a glued text arrow. */
 .ui-friend-row-arrow {
-  color: var(--ink-secondary);
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-right: 1px solid var(--ink-secondary);
+  border-bottom: 1px solid var(--ink-secondary);
+  transform: rotate(-45deg);
+}
+
+/* Shared chevron for footer links (gate 63): inherits the link colour. */
+.ui-arrow-chevron {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  transform: rotate(-45deg);
 }
 
 /* ---- LifeAreaRow ---- */
@@ -482,6 +503,11 @@
   transition: color var(--motion-base) var(--motion-ease);
 }
 
+.ui-button-link:disabled {
+  color: var(--ink-tertiary);
+  cursor: not-allowed;
+}
+
 .ui-button-link:hover {
   color: var(--ink-secondary);
 }
@@ -501,7 +527,29 @@
 
 .ui-button-solid:disabled {
   opacity: 0.5;
-  cursor: default;
+  cursor: not-allowed;
+}
+
+/* Pressed states (gate 26b): one signal per element, colour and opacity only. */
+
+.ui-button-solid:active {
+  opacity: 0.82;
+}
+
+.ui-button-link:active {
+  color: var(--ink-tertiary);
+}
+
+.ui-screen-header-tab:active {
+  color: var(--ink-tertiary);
+}
+
+.ui-tab-bar-item:active {
+  color: var(--ink-tertiary);
+}
+
+.ui-friend-row:active {
+  background: var(--hairline);
 }
 
 /* ---- Input ---- */
@@ -526,7 +574,9 @@
   flex: 1;
   background: none;
   border: none;
-  border-bottom: 1px solid var(--hairline);
+  /* Form affordance: the component boundary meets 3:1 (gate 40);
+     decorative hairlines stay on --hairline. */
+  border-bottom: 1px solid var(--ink-tertiary);
   color: var(--ink);
   padding: var(--space-3) 0;
   font-size: 17px;

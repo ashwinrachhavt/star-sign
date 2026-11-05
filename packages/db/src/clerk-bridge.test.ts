@@ -63,8 +63,9 @@ describe("clerk identity bridge (migration 0007)", () => {
     ).rejects.toThrow(/duplicate key|unique constraint/i);
   });
 
-  it("criterion 3: auth.uid() RLS still isolates users after mapping (A cannot touch B's rows)", async () => {
-    // Give B a birth profile (owned row).
+  it("criterion 3: RLS still isolates users after mapping (A cannot touch B's rows)", async () => {
+    // Give B a birth profile (owned row), pre-mapping: legacy sessions
+    // (sub = profile UUID) still resolve through the unmapped profile.
     await asUser(sql, B, (tx) =>
       tx`
         insert into birth_profiles (user_id, birth_date, birth_time_precision, birth_time_zone, birth_lat, birth_lon)
@@ -74,28 +75,39 @@ describe("clerk identity bridge (migration 0007)", () => {
     // Map B's subject (as the bridge would post-sign-in).
     await sql`update profiles set clerk_subject = ${CLERK_SUBJ_B} where id = ${B}`;
 
+    // Post-mapping, identities resolve by SUBJECT (a mapped profile no
+    // longer resolves through its UUID — one identity per profile).
     // A (mapped to A's subject) cannot see or mutate B's birth profile.
-    const aSeesB = await asUser(sql, A, (tx) =>
+    const aSeesB = await asUser(sql, CLERK_SUBJ_A, (tx) =>
       tx`select user_id from birth_profiles where user_id = ${B}`,
     );
     expect(aSeesB).toHaveLength(0);
 
     // A's update silently affects 0 rows (RLS USING filter).
-    await asUser(sql, A, (tx) =>
+    await asUser(sql, CLERK_SUBJ_A, (tx) =>
       tx`delete from birth_profiles where user_id = ${B}`,
     );
-    const bStillThere = await asUser(sql, B, (tx) =>
+    const bStillThere = await asUser(sql, CLERK_SUBJ_B, (tx) =>
       tx`select user_id from birth_profiles where user_id = ${B}`,
     );
     expect(bStillThere).toHaveLength(1);
 
-    // B still sees their own row through their own session.
+    // B still sees their own row through their own (Clerk) session.
     expect(bStillThere[0].user_id).toBe(B);
   });
 
   it("anon cannot use the mapping to escalate (fail closed)", async () => {
     const rows = await asAnon(sql, (tx) =>
       tx`select id from profiles where clerk_subject = ${CLERK_SUBJ_A}`,
+    );
+    expect(rows).toHaveLength(0);
+  });
+
+  it("anon and stranger subjects cannot read mapped profiles through RLS v3", async () => {
+    // A stranger Clerk session resolves no profile — the helper returns
+    // null and the profiles policy filters everything out.
+    const rows = await asUser(sql, "user_2strangerSubject000000000000x", (tx) =>
+      tx`select id from profiles`,
     );
     expect(rows).toHaveLength(0);
   });

@@ -2,9 +2,11 @@
  * GET/POST /api/connections (api.md §7, ASH-256 / 5.1b).
  *
  * GET: the actor's connections (any state) — both directions.
- * POST: request a connection. Cross-user existence is never confirmed
- * (a request targeting an unknown/nonexistent user fails closed with
- * 404 at read time and a FK error surfaces as 409 here).
+ * POST: request a connection. Two exact-match shapes: by profile id
+ * (the pasted connection code) or by exact handle (W2 — the public
+ * @name; no search directory). Cross-user existence is never confirmed
+ * beyond the exact handle: an unknown handle 404s honestly ("not on
+ * Star Sign yet") and a FK error surfaces as 404.
  */
 import { connectionRequestSchema, connectionViewSchema } from "@star-sign/core";
 import {
@@ -18,6 +20,7 @@ import {
   requestId,
   requireActor,
 } from "../_lib/api";
+import { adminClient } from "@/lib/auth/admin";
 
 function toView(row: Record<string, unknown>) {
   return connectionViewSchema.parse({
@@ -60,7 +63,42 @@ export async function POST(req: Request) {
   const parsed = await parseBody(req, connectionRequestSchema, reqId);
   if (!parsed.ok) return parsed.response;
 
-  if (parsed.data.addresseeId === actor.userId) {
+  // Handle shape: resolve the exact handle to a profile via the service
+  // role (the actor's RLS client can only ever see their own profile
+  // row). Handles are the public identifier, but only exact matches
+  // resolve — no directory, no prefix search. Unknown → honest 404; the
+  // client falls back to the free manual-add people flow.
+  let addresseeId: string;
+  if ("handle" in parsed.data) {
+    const admin = adminClient();
+    const { data: profile, error: lookupError } = await admin
+      .from("profiles")
+      .select("id")
+      .eq("handle", parsed.data.handle)
+      .maybeSingle();
+    if (lookupError) {
+      // A failed lookup is not "unknown handle": reporting 404 here would
+      // tell a real user that a real person isn't on Star Sign yet.
+      console.error(
+        `[connections:${reqId}] handle lookup failed`,
+        JSON.stringify(lookupError),
+      );
+      return jsonError(500, "internal_error", "Could not resolve that handle.", reqId);
+    }
+    if (!profile) {
+      return jsonError(
+        404,
+        "not_found",
+        "No one on Star Sign uses that handle yet. You can still add them manually below.",
+        reqId,
+      );
+    }
+    addresseeId = profile.id;
+  } else {
+    addresseeId = parsed.data.addresseeId;
+  }
+
+  if (addresseeId === actor.userId) {
     return jsonError(409, "conflict", "You cannot connect to yourself.", reqId);
   }
 
@@ -76,7 +114,7 @@ export async function POST(req: Request) {
     .from("connections")
     .insert({
       requester_id: actor.userId,
-      addressee_id: parsed.data.addresseeId,
+      addressee_id: addresseeId,
       state: "requested",
     })
     .select("*")

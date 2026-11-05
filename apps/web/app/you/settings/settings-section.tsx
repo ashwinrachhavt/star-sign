@@ -49,9 +49,9 @@ export function SettingsSection({
           quietEndHour: next.quietEndHour,
         }),
       });
-      setStatus(res.ok ? "Preferences saved." : "Could not save — try again.");
+      setStatus(res.ok ? "Preferences saved." : "Could not save. Try again.");
     } catch {
-      setStatus("Could not save — try again.");
+      setStatus("Could not save. Try again.");
     } finally {
       setSaving(false);
     }
@@ -62,7 +62,7 @@ export function SettingsSection({
     try {
       const res = await fetch("/api/account-export", { method: "POST" });
       if (!res.ok) {
-        setStatus("Export failed — try again.");
+        setStatus("Export failed. Try again.");
         return;
       }
       const blob = await res.blob();
@@ -74,7 +74,7 @@ export function SettingsSection({
       URL.revokeObjectURL(url);
       setStatus("Export downloaded.");
     } catch {
-      setStatus("Export failed — try again.");
+      setStatus("Export failed. Try again.");
     }
   }
 
@@ -83,13 +83,13 @@ export function SettingsSection({
     try {
       const res = await fetch("/api/account-deletion", { method: "POST" });
       if (!res.ok) {
-        setStatus("Deletion failed — try again.");
+        setStatus("Deletion failed. Try again.");
         return;
       }
       router.push("/login");
       router.refresh();
     } catch {
-      setStatus("Deletion failed — try again.");
+      setStatus("Deletion failed. Try again.");
     }
   }
 
@@ -140,7 +140,7 @@ export function SettingsSection({
             className={`type-micro-label t-11 ${fontMono.className}`}
             style={{ color: "var(--ink-tertiary)", marginTop: "var(--space-3)" }}
           >
-            QUIET HOURS {String(state.quietStartHour ?? 22).padStart(2, "0")}:00 —{" "}
+            QUIET HOURS {String(state.quietStartHour ?? 22).padStart(2, "0")}:00 UNTIL{" "}
             {String(state.quietEndHour ?? 8).padStart(2, "0")}:00. EVERYTHING IS OPT-IN AND
             CAN BE TURNED OFF HERE.
           </p>

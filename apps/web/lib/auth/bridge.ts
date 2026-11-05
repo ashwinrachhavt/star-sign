@@ -1,23 +1,23 @@
 /**
- * Clerk ↔ profile identity bridge (ASH-231 / 0.1b).
+ * Clerk ↔ profile identity bridge (ASH-231 / 0.1b; RLS v3 W1).
  *
  * Clerk issues and revokes sessions; Supabase stays the data layer with
- * its existing auth.uid()-based RLS. The bridge maps a Clerk subject to
- * the local profile UUID every RLS policy already expects:
+ * RLS resolving ownership through profiles.clerk_subject (migration
+ * 0013). The Supabase client carries the Clerk session token via the
+ * accessToken callback (native third-party integration), so
+ * auth.jwt()->>'sub' IS the Clerk subject — no JWT template and no
+ * per-user token minting. (Templates are static claims and cannot
+ * perform a per-user DB lookup, which supersedes the 0009-era plan to
+ * carry the profile UUID in sub.)
  *
  *   1. Clerk session → subject (text, e.g. user_2abc...)
- *   2. profiles.clerk_subject → profile UUID (unique, migration 0007)
- *   3. requireActor returns the profile UUID; Supabase queries run with
- *      the profile's anon-key session — RLS keeps using auth.uid().
+ *   2. profiles.clerk_subject → profile UUID (unique, migration 0009)
+ *   3. requireActor returns the profile UUID; RLS v3 policies resolve
+ *      the actor from the token's subject directly.
  *
- * For RLS to enforce per-actor policies, the Supabase request must carry
- * a JWT whose sub is the profile UUID. Two paths:
- *   - Production: Supabase third-party auth with Clerk as JWT issuer +
- *     a custom JWT template claim holding the mapped profile UUID
- *     (dashboard config — see AUTH_SETUP.md; documented, not code).
- *   - Local/dev fallback without that config: the bridge provisions an
- *     unsigned dev context only when CLERK is not configured at all, so
- *     local Supabase-stack flows (tests, e2e) are unaffected.
+ * Local/dev fallback without Clerk keys: the pre-existing Supabase
+ * session path (token sub = profile UUID) — local Supabase-stack flows
+ * (tests, e2e) are unaffected.
  *
  * SECURITY: never trust a client-supplied user id; the subject always
  * comes from the verified Clerk session server-side.
@@ -25,25 +25,18 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { createClient } from "@/lib/supabase/server";
 import { adminClient } from "@/lib/auth/admin";
+import { provisionClerkProfileViaSql } from "@/lib/auth/sql-admin";
+import { clerkConfigured } from "@/lib/auth/config";
+
+export { clerkConfigured };
 
 export interface Actor {
-  /** Profile UUID — the value every RLS policy compares auth.uid() against. */
+  /** Profile UUID — the value every RLS v3 policy resolves through
+   *  profiles.clerk_subject. */
   userId: string;
   /** Clerk subject (text). Null when the profile predates Clerk. */
   clerkSubject: string | null;
   supabase: Awaited<ReturnType<typeof createClient>>;
-}
-
-/**
- * True when Clerk env is present. Without it (local Supabase-stack runs,
- * CI), auth flows fall back to the pre-existing Supabase session path —
- * the migration never locks anyone out (ticket criterion 2).
- */
-export function clerkConfigured(): boolean {
-  return Boolean(
-    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
-      process.env.CLERK_SECRET_KEY,
-  );
 }
 
 /**
@@ -66,9 +59,9 @@ export async function resolveActor(): Promise<Actor | null> {
   const supabase = await createClient();
   const subject = clerk.id;
 
-  // Bridge: subject → profile UUID (unique column, migration 0007).
-  // service-role path is required to read/write the mapping row without
-  // a Supabase JWT (the user is Clerk-authenticated, not yet bridged).
+  // Bridge: subject → profile UUID (unique column, migration 0009).
+  // service-role path is required to read the mapping row without a
+  // Supabase JWT (the user is Clerk-authenticated, not yet bridged).
   const admin = adminClient();
   const { data: existing } = await admin
     .from("profiles")
@@ -80,18 +73,18 @@ export async function resolveActor(): Promise<Actor | null> {
     return { userId: existing.id, clerkSubject: subject, supabase };
   }
 
-  // First Clerk sign-in: provision the profile. Email is the natural
-  // display fallback; the profile row is tiny by design (ASH-231 ruled
-  // no separate users table — profiles.id stays the FK target).
+  // First Clerk sign-in: provision the profile through the SQL identity
+  // channel (the same one account deletion uses). Third-party auth never
+  // creates an auth.users row for a Clerk identity, and profiles.id FKs
+  // auth.users(id) — PostgREST alone cannot anchor it. The SQL path
+  // anchors the identity row (reusing an existing email's row — the
+  // documented email-link import), lets the signup trigger create the
+  // profile, and maps the subject with auth_provider 'clerk'.
   const email = clerk.primaryEmailAddress?.emailAddress ?? null;
-  const { data: created, error } = await admin
-    .from("profiles")
-    .insert({ clerk_subject: subject, display_name: email ?? "friend" })
-    .select("id, clerk_subject")
-    .single();
-  if (error || !created) return null;
+  const provisioned = await provisionClerkProfileViaSql(subject, email);
+  if (!provisioned.ok) return null;
 
-  return { userId: created.id, clerkSubject: subject, supabase };
+  return { userId: provisioned.profileId, clerkSubject: subject, supabase };
 }
 
 /** Read the Clerk session token's subject without full user fetch. */

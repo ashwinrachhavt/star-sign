@@ -22,7 +22,9 @@ export default async function ConnectionConsentPage({
 
   const { data: connection } = await supabase
     .from("connections")
-    .select("id, requester_id, addressee_id, state, requested_at")
+    .select(
+      "id, requester_id, addressee_id, state, requested_at, daily_updates_requester, daily_updates_addressee",
+    )
     .eq("id", id)
     .maybeSingle();
 
@@ -71,7 +73,7 @@ export default async function ConnectionConsentPage({
             <div className="card" style={{ marginTop: "var(--space-4)" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
                 <p className="type-prose t-15">
-                  ☉ <strong>You share chart placements</strong> — the signs
+                  ☉ <strong>You share chart placements</strong>: the signs
                   (and houses, since your birth time is exact) of your Sun,
                   Moon, and planets. Not your birth date, time, or place.
                 </p>
@@ -80,12 +82,12 @@ export default async function ConnectionConsentPage({
                   Accepting opens the same view of their chart to you.
                 </p>
                 <p className="type-prose t-15">
-                  ☉ <strong>They can't see anything else</strong> — no
+                  ☉ <strong>They can’t see anything else</strong>: no
                   readings, no notes, no private people list.
                 </p>
                 <p className="type-prose t-15">
                   ☉ <strong>Either of you can end it at any time,</strong>{" "}
-                  and it ends immediately — no grace period where your chart
+                  and it ends immediately: no grace period where your chart
                   stays visible.
                 </p>
               </div>
@@ -101,6 +103,12 @@ export default async function ConnectionConsentPage({
               connectionId={connection.id}
               isRecipient={!outgoing}
               state={connection.state}
+              otherName={otherName}
+              shareDailyUpdates={
+                outgoing
+                  ? connection.daily_updates_requester
+                  : connection.daily_updates_addressee
+              }
             />
           </>
         ) : (
@@ -112,6 +120,12 @@ export default async function ConnectionConsentPage({
               connectionId={connection.id}
               isRecipient={!outgoing}
               state={connection.state}
+              otherName={otherName}
+              shareDailyUpdates={
+                outgoing
+                  ? connection.daily_updates_requester
+                  : connection.daily_updates_addressee
+              }
             />
           </>
         )}

@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import * as astro from "astronomy-engine";
 import { anglesFor, porphyryCusps, houseForLongitude } from "./houses.js";
 import { computeNatalChart, resolveLocalToUtc, signForLongitude } from "./chart.js";
 import type { BirthProfile } from "./types.js";
@@ -27,7 +28,6 @@ describe("anglesFor (ASH-237)", () => {
   it("ascendant equals the sun's longitude at local sunrise (classic check)", () => {
     // At sunrise the Sun sits on the ascendant. Sunrise instant comes from
     // astronomy-engine's SearchRiseCalc (independent of our angle math).
-    const astro = require("astronomy-engine") as typeof import("astronomy-engine");
     const date = new Date(Date.UTC(1990, 5, 15));
     const observer = new astro.Observer(NYC.lat, NYC.lon, 0);
     const sunrise = astro.SearchRiseSet(astro.Body.Sun, observer, +1, date, 2);

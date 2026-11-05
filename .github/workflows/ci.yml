@@ -75,10 +75,33 @@ jobs:
 
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 3.0.0
 
       - name: Start local Supabase
-        run: supabase start
+        # CLI 3.x removed `--db-password` from `start`; the default
+        # local-stack DB password is already `postgres`. Retry: shared
+        # runner IPs hit Docker Hub rate limits on fresh image pulls
+        # (toomanyrequests) — a resumed start recovers partial stacks.
+        run: |
+          for i in 1 2 3 4 5; do
+            supabase start && exit 0
+            echo "supabase start attempt $i failed; retrying in 60s"
+            sleep 60
+          done
+          supabase start
+
+      # Keys MUST match the running containers: `supabase status` reads
+      # CLI-side state, which diverged from what PostgREST verifies after
+      # retried starts (PGRST301 "JWT cryptographic operation failed" on
+      # the service-role key broke the connect step). The per-start
+      # secrets file is written for the containers themselves — read the
+      # keys from it, failing loudly if the successful start left none.
+      - name: Export local Supabase keys
+        run: |
+          SECRETS_FILE=$(ls supabase/.temp/start-secrets/*/env/docker.env | head -1)
+          test -f "$SECRETS_FILE"
+          grep -E '^SUPABASE_ANON_KEY=' "$SECRETS_FILE" | sed 's/^SUPABASE_ANON_KEY=/ANON_KEY=/' >> "$GITHUB_ENV"
+          grep -E '^SUPABASE_SERVICE_ROLE_KEY=' "$SECRETS_FILE" | sed 's/^SUPABASE_SERVICE_ROLE_KEY=/SERVICE_ROLE_KEY=/' >> "$GITHUB_ENV"
 
       - name: Install Playwright
         run: pnpm --dir e2e install --no-save && pnpm --dir e2e exec playwright install --with-deps chromium
@@ -87,4 +110,19 @@ jobs:
         run: pnpm --dir e2e test
         env:
           SUPABASE_URL: http://localhost:54321
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_LOCAL_ANON_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+          SUPABASE_ANON_KEY: ${{ env.ANON_KEY }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ env.ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ env.SERVICE_ROLE_KEY }}
+          SUPABASE_DB_PASSWORD: postgres
+
+      - name: Upload journey evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: journey-evidence
+          path: |
+            e2e/artifacts/
+            e2e/test-results/
+          retention-days: 7
+          if-no-files-found: ignore

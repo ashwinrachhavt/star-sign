@@ -13,9 +13,11 @@ android/
 coverage/
 playwright-report/
 test-results/
+e2e/artifacts/
 .turbo/
 supabase/.branches
 supabase/.temp
 .agents
 .claude/skills/
-design/reference/
+.hallmark/
+design/reference/node_modules.rootsnap-*/

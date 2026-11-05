@@ -89,12 +89,35 @@ export const connectionStateSchema = z.enum([
 
 export type ConnectionState = z.infer<typeof connectionStateSchema>;
 
-/** POST /api/connections — request a connection with someone by user id. */
-export const connectionRequestSchema = z
-  .object({
-    addresseeId: uuidSchema,
-  })
-  .strict();
+/**
+ * Handles: the public, exact-match social identifier. Lowercase
+ * alphanumerics with single dashes, 2–40 chars (migration 0014 CHECK).
+ */
+export const handleSchema = z
+  .string()
+  .regex(/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/, "lowercase letters, digits, and dashes only")
+  .min(2)
+  .max(40);
+
+export type Handle = z.infer<typeof handleSchema>;
+
+/**
+ * POST /api/connections — request a connection. Two exact-match shapes:
+ * by profile id (the pasted connection code) or by handle (the public
+ * @name). Exact match only — no search directory.
+ */
+export const connectionRequestSchema = z.union([
+  z
+    .object({
+      addresseeId: uuidSchema,
+    })
+    .strict(),
+  z
+    .object({
+      handle: handleSchema,
+    })
+    .strict(),
+]);
 
 export type ConnectionRequestInput = z.infer<typeof connectionRequestSchema>;
 
@@ -110,3 +133,46 @@ export const connectionViewSchema = z.object({
 });
 
 export type ConnectionView = z.infer<typeof connectionViewSchema>;
+
+/** Body for the daily-updates grant toggle (PATCH /api/connections/{id}). */
+export const connectionGrantUpdateSchema = z
+  .object({
+    shareDailyUpdates: z.boolean(),
+  })
+  .strict();
+
+export type ConnectionGrantUpdateInput = z.infer<typeof connectionGrantUpdateSchema>;
+
+/**
+ * One friend update (GET /api/friend-updates): the OTHER person's daily
+ * theme, derived on read from their chart basis + today's transits. The
+ * projection allowlist — no raw birth fields (date/time/coordinates)
+ * exist on this shape; `basis.precision` is the only birth-data echo, and
+ * `uncertaintyNote` carries the honest degradation for non-exact times.
+ * Area states reuse the pipeline's own rank vocabulary (rankLifeAreas).
+ */
+export const friendUpdateSchema = z.object({
+  connectionId: uuidSchema,
+  displayName: z.string(),
+  handle: handleSchema.nullable(),
+  headline: z.string(),
+  lifeAreas: z.array(
+    z.object({
+      area: z.string(),
+      state: z.enum(["charged", "warm", "steady", "strained"]),
+    }),
+  ),
+  basis: z.object({
+    precision: birthTimePrecisionSchema,
+  }),
+  uncertaintyNote: z.string().nullable(),
+});
+
+export type FriendUpdate = z.infer<typeof friendUpdateSchema>;
+
+/** GET /api/friend-updates response body. */
+export const friendUpdatesViewSchema = z.object({
+  updates: z.array(friendUpdateSchema),
+});
+
+export type FriendUpdatesView = z.infer<typeof friendUpdatesViewSchema>;

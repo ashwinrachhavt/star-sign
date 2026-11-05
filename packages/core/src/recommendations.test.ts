@@ -60,7 +60,6 @@ describe("recommendations (ASH-264)", () => {
   it("deterministic rotation varies days without breaking completeness", () => {
     const events = [event({ transit: "venus", natal: "moon", type: "trine" })];
     const a = recommendForEvents(events, 1, 2);
-    const b = recommendForEvents(events, 2, 2);
     expect(a.map((r) => r.item.id)).toEqual(a.map((r) => r.item.id)); // deterministic per seed
     expect(a.length).toBeGreaterThan(0);
   });

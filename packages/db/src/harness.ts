@@ -31,6 +31,12 @@ const MIGRATIONS = [
   "0010_share_scope.sql",
   "0011_onboarding_and_places.sql",
   "0012_copy_version_2026_10_3.sql",
+  "0013_rls_v3_clerk_subject.sql",
+  "0014_handles.sql",
+  "0015_daily_updates_grant.sql",
+  "0016_connections_grant_flip_updates.sql",
+  "0017_reading_version_bump_v2026_11_1.sql",
+  "0018_daily_readings_dive_deeper.sql",
 ];
 
 export async function createHarnessDb(): Promise<TestDb> {
@@ -54,7 +60,7 @@ async function installShims(sql: TestDb) {
     create schema if not exists public;
     create table if not exists auth.users (
       id uuid primary key default gen_random_uuid(),
-      email text,
+      email text unique,
       raw_user_meta_data jsonb not null default '{}'::jsonb,
       created_at timestamptz not null default now()
     );
@@ -62,6 +68,13 @@ async function installShims(sql: TestDb) {
     language sql stable
     as $fn$
       select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
+    $fn$;
+    -- Mirrors Supabase's auth.jwt(): the full claims JSON PostgREST sets
+    -- from the request JWT. RLS v3 reads the subject through this.
+    create or replace function auth.jwt() returns jsonb
+    language sql stable
+    as $fn$
+      select coalesce(nullif(current_setting('request.jwt.claims', true), '')::jsonb, '{}'::jsonb)
     $fn$;
     do $$ begin
       create role authenticated nologin;
@@ -113,8 +126,13 @@ export async function asUser<T>(
 ): Promise<T> {
   return sql.begin(async (tx) => {
     await tx.unsafe(`set local role authenticated`);
+    // Supabase exposes both the extracted sub claim (auth.uid()) and the
+    // full claims JSON (auth.jwt()); set both so either resolution works.
+    // sub may be a profile UUID (legacy Supabase session) or a Clerk
+    // subject (RLS v3 Clerk path) — both are plain text here.
     await tx.unsafe(
-      `select set_config('request.jwt.claim.sub', '${userId.replaceAll("'", "''")}', true)`,
+      `select set_config('request.jwt.claim.sub', $1, true), set_config('request.jwt.claims', $2, true)`,
+      [userId, JSON.stringify({ sub: userId })],
     );
     return fn(tx);
   }) as Promise<T>;

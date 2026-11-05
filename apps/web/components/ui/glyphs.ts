@@ -4,12 +4,21 @@
  * these inline. All 10 bodies + 5 aspects (ASH-254 AC2).
  */
 
+/**
+ * Emoji-capable glyphs (♀ ♂ and the zodiac ring) can render as colour emoji
+ * on some platforms. U+FE0E forces text presentation — every glyph stays
+ * monochrome ink, part of the typography (gate 30a: no emoji as icons).
+ */
+function text(glyph: string): string {
+  return `${glyph}\uFE0E`;
+}
+
 export const BODY_GLYPHS: Record<string, string> = {
   sun: "☉",
   moon: "☽",
   mercury: "☿",
-  venus: "♀",
-  mars: "♂",
+  venus: text("♀"),
+  mars: text("♂"),
   jupiter: "♃",
   saturn: "♄",
   uranus: "♅",
@@ -26,18 +35,18 @@ export const ASPECT_GLYPHS: Record<string, string> = {
 };
 
 export const SIGN_GLYPHS: Record<string, string> = {
-  aries: "♈",
-  taurus: "♉",
-  gemini: "♊",
-  cancer: "♋",
-  leo: "♌",
-  virgo: "♍",
-  libra: "♎",
-  scorpio: "♏",
-  sagittarius: "♐",
-  capricorn: "♑",
-  aquarius: "♒",
-  pisces: "♓",
+  aries: text("♈"),
+  taurus: text("♉"),
+  gemini: text("♊"),
+  cancer: text("♋"),
+  leo: text("♌"),
+  virgo: text("♍"),
+  libra: text("♎"),
+  scorpio: text("♏"),
+  sagittarius: text("♐"),
+  capricorn: text("♑"),
+  aquarius: text("♒"),
+  pisces: text("♓"),
 };
 
 export function bodyGlyph(planet: string): string {

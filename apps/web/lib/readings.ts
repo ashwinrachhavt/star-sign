@@ -45,7 +45,12 @@ export function parseLifeAreas(raw: unknown): ParsedLifeArea[] {
       typeof (entry as { temperature: unknown }).temperature === "string"
     ) {
       const t = (entry as { temperature: string }).temperature;
-      if (t === "hot" || t === "warm" || t === "quiet") {
+      // Current scale (spec W2b) + the ash-268 interim scale: both were
+      // real persisted states — each renders under its own name.
+      if (
+        t === "charged" || t === "warm" || t === "steady" || t === "strained" ||
+        t === "hot" || t === "quiet"
+      ) {
         out.push({
           area: (entry as { area: string }).area,
           temperature: t,
@@ -70,6 +75,11 @@ export function readingFromRow(row: Record<string, unknown>): DailyReading {
     lifeAreas: parseLifeAreas(row.life_areas) as DailyReading["lifeAreas"],
     provenance: row.provenance as never,
     uncertaintyNote: row.uncertainty_note as string,
+    // Dive layer (W2b proof lines) persisted since 0018 — pre-0018 rows
+    // carry none and render without one (never faked).
+    ...(row.dive_deeper
+      ? { diveDeeper: row.dive_deeper as DailyReading["diveDeeper"] }
+      : {}),
   };
 }
 
@@ -122,6 +132,7 @@ export async function getOrCreateDailyReading(
       selected_events: reading.provenance.selectedEvents,
       provenance: reading.provenance,
       uncertainty_note: reading.uncertaintyNote,
+      dive_deeper: reading.diveDeeper ?? null,
     })
     .select()
     .single();

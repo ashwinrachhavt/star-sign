@@ -15,9 +15,22 @@ requires code changes; every manual step is dashboard-side.
 - `middleware.ts`: protection keys off Clerk when configured
 - `POST /api/account-export`, `POST /api/account-deletion` (SQL cascade +
   Clerk `users.deleteUser`)
-- Migration `0007_clerk_identity_bridge.sql`: `profiles.clerk_subject
+- Migration `0009_clerk_identity_bridge.sql`: `profiles.clerk_subject
   text unique`, `auth_provider` column
-- RLS bridge tests: `packages/db/src/clerk-bridge.test.ts`
+- Migration `0013_rls_v3_clerk_subject.sql` (RLS v3, W1): every
+  actor-owned table's RLS resolves the actor through
+  `profiles.clerk_subject` via `app.actor_profile_id()` — the web
+  Supabase client passes the Clerk session token through the
+  `accessToken` callback, so no JWT template is needed. Legacy
+  Supabase-auth sessions (sub = profile UUID, no clerk_subject) keep
+  resolving — the fallback path never locks out.
+- Provisioning (`lib/auth/sql-admin.ts` `provisionClerkProfileViaSql`):
+  first Clerk sign-in anchors an `auth.users` row through the SQL
+  identity channel (third-party auth never creates one, and
+  `profiles.id` FKs it), then maps the subject with
+  `auth_provider='clerk'`
+- RLS bridge tests: `packages/db/src/clerk-bridge.test.ts` +
+  `packages/db/src/rls-v3.test.ts`
 
 ## Ashwin's checklist (dashboard only)
 
@@ -46,17 +59,24 @@ Clerk app: use the existing `app_3LA5yQmjnBph7r0ZKBPZ2uhpuP1`.
 ### 3. Supabase third-party auth (Supabase dashboard → Authentication → Third-Party Auth)
 
 - Add Clerk as issuer with domain `https://<clerk-domain>.clerk.accounts.dev`
-- Supabase then validates Clerk JWTs; the signed-in Supabase request's
-  `auth.uid()` resolves from the JWT `sub` claim.
+- Supabase then validates Clerk JWTs; the request's JWT `sub` claim IS
+  the raw Clerk subject, and RLS v3 (migration 0013) resolves ownership
+  through `profiles.clerk_subject` from that subject.
 
-### 4. JWT template (Clerk dashboard → JWT templates)
+### 4. No JWT template (fork resolved — RLS v3)
 
-- Create a Supabase template so tokens carry `sub` = the **profile UUID**
-  (our bridge value), not the raw Clerk subject. The bridge's
-  `resolveActor` supplies the mapping; if the template cannot call out to
-  fetch it, set `sub` to the Clerk subject and switch RLS to match on
-  `clerk_subject` instead — one policy generation, owner decision needed
-  (flagged in the PR).
+None needed. The earlier plan (and the 0009-header ruling) expected a
+Clerk JWT template to carry the **profile UUID** in `sub`; that path is
+not implementable as written — Clerk JWT templates are static claims and
+cannot perform a per-user DB lookup. The fork is resolved by re-keying
+RLS instead: migration `0013_rls_v3_clerk_subject.sql` resolves every
+actor-owned table through `profiles.clerk_subject`, and the native
+integration passes the Clerk `sub` through unchanged.
+
+Migration numbering note: the spec expected `0011` to be free, but main
+gained `0011_onboarding_and_places.sql` (#42) and `0012` is reserved by
+the incoming life-area-temperatures merge — RLS v3 took the next free
+number, `0013`.
 
 ### 5. Session revocation (0.1d — configuration only)
 

@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { computeWeekAhead } from "@star-sign/core";
 import { redirect } from "next/navigation";
 import { ScreenHeader, TransitEventCard } from "@/components/ui";
-import { dateRangeLabel } from "@/components/ui/glyphs";
+import { bodyGlyph, dateRangeLabel } from "@/components/ui/glyphs";
 import { fontMono } from "@/app/fonts";
 
 /** Structural mirror of core's TransitEvent (ruleset.ts not re-exported). */
@@ -15,11 +15,6 @@ interface WeekEvent {
   areas: readonly string[];
   score: number;
 }
-
-const PLANET_GLYPHS: Record<string, string> = {
-  sun: "☉", moon: "☽", mercury: "☿", venus: "♀", mars: "♂",
-  jupiter: "♃", saturn: "♄", uranus: "♅", neptune: "♆", pluto: "♇",
-};
 
 const ASPECT_WORDS: Record<string, string> = {
   conjunction: "meets",
@@ -101,7 +96,7 @@ export default async function WeekPage() {
           className="type-prose t-17"
           style={{ color: "var(--ink-secondary)", marginTop: "var(--space-6)" }}
         >
-          A quiet week — the sky has nothing loud planned. Rest or start
+          A quiet week: the sky has nothing loud planned. Rest or start
           something of your own.
         </p>
       ) : (
@@ -137,7 +132,7 @@ export default async function WeekPage() {
                       title={`${cap(e.transit)} ${ASPECT_WORDS[e.type]} natal ${cap(e.natal)}`}
                       footer={
                         <span>
-                          {PLANET_GLYPHS[e.transit]} {cap(e.transit)} · score{" "}
+                          {bodyGlyph(e.transit)} {cap(e.transit)} · score{" "}
                           {e.score.toFixed(1)}
                         </span>
                       }
