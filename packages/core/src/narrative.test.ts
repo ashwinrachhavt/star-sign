@@ -55,8 +55,8 @@ describe("buildDailyNarrativeFacts", () => {
     });
     expect(facts).not.toBeNull();
     expect(facts!.scope).toBe("daily");
-    expect(facts!.forDate).toBe(FOR_DATE);
     if (facts!.scope !== "daily") return;
+    expect(facts!.forDate).toBe(FOR_DATE);
     expect(facts!.headline).toBe(reading.headline);
     expect(facts!.explanation).toBe(reading.explanation);
     expect(facts!.lifeAreas).toEqual(
@@ -189,7 +189,7 @@ describe("buildAskNarrativeFacts", () => {
 });
 
 describe("buildNarrativePrompt (grounding shape)", () => {
-  const facts = buildDailyNarrativeFacts({
+  const factsUnchecked = buildDailyNarrativeFacts({
     forDate: reading.forDate,
     headline: reading.headline,
     explanation: reading.explanation,
@@ -200,6 +200,8 @@ describe("buildNarrativePrompt (grounding shape)", () => {
     uncertaintyNote: reading.uncertaintyNote,
     diveDeeper: reading.diveDeeper,
   })!;
+  if (factsUnchecked.scope !== "daily") throw new Error("unreachable: daily facts");
+  const facts = factsUnchecked;
 
   it("system prompt carries the binding contract: refuse-on-thin-facts and no predictions", () => {
     const { system } = buildNarrativePrompt(facts);

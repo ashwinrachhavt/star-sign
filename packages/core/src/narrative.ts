@@ -303,7 +303,7 @@ export function parseNarrativeOutput(raw: string): NarrativeParseResult {
 }
 
 function stripWrappingQuotes(text: string): string {
-  const quoted = /^"(.*)"$/s.exec(text);
+  const quoted = /^"([\s\S]*)"$/.exec(text);
   return quoted ? quoted[1].trim() : text;
 }
 
