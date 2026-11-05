@@ -705,7 +705,8 @@
      ("SAGITTARIUS") — on a phone it needs the wider track or its names
      break mid-word (break-word is the last resort, not the layout).
      Placements copy wraps cleanly at spaces. */
-  .ui-chart-table-row {
+  .ui-chart-table-row,
+  .ui-chart-grid-row {
     grid-template-columns: 1.4fr 1fr auto;
   }
 
