@@ -648,3 +648,103 @@
   color: var(--ink-tertiary);
   white-space: nowrap;
 }
+
+/* ---- Responsive adaptation ---- */
+
+/* One mobile boundary at 40rem — the container's own max-width (640px).
+   Below it the app is a phone: navigation leaves the header strip and
+   becomes a fixed bottom bar in thumb reach, primary actions become
+   full-width rows. Above it, nothing changes: the desktop layout keeps
+   the header tab strip and inline actions. All values are tokens.css
+   tokens; no new colors, no new type. */
+
+/* Fixed bottom tab bar (mobile only). Same destinations as the header
+   strip — ScreenHeader renders both from one tabs list. Painted with the
+   page ground so content scrolling beneath is masked; safe-area inset
+   folds in below (viewport-fit=cover, layout.tsx). */
+.ui-app-bottom-nav {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  border-top: 1px solid var(--hairline);
+  background: var(--bg);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@media (max-width: 40rem) {
+  .ui-app-bottom-nav {
+    display: flex;
+  }
+
+  /* The strip and the bar never show together — one primary nav per
+     viewport. (Playwright role queries ignore display:none elements, so
+     the e2e journeys still resolve a single nav link.) */
+  .ui-screen-header-tabs {
+    display: none;
+  }
+
+  /* Primary actions as full-width thumb rows. Solid buttons are always
+     the one primary action of their context (sign in, continue, send
+     request); link buttons stay inline text. */
+  .ui-button-solid {
+    width: 100%;
+  }
+}
+
+/* Coarse pointers get the 48px floor on the small targets (44px is the
+   resting size for fine pointers; the system's min-heights hold). */
+@media (pointer: coarse) {
+  .ui-app-bottom-nav-item {
+    min-height: 56px;
+  }
+
+  .ui-chart-grid-dot-button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .ui-place-option {
+    min-height: 48px;
+  }
+
+  .ui-button-solid,
+  .ui-button-link,
+  .ui-friend-row {
+    min-height: 48px;
+  }
+}
+
+/* Bottom-nav item: the established tab voice — micro-label mono, quiet
+   until active, one press signal. Sits at thumb height, so it is
+   generous where the header strip was dense. */
+.ui-app-bottom-nav-item {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 44px;
+  color: var(--ink-secondary);
+  text-decoration: none;
+  transition: color var(--motion-base) var(--motion-ease);
+}
+
+.ui-app-bottom-nav-item[data-active="true"] {
+  color: var(--ink);
+}
+
+.ui-app-bottom-nav-item:active {
+  color: var(--ink-tertiary);
+}
+
+/* The place listbox floats under a focused input; on a phone the
+   keyboard plus eight candidates can outrun the viewport. Cap it and
+   scroll — the rows stay full-height targets. dvh follows the keyboard
+   (interactiveWidget: resizes-content); vh is the fallback. */
+.ui-place-listbox {
+  max-height: 50vh;
+  max-height: 50dvh;
+  overflow-y: auto;
+}

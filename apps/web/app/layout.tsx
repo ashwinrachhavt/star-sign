@@ -1,13 +1,33 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { fontMono, fontSans, fontSerif } from "./fonts";
 import "../styles/tokens.css";
 import "../styles/type.css";
+import "../components/ui/ui.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Star Sign",
   description: "A private sky shared with someone you care about.",
+};
+
+/**
+ * Mobile adaptation (responsive pass): the viewport follows the device,
+ * the layout respects the fixed bottom tab bar's safe-area inset, and
+ * the keyboard resizes the layout (not just the visuals) so the
+ * onboarding form stays reachable while typing. themeColor mirrors
+ * tokens.css --bg in both schemes — meta tags cannot read CSS custom
+ * properties, so the values are kept in sync by comment.
+ */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  interactiveWidget: "resizes-content",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0d0d0d" },
+    { media: "(prefers-color-scheme: light)", color: "#f7f6f3" },
+  ],
 };
 
 /**
