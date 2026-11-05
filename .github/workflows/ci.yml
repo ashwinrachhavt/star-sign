@@ -78,7 +78,9 @@ jobs:
           version: latest
 
       - name: Start local Supabase
-        run: supabase start --db-password postgres
+        # CLI 3.x removed `--db-password` from `start`; the default
+        # local-stack DB password is already `postgres`.
+        run: supabase start
 
       # Keys are read from the running stack (CLI 3.x no longer ships the
       # fixed legacy demo secrets). These are local-stack keys, not
