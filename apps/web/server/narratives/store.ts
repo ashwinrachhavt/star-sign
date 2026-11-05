@@ -8,8 +8,8 @@
 import {
   narrativeModelIdentity,
   type NarrativeStore,
-  type NarrativeScope,
 } from "./narrate";
+import type { NarrativeScope } from "./mercury";
 
 type SupabaseClient = Awaited<
   ReturnType<typeof import("@/lib/supabase/server").createClient>
