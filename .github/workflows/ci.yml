@@ -83,10 +83,10 @@ jobs:
         # runner IPs hit Docker Hub rate limits on fresh image pulls
         # (toomanyrequests) — a resumed start recovers partial stacks.
         run: |
-          for i in 1 2 3; do
+          for i in 1 2 3 4 5; do
             supabase start && exit 0
-            echo "supabase start attempt $i failed; retrying in 30s"
-            sleep 30
+            echo "supabase start attempt $i failed; retrying in 60s"
+            sleep 60
           done
           supabase start
 

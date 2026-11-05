@@ -8,6 +8,9 @@ export default defineConfig({
   testDir: ".",
   timeout: 30_000,
   retries: 1,
+  // Keep passing-run videos in test-results: with the default cleanup
+  // the recorded journey WebM disappears as soon as the run is green.
+  preserveOutput: "always",
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: "retain-on-failure",
