@@ -75,6 +75,11 @@ export function readingFromRow(row: Record<string, unknown>): DailyReading {
     lifeAreas: parseLifeAreas(row.life_areas) as DailyReading["lifeAreas"],
     provenance: row.provenance as never,
     uncertaintyNote: row.uncertainty_note as string,
+    // Dive layer (W2b proof lines) persisted since 0018 — pre-0018 rows
+    // carry none and render without one (never faked).
+    ...(row.dive_deeper
+      ? { diveDeeper: row.dive_deeper as DailyReading["diveDeeper"] }
+      : {}),
   };
 }
 
@@ -127,6 +132,7 @@ export async function getOrCreateDailyReading(
       selected_events: reading.provenance.selectedEvents,
       provenance: reading.provenance,
       uncertainty_note: reading.uncertaintyNote,
+      dive_deeper: reading.diveDeeper ?? null,
     })
     .select()
     .single();
