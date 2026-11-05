@@ -11,6 +11,9 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: "retain-on-failure",
+    // Record every journey run: the WebM doubles as the social-loop
+    // dogfood evidence uploaded with the PR.
+    video: "on",
   },
   webServer: {
     command: `pnpm --dir ../apps/web dev --port ${PORT}`,
