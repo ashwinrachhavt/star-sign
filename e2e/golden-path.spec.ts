@@ -31,10 +31,14 @@ test("golden path: signup → onboarding → verify → day page", async ({ page
   // Default precision is "exact" → a time is required.
   await page.getByLabel("Time", { exact: true }).fill("09:30");
   await page.getByLabel("Time zone at birth").fill("America/New_York");
-  // Geocoded place (owner request): type the place, coordinates resolve
-  // server-side — no manual lat/lon entry. The hint renders the resolved
-  // coordinates in parentheses after the name (hallmark polish, PR #49).
+  // Geocoded place (owner request): type the place, then explicitly pick
+  // a candidate — the picker never silently locks a first hit. The hint
+  // then renders the locked coordinates in parentheses after the name
+  // (hallmark polish, PR #49).
   await page.getByLabel("Birth place").fill("New York");
+  const suggestions = page.getByRole("listbox", { name: "Birth place suggestions" });
+  await suggestions.getByRole("option").first().waitFor({ timeout: 15_000 });
+  await page.getByRole("option", { name: /New York/ }).first().click();
   await page.getByText(/New York.*\d+\.\d+°/).waitFor({ timeout: 15_000 });
   await page.getByRole("button", { name: /continue/i }).click();
 
