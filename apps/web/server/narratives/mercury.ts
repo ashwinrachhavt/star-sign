@@ -72,7 +72,12 @@ export class MercuryNarrativeAdapter implements NarrativeAdapter {
           // Grounded restatement, not free generation: a lowish
           // temperature keeps the narrator near the supplied facts.
           temperature: 0.6,
-          max_tokens: 400,
+          // mercury-3 is a reasoning model: encrypted reasoning tokens
+          // ride inside the completion budget (323 reasoning + ~75 prose
+          // on a live probe). 1200 leaves the ~80-word narrative ample
+          // room after reasoning variance; the output cap still binds
+          // via NARRATIVE_MAX_WORDS.
+          max_tokens: 1200,
         }),
         signal: AbortSignal.timeout(MERCURY_TIMEOUT_MS),
       });
