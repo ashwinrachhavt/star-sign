@@ -78,7 +78,13 @@ jobs:
           version: latest
 
       - name: Start local Supabase
-        run: supabase start
+        run: supabase start --db-password postgres
+
+      # Keys are read from the running stack (CLI 3.x no longer ships the
+      # fixed legacy demo secrets). These are local-stack keys, not
+      # credentials — the stack runs entirely inside this job.
+      - name: Export local Supabase keys
+        run: supabase status -o env | grep -E '^(ANON_KEY|SERVICE_ROLE_KEY)=' >> "$GITHUB_ENV"
 
       - name: Install Playwright
         run: pnpm --dir e2e install --no-save && pnpm --dir e2e exec playwright install --with-deps chromium
@@ -87,7 +93,11 @@ jobs:
         run: pnpm --dir e2e test
         env:
           SUPABASE_URL: http://localhost:54321
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_LOCAL_ANON_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+          SUPABASE_ANON_KEY: ${{ env.ANON_KEY }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ env.ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ env.SERVICE_ROLE_KEY }}
+          SUPABASE_DB_PASSWORD: postgres
 
       - name: Upload journey evidence
         if: always()

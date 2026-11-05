@@ -40,6 +40,7 @@ test("journey: onboard → today → connect by handle → accept → friend upd
   // seeded (birth basis + handle); Ari onboards through the real UI.
   const maya = await seedStubUser(sql, {
     email: "e2e-beta@star-sign.test",
+    password: "e2e-maya-pass-1",
     displayName: "Maya",
     handle: "maya-orion",
     birth: {
@@ -53,12 +54,13 @@ test("journey: onboard → today → connect by handle → accept → friend upd
   });
   const ari = await seedStubUser(sql, {
     email: "e2e-alpha@star-sign.test",
+    password: "e2e-ari-pass-1",
     displayName: "Ari",
   });
 
   // --- Ari: stubbed Clerk session → onboarding through the real UI ---
   const ctxA = await browser.newContext();
-  await ctxA.addCookies([{ ...stubSessionCookie(ari.token), url: "http://localhost:3010" }]);
+  await ctxA.addCookies([{ ...stubSessionCookie(ari.session), url: "http://localhost:3010" }]);
   const a = await ctxA.newPage();
 
   await a.goto("/onboarding");
@@ -120,7 +122,7 @@ test("journey: onboard → today → connect by handle → accept → friend upd
 
   // --- Maya: accept through the real consent surface ---
   const ctxB = await browser.newContext();
-  await ctxB.addCookies([{ ...stubSessionCookie(maya.token), url: "http://localhost:3010" }]);
+  await ctxB.addCookies([{ ...stubSessionCookie(maya.session), url: "http://localhost:3010" }]);
   const b = await ctxB.newPage();
 
   await b.goto("/people");
