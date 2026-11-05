@@ -71,11 +71,20 @@ export async function POST(req: Request) {
   let addresseeId: string;
   if ("handle" in parsed.data) {
     const admin = adminClient();
-    const { data: profile } = await admin
+    const { data: profile, error: lookupError } = await admin
       .from("profiles")
       .select("id")
       .eq("handle", parsed.data.handle)
       .maybeSingle();
+    if (lookupError) {
+      // A failed lookup is not "unknown handle": reporting 404 here would
+      // tell a real user that a real person isn't on Star Sign yet.
+      console.error(
+        `[connections:${reqId}] handle lookup failed`,
+        JSON.stringify(lookupError),
+      );
+      return jsonError(500, "internal_error", "Could not resolve that handle.", reqId);
+    }
     if (!profile) {
       return jsonError(
         404,

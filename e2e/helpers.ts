@@ -111,13 +111,28 @@ export async function seedStubUser(
 
     // Map the GoTrue identity onto the app's actor anchor (0009 bridge):
     // profiles.clerk_subject = the auth.users id the JWT sub carries.
-    await tx`
+    const anchored = await tx`
       update public.profiles
       set clerk_subject = ${subject}, auth_provider = 'clerk', display_name = ${opts.displayName}
-      where id = ${subject}::uuid`;
+      where id = ${subject}::uuid
+      returning id`;
+    if (anchored.length === 0) {
+      // Silent zero-row updates here look like "handle not found" four
+      // steps later — fail at the cause instead.
+      throw new Error(
+        `seedStubUser(${opts.email}): signup trigger created no profile for auth user ${subject}`,
+      );
+    }
 
     if (opts.handle) {
-      await tx`update public.profiles set handle = ${opts.handle} where id = ${subject}::uuid`;
+      const tagged = await tx`
+        update public.profiles set handle = ${opts.handle} where id = ${subject}::uuid
+        returning id`;
+      if (tagged.length === 0) {
+        throw new Error(
+          `seedStubUser(${opts.email}): handle update matched no profile for ${subject}`,
+        );
+      }
     }
 
     if (opts.birth) {
