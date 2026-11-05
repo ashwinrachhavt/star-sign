@@ -74,8 +74,14 @@ test("journey: onboard → today → connect by handle → accept → friend upd
   await a.getByLabel("Birth date").fill("1990-06-15");
   await a.getByLabel("Time", { exact: true }).fill("09:30");
   await a.getByLabel("Time zone at birth").fill("America/New_York");
-  // Geocoded place: coordinates resolve server-side (owner request).
+  // Geocoded place (owner request): type the place, then explicitly pick
+  // a candidate — the picker never silently locks a first hit. The hint
+  // then renders the locked coordinates in parentheses after the name
+  // (hallmark polish, PR #49).
   await a.getByLabel("Birth place").fill("New York");
+  const suggestions = a.getByRole("listbox", { name: "Birth place suggestions" });
+  await suggestions.getByRole("option").first().waitFor({ timeout: 15_000 });
+  await a.getByRole("option", { name: /New York/ }).first().click();
   await a.getByText(/New York.*\d+\.\d+°/).waitFor({ timeout: 15_000 });
   await a.getByRole("button", { name: /continue/i }).click();
 
