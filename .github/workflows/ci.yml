@@ -75,7 +75,7 @@ jobs:
 
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 3.0.0
 
       - name: Start local Supabase
         # CLI 3.x removed `--db-password` from `start`; the default
@@ -90,11 +90,18 @@ jobs:
           done
           supabase start
 
-      # Keys are read from the running stack (CLI 3.x no longer ships the
-      # fixed legacy demo secrets). These are local-stack keys, not
-      # credentials — the stack runs entirely inside this job.
+      # Keys MUST match the running containers: `supabase status` reads
+      # CLI-side state, which diverged from what PostgREST verifies after
+      # retried starts (PGRST301 "JWT cryptographic operation failed" on
+      # the service-role key broke the connect step). The per-start
+      # secrets file is written for the containers themselves — read the
+      # keys from it, failing loudly if the successful start left none.
       - name: Export local Supabase keys
-        run: supabase status -o env | grep -E '^(ANON_KEY|SERVICE_ROLE_KEY)=' >> "$GITHUB_ENV"
+        run: |
+          SECRETS_FILE=$(ls supabase/.temp/start-secrets/*/env/docker.env | head -1)
+          test -f "$SECRETS_FILE"
+          grep -E '^SUPABASE_ANON_KEY=' "$SECRETS_FILE" | sed 's/^SUPABASE_ANON_KEY=/ANON_KEY=/' >> "$GITHUB_ENV"
+          grep -E '^SUPABASE_SERVICE_ROLE_KEY=' "$SECRETS_FILE" | sed 's/^SUPABASE_SERVICE_ROLE_KEY=/SERVICE_ROLE_KEY=/' >> "$GITHUB_ENV"
 
       - name: Install Playwright
         run: pnpm --dir e2e install --no-save && pnpm --dir e2e exec playwright install --with-deps chromium
