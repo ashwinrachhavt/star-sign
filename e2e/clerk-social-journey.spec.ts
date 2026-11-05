@@ -206,13 +206,13 @@ test("journey: onboard → today → connect by handle → accept → friend upd
   const fu2 = await a.request.get("/api/friend-updates");
   expect(((await fu2.json()) as { data: { updates: unknown[] } }).data.updates).toHaveLength(0);
 
-  // Chart: fails closed — the revoked state serves no placements.
+  // Chart: fails closed — the disconnected state serves no placements.
   const chart = await a.request.get(`/api/connections/${connId}/chart`);
   expect(chart.status()).toBe(200);
   const chartBody = (await chart.json()) as {
     data: { state: string; placements?: unknown[] };
   };
-  expect(chartBody.data.state).toBe("revoked");
+  expect(chartBody.data.state).toBe("disconnected");
   expect(chartBody.data.placements).toBeUndefined();
 
   // Cross-user connection ids → 404, never a leak.
