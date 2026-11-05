@@ -607,3 +607,44 @@
   filter: grayscale(1) contrast(1.1);
   mix-blend-mode: normal;
 }
+
+/* ---- PlacePicker (birth-place combobox listbox) ---- */
+
+/* The listbox floats over the form below the input, so it is painted
+   with the page ground (--bg) — the hairline card treatment would let
+   the form's own text bleed through. Same shape rules as every card:
+   1px hairline, no radius, no shadow. Rows take the --hairline ground
+   when keyboard-active, the established signal (ui-friend-row:active). */
+
+.ui-place-listbox {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--hairline);
+  background: var(--bg);
+}
+
+.ui-place-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+  min-height: 44px;
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  border-bottom: 1px solid var(--hairline);
+  transition: background var(--motion-fast) var(--motion-ease);
+}
+
+.ui-place-option:last-child {
+  border-bottom: none;
+}
+
+.ui-place-option[aria-selected="true"] {
+  background: var(--hairline);
+}
+
+.ui-place-option-meta {
+  color: var(--ink-tertiary);
+  white-space: nowrap;
+}
