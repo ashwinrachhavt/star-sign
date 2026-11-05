@@ -111,7 +111,11 @@ test("journey: onboard → today → connect by handle → accept → friend upd
   await a.waitForURL("**/people", { timeout: 15_000 });
   await a.getByPlaceholder(/their handle/i).fill("@maya-orion");
   await a.getByRole("button", { name: /send request/i }).click();
-  await expect(a.getByText(/request sent/i)).toBeVisible({ timeout: 10_000 });
+  // Match the form-status sentence, not the row badge ("REQUEST SENT.
+  // THEY HAVEN'T ANSWERED YET") — both render; strict mode needs one.
+  await expect(a.getByText(/Request sent\. They'll see it/i)).toBeVisible({
+    timeout: 10_000,
+  });
   await expect(a.getByText(/WAITING FOR THEIR YES/i)).toBeVisible();
   await a.screenshot({ path: "artifacts/tc-3-request-sent.png" });
 
@@ -131,7 +135,9 @@ test("journey: onboard → today → connect by handle → accept → friend upd
   await b.waitForURL(`**/connections/${connId}`, { timeout: 15_000 });
   await b.screenshot({ path: "artifacts/tc-4-consent.png" });
   await b.getByRole("button", { name: /accept/i }).click();
-  await expect(b.getByText(/DAILY UPDATES ON/i)).toBeVisible({ timeout: 15_000 });
+  await expect(b.getByText(/sees your daily theme on their people page/i)).toBeVisible({
+    timeout: 15_000,
+  });
   await b.screenshot({ path: "artifacts/tc-4-accepted.png" });
 
   // --- Ari: Maya's personalized friend update ---
@@ -193,6 +199,9 @@ test("journey: onboard → today → connect by handle → accept → friend upd
   await a.screenshot({ path: "artifacts/tc-8-revoked.png" });
 
   // --- Shared access gone immediately ---
+  // Reload: the revoke updated the row in place, but the friend-updates
+  // section refetches on mount — a stale client state must not count.
+  await a.reload();
   await expect(a.getByText("FRIEND UPDATES", { exact: true })).toHaveCount(0);
   const fu2 = await a.request.get("/api/friend-updates");
   expect(((await fu2.json()) as { data: { updates: unknown[] } }).data.updates).toHaveLength(0);
