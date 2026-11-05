@@ -109,9 +109,9 @@ test("journey: onboard → today → connect by handle → accept → friend upd
   // --- Add Maya by exact handle ---
   await a.getByRole("link", { name: "People" }).click();
   await a.waitForURL("**/people", { timeout: 15_000 });
-  await a.getByLabel(/their handle/i).fill("@maya-orion");
+  await a.getByPlaceholder(/their handle/i).fill("@maya-orion");
   await a.getByRole("button", { name: /send request/i }).click();
-  await expect(a.getByText(/Request sent/)).toBeVisible({ timeout: 10_000 });
+  await expect(a.getByText(/request sent/i)).toBeVisible({ timeout: 10_000 });
   await expect(a.getByText(/WAITING FOR THEIR YES/i)).toBeVisible();
   await a.screenshot({ path: "artifacts/tc-3-request-sent.png" });
 
