@@ -651,6 +651,18 @@
 
 /* ---- Responsive adaptation ---- */
 
+/* Grid cells must be allowed to shrink below their content's min-width:
+   fr tracks floor at min-content, so a long sign name ("SAGITTARIUS")
+   would push the chart row past the column edge and vanish under
+   overflow-x: clip. With min-width: 0 the track shrinks and the word
+   wraps inside the cell (Floor 5). At desktop widths this never
+   triggers — the column is 600px and the tracks never pinch. */
+.ui-chart-grid-row > [role="cell"],
+.ui-chart-table-row > * {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
 /* One mobile boundary at 40rem — the container's own max-width (640px).
    Below it the app is a phone: navigation leaves the header strip and
    becomes a fixed bottom bar in thumb reach, primary actions become
@@ -688,8 +700,15 @@
 
   /* Primary actions as full-width thumb rows. Solid buttons are always
      the one primary action of their context (sign in, continue, send
-     request); link buttons stay inline text. */
+     request); link buttons stay inline text. Some CTAs are wrapped in a
+     link (the verify screen) — the anchor takes the row's width too, or
+     a 100% button inside a content-hugging anchor is a no-op. */
   .ui-button-solid {
+    width: 100%;
+  }
+
+  a:has(> .ui-button-solid) {
+    display: block;
     width: 100%;
   }
 }
