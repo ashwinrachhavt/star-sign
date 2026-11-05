@@ -59,7 +59,9 @@ test("journey: onboard → today → connect by handle → accept → friend upd
   });
 
   // --- Ari: stubbed Clerk session → onboarding through the real UI ---
-  const ctxA = await browser.newContext();
+  const ctxA = await browser.newContext({
+    recordVideo: { dir: "test-results/journey-videos" },
+  });
   await ctxA.addCookies([{ ...stubSessionCookie(ari.session), url: "http://localhost:3010" }]);
   const a = await ctxA.newPage();
 
@@ -125,7 +127,9 @@ test("journey: onboard → today → connect by handle → accept → friend upd
   expect(connId).toBeTruthy();
 
   // --- Maya: accept through the real consent surface ---
-  const ctxB = await browser.newContext();
+  const ctxB = await browser.newContext({
+    recordVideo: { dir: "test-results/journey-videos" },
+  });
   await ctxB.addCookies([{ ...stubSessionCookie(maya.session), url: "http://localhost:3010" }]);
   const b = await ctxB.newPage();
 
