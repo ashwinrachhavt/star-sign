@@ -100,11 +100,14 @@ function OnboardingForm() {
   // request, 2026-10-25).
   useEffect(() => {
     const query = placeLabel.trim();
-    if (query.length < 2) {
-      setPlace(null);
-      return;
-    }
+    // All setState happens inside the debounced timer: calling it
+    // synchronously in the effect body triggers cascading renders
+    // (react-hooks setState-in-effect rule).
     const timer = setTimeout(async () => {
+      if (query.length < 2) {
+        setPlace(null);
+        return;
+      }
       setPlaceBusy(true);
       try {
         const res = await fetch("/api/geocode", {

@@ -123,7 +123,7 @@ function houseSentence(house: number): string {
  */
 export function interpretPlacements(
   chart: NatalChart,
-  precision: BirthTimePrecision,
+  _precision: BirthTimePrecision,
 ): PlacementInterpretation[] {
   const cards: PlacementInterpretation[] = [];
 

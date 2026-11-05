@@ -11,8 +11,6 @@ const exactProfile: BirthProfile = {
 };
 
 describe("dive deeper (ASH-249)", () => {
-  const reading = generateDailyReading({ profile: exactProfile, forDate: "2026-10-24" });
-
   it("diveDeeper present iff events exist; absent means no fake content", () => {
     // Sweep the year across multiple charts: the section must exist exactly
     // when selectedEvents is non-empty — never content without provenance.

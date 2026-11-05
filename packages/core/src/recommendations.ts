@@ -37,24 +37,6 @@ export interface Recommendation {
 }
 
 /**
- * Planet → mood mapping for aspect-family matching fallback: friction
- * families read "intense", flowing families read "warm"/"steadying".
- */
-function moodForFamily(family: AspectFamily): Mood {
-  switch (family) {
-    case "square":
-    case "opposition":
-      return "intense";
-    case "conjunction":
-      return "awake";
-    case "trine":
-      return "warm";
-    case "sextile":
-      return "steadying";
-  }
-}
-
-/**
  * Recommends up to `count` items for the day's events. Deterministic:
  * same events → same recs (stable order by dataset position, seeded
  * rotation by day so consecutive days vary within the matching pool).

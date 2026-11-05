@@ -36,6 +36,7 @@ const MIGRATIONS = [
   "0015_daily_updates_grant.sql",
   "0016_connections_grant_flip_updates.sql",
   "0017_reading_version_bump_v2026_11_1.sql",
+  "0018_daily_readings_dive_deeper.sql",
 ];
 
 export async function createHarnessDb(): Promise<TestDb> {

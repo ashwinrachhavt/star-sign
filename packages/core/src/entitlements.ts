@@ -22,11 +22,14 @@ export type Feature =
 
 export type Tier = "free" | "premium";
 
-/** The owner's proposed free/paid line (ASH-265 ticket comment, 2026-10-25). */
+/** The free/paid line. The 2026-10-25 proposal (ASH-265) put dive_deeper
+ * behind the paywall; the MVP spec (art_g6VLL2Bx, W2b "Pro depth, free",
+ * 2026-11-04) supersedes it: no paywall on any of the Pro feel today —
+ * proof lines and the dive layer ship free. Billing provider deferred. */
 export const DEFAULT_FEATURE_TIERS: Record<Feature, Tier> = {
   daily_reading: "free",
   notifications: "free",
-  dive_deeper: "premium",
+  dive_deeper: "free",
   week_ahead_full: "premium",
   compatibility_report: "premium",
 };

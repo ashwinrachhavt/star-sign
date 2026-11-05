@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@clerk/nextjs": "6.39.8",
@@ -21,9 +22,12 @@
     "zod": "^3"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "eslint": "^9.39.2",
+    "eslint-config-next": "15.5.28",
     "typescript": "^5",
     "vitest": "^2.1.3"
   },
