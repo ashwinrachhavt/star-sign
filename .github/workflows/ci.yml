@@ -79,8 +79,16 @@ jobs:
 
       - name: Start local Supabase
         # CLI 3.x removed `--db-password` from `start`; the default
-        # local-stack DB password is already `postgres`.
-        run: supabase start
+        # local-stack DB password is already `postgres`. Retry: shared
+        # runner IPs hit Docker Hub rate limits on fresh image pulls
+        # (toomanyrequests) — a resumed start recovers partial stacks.
+        run: |
+          for i in 1 2 3; do
+            supabase start && exit 0
+            echo "supabase start attempt $i failed; retrying in 30s"
+            sleep 30
+          done
+          supabase start
 
       # Keys are read from the running stack (CLI 3.x no longer ships the
       # fixed legacy demo secrets). These are local-stack keys, not
