@@ -61,6 +61,15 @@ a {
   }
 }
 
+/* Mobile adaptation (≤40rem, ui.css owns the breakpoint comment): the
+   fixed bottom tab bar must never sit over the last card — the column
+   clears it by one bar height plus one section's breathing room. */
+@media (max-width: 40rem) {
+  .container {
+    padding-bottom: calc(var(--space-8) + var(--space-7));
+  }
+}
+
 /* Hairline box: 1px border, no radius, no shadow, no fill */
 .card {
   background: var(--card-bg);
