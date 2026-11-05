@@ -17,6 +17,7 @@ export type Feature =
   | "daily_reading" // always free — guarded here to make the invariant explicit
   | "dive_deeper"
   | "week_ahead_full"
+  | "ai_ask_narrative" // pro: richer (LLM-narrated) Ask answers over the same cited facts
   | "compatibility_report"
   | "notifications";
 
@@ -31,6 +32,7 @@ export const DEFAULT_FEATURE_TIERS: Record<Feature, Tier> = {
   notifications: "free",
   dive_deeper: "free",
   week_ahead_full: "premium",
+  ai_ask_narrative: "premium",
   compatibility_report: "premium",
 };
 
