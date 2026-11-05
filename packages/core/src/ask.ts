@@ -14,8 +14,7 @@
  * port with validated output — the retrieval/refusal/provenance layers
  * stay exactly as they are.
  */
-import type { DailyReading, NatalChart, Planet, ZodiacSign } from "./types";
-import { PLANETS } from "./types";
+import type { DailyReading, NatalChart, Planet } from "./types";
 
 export const ASK_RULESET_VERSION = "ask-2026-10.1";
 export const ASK_MODEL_NAME = "star-sign-templates";
@@ -159,13 +158,11 @@ export function answerQuestion(
     };
   }
 
-  const { facts, planets } = retrieveFacts(ctx, topic);
+  const { facts } = retrieveFacts(ctx, topic);
   const placementOf = (p: Planet) =>
     ctx.chart.placements.find((c) => c.planet === p);
   const signOf = (p: Planet) => cap(placementOf(p)?.sign ?? "unknown");
-  const has = (p: Planet) => planets.includes(p);
 
-  const lines: string[] = [];
   const sunLine = `your ${signOf("sun")} sun keeps the center of gravity where you put it`;
   const venusMoonLine = `your ${signOf("venus")} Venus and ${signOf("moon")} moon describe what you warm to and what you need`;
   const marsSaturnLine = `your ${signOf("mars")} Mars sets the pace, your ${signOf("saturn")} Saturn sets the standard`;

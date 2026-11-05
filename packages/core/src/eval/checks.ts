@@ -20,14 +20,6 @@ const PLANET_WORDS: Record<string, string> = {
   neptune: "Neptune", pluto: "Pluto",
 };
 
-const ASPECT_PATTERNS: Array<{ type: string; re: RegExp }> = [
-  { type: "conjunction", re: /\bmeets your natal\b/i },
-  { type: "opposition", re: /\bpulls against your natal\b/i },
-  { type: "square", re: /\brubs your natal \w+ the wrong way\b/i },
-  { type: "trine", re: /\bflows with your natal\b/i },
-  { type: "sextile", re: /\bopens a small door with your natal\b/i },
-];
-
 /** Deterministic word count (shared definition with reading.ts). */
 export function wordCount(s: string): number {
   return s.trim().split(/\s+/).filter(Boolean).length;

@@ -11,7 +11,6 @@ import type {
   BirthProfile,
   DailyReading,
   DiveDeeper,
-  LifeArea,
   NatalChart,
   ReadingProvenance,
   ReadingProvenanceInput,
