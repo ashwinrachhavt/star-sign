@@ -105,11 +105,18 @@ db tests. The Clerk path activates only when both env keys are present.
 
 ## Local development with Clerk keys
 
-Two things must be true or the app silently falls back / loop-redirects:
+Three things must be true or the app silently falls back / loop-redirects:
 
 1. `apps/web/.env.local` has both `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and
    `CLERK_SECRET_KEY`. `login/page.tsx` and `middleware.ts` key off them.
-2. `supabase/config.toml` enables Clerk as a third-party issuer, so the
+2. `apps/web/.env.local` gives provisioning a database URL, as either
+   `SUPABASE_DB_URL` or `SUPABASE_DB_PASSWORD`. The first Clerk sign-in
+   must anchor an `auth.users` row through `lib/auth/sql-admin.ts`, which
+   needs a direct Postgres connection; without one `resolveActor` returns
+   null, so every protected page bounces to `/login` while `/login`
+   bounces back for a signed-in user — an `ERR_TOO_MANY_REDIRECTS` loop.
+   Locally: `SUPABASE_DB_URL=postgres://postgres:postgres@localhost:54322/postgres`.
+3. `supabase/config.toml` enables Clerk as a third-party issuer, so the
    local PostgREST accepts Clerk JWTs (RLS v3 resolves the subject):
 
    ```toml
