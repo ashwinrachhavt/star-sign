@@ -37,8 +37,8 @@ export default function ClerkLoginForm() {
   const [verifyingFlow, setVerifyingFlow] = useState<AuthFlow | null>(null);
   const [code, setCode] = useState("");
   const router = useRouter();
-  const { isLoaded: signInLoaded, signIn } = useSignIn();
-  const { isLoaded: signUpLoaded, signUp } = useSignUp();
+  const { isLoaded: signInLoaded, signIn, setActive: setActiveSignIn } = useSignIn();
+  const { isLoaded: signUpLoaded, signUp, setActive: setActiveSignUp } = useSignUp();
 
   const clerkReady = signInLoaded && signUpLoaded && !!signIn && !!signUp;
 
@@ -57,6 +57,9 @@ export default function ClerkLoginForm() {
         const attempt = await signIn.create({ identifier: email, password });
         const plan = planAuthStep("signin", attempt.status ?? "unknown");
         if (plan.kind === "complete") {
+          // A complete status is not an active session: activate it or the
+          // server sees an anonymous request and bounces to /login.
+          await setActiveSignIn({ session: attempt.createdSessionId });
           finish(plan.redirectTo);
           return;
         }
@@ -83,6 +86,7 @@ export default function ClerkLoginForm() {
       if (plan.kind === "complete") {
         // No verification required (e.g. the "Verify at sign-up" toggle is
         // off) — complete immediately.
+        await setActiveSignUp({ session: attempt.createdSessionId });
         finish(plan.redirectTo);
         return;
       }
@@ -110,6 +114,14 @@ export default function ClerkLoginForm() {
           ? await signUp.attemptVerification({ strategy: "email_code", code })
           : await signIn.attemptFirstFactor({ strategy: "email_code", code });
       if (attempt.status === "complete") {
+        // Verified, but a complete status is not an active session; activate
+        // before leaving or the server bounces the next request to /login.
+        const activation = { session: attempt.createdSessionId };
+        if (verifyingFlow === "signup") {
+          await setActiveSignUp(activation);
+        } else {
+          await setActiveSignIn(activation);
+        }
         finish(AUTH_REDIRECT[verifyingFlow]);
         return;
       }
@@ -140,6 +152,27 @@ export default function ClerkLoginForm() {
       }
     } catch (err) {
       setError(describeAuthError(err, "OAuth failed."));
+    }
+  }
+
+  async function verifyCode(e: React.FormEvent) {
+    e.preventDefault();
+    if (!signUp) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const attempt = await signUp.attemptEmailAddressVerification({ code });
+      if (attempt.status === "complete") {
+        await setActiveSignUp({ session: attempt.createdSessionId });
+        router.push("/onboarding");
+        router.refresh();
+        return;
+      }
+      setError("That code didn't finish creating the account. Check the email and try again.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Verification failed.");
+    } finally {
+      setBusy(false);
     }
   }
 

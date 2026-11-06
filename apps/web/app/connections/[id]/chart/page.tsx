@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { resolveActor } from "@/lib/auth/bridge";
 import { notFound, redirect } from "next/navigation";
 import { ScreenHeader } from "@/components/ui";
 import { bodyGlyph } from "@/components/ui/glyphs";
@@ -23,9 +23,9 @@ export default async function PartnerChartPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = await createClient();
-  const { data: userData } = await supabase.auth.getUser();
-  if (!userData.user) redirect("/login");
+  const actor = await resolveActor();
+  if (!actor) redirect("/login");
+  const { userId, supabase } = actor;
 
   // Server-side projection via the same visibility module the API route
   // uses — one implementation, two surfaces (route = client API, page =
@@ -39,13 +39,13 @@ export default async function PartnerChartPage({
       .maybeSingle();
     if (
       !connection ||
-      (connection.requester_id !== userData.user.id &&
-        connection.addressee_id !== userData.user.id)
+      (connection.requester_id !== userId &&
+        connection.addressee_id !== userId)
     ) {
       notFound();
     }
     const partnerId =
-      connection.requester_id === userData.user.id
+      connection.requester_id === userId
         ? connection.addressee_id
         : connection.requester_id;
     const { data: partnerProfile } = await supabase

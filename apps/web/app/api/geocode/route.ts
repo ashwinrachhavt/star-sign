@@ -20,6 +20,7 @@
 import { jsonError, jsonOk, parseBody, rateLimit, rateLimitResponse, RATE_LIMITS, requestId, requireActor } from "../_lib/api";
 import { z } from "zod";
 import { adminClient } from "@/lib/auth/admin";
+import { candidateQueries } from "@/lib/geocode";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { geocodeFailureMessage, type PlaceCandidate } from "@/lib/places";
 
@@ -128,31 +129,40 @@ export async function POST(req: Request) {
     }
   }
 
-  // Provider lookup.
-  const url = new URL("https://geocoding-api.open-meteo.com/v1/search");
-  url.searchParams.set("name", parsed.data.query);
-  url.searchParams.set("count", String(CANDIDATE_COUNT));
-  url.searchParams.set("language", "en");
-  url.searchParams.set("format", "json");
+  // Provider lookup. Open-Meteo matches names literally and needs the FULL
+  // country name ("USA" and "UK" match nothing), so try the user's text
+  // first, then the expanded and shortened candidates. The first candidate
+  // that yields places wins; it keeps main's multi-candidate response (the
+  // client shows a listbox, never a silent first hit).
+  let results: OpenMeteoResult[] = [];
+  let providerDown = false;
+  for (const candidate of candidateQueries(parsed.data.query)) {
+    const url = new URL("https://geocoding-api.open-meteo.com/v1/search");
+    url.searchParams.set("name", candidate);
+    url.searchParams.set("count", String(CANDIDATE_COUNT));
+    url.searchParams.set("language", "en");
+    url.searchParams.set("format", "json");
 
-  let results: OpenMeteoResult[];
-  try {
-    const res = await fetch(url.toString(), { signal: AbortSignal.timeout(5000) });
-    if (!res.ok) {
-      // The provider answered with an error status — reachable but
-      // unhappy (their rate limiting, their 5xx). Distinct from a
-      // no-match: the query may be fine, the service isn't.
-      return jsonError(
-        502,
-        "upstream_unavailable",
-        geocodeFailureMessage("upstream_unavailable"),
-        reqId,
-      );
+    try {
+      const res = await fetch(url.toString(), { signal: AbortSignal.timeout(5000) });
+      if (!res.ok) {
+        // Reachable but unhappy (their rate limiting, their 5xx). Another
+        // candidate query would hit the same failure, so report it as a
+        // provider outage rather than a no-match.
+        providerDown = true;
+        break;
+      }
+      const body = (await res.json()) as { results?: OpenMeteoResult[] };
+      results = body.results ?? [];
+      if (results.length > 0) break;
+    } catch {
+      // Timeout or network failure — provider down, not a bad query.
+      providerDown = true;
+      break;
     }
-    const body = (await res.json()) as { results?: OpenMeteoResult[] };
-    results = body.results ?? [];
-  } catch {
-    // Timeout or network failure — provider down, not a bad query.
+  }
+
+  if (providerDown) {
     return jsonError(
       502,
       "upstream_unavailable",

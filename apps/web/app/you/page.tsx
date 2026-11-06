@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { resolveActor } from "@/lib/auth/bridge";
 import { redirect } from "next/navigation";
 import {
   computeNatalChart,
@@ -23,10 +23,9 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
  * house context — all from the computed chart, never invented.
  */
 export default async function YouChartPage() {
-  const supabase = await createClient();
-  const { data: userData } = await supabase.auth.getUser();
-  if (!userData.user) redirect("/login");
-  const userId = userData.user.id;
+  const actor = await resolveActor();
+  if (!actor) redirect("/login");
+  const { userId, supabase } = actor;
 
   const { data: profileRow } = await supabase
     .from("birth_profiles")

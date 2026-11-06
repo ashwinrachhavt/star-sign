@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { resolveActor } from "@/lib/auth/bridge";
 import { redirect } from "next/navigation";
 import { ScreenHeader } from "@/components/ui";
 import { SettingsSection } from "./settings-section";
@@ -12,10 +12,9 @@ export const dynamic = "force-dynamic";
  * endpoints, no duplicated policy.
  */
 export default async function YouSettingsPage() {
-  const supabase = await createClient();
-  const { data: userData } = await supabase.auth.getUser();
-  if (!userData.user) redirect("/login");
-  const userId = userData.user.id;
+  const actor = await resolveActor();
+  if (!actor) redirect("/login");
+  const { userId, supabase } = actor;
 
   const [{ data: profileRow }, { data: prefs }, { data: profileMeta }] = await Promise.all([
     supabase

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { resolveActor } from "@/lib/auth/bridge";
 import { redirect } from "next/navigation";
 import AddPersonForm from "./add-person-form";
 import PersonCard from "./person-card";
@@ -8,11 +8,10 @@ import { ScreenHeader } from "@/components/ui";
 import { fontMono } from "@/app/fonts";
 
 export default async function PeoplePage() {
-  const supabase = await createClient();
-  const { data: userData } = await supabase.auth.getUser();
-  if (!userData.user) redirect("/login");
+  const actor = await resolveActor();
+  if (!actor) redirect("/login");
 
-  const userId = userData.user.id;
+  const { userId, supabase } = actor;
 
   const { data: people } = await supabase
     .from("people")

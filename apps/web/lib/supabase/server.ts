@@ -27,11 +27,23 @@ export async function createClient() {
     // (native third-party integration) so RLS v3 policies resolve the
     // actor via profiles.clerk_subject — no JWT template. Not configured:
     // keep the Supabase-session fallback exactly as before RLS v3.
+    //
+    // NOTE: this must not use the `accessToken` option. @supabase/ssr
+    // (0.12.7, latest) unconditionally calls
+    // `client.auth.onAuthStateChange`, which supabase-js throws on when
+    // `accessToken` is set ("...accessing supabase.auth.onAuthStateChange
+    // is not possible"). Injecting the token per request via a fetch
+    // wrapper achieves the same RLS result without that conflict.
     ...(clerkConfigured()
       ? {
-          accessToken: async () => {
-            const { getToken } = await auth();
-            return (await getToken()) ?? null;
+          global: {
+            fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
+              const { getToken } = await auth();
+              const token = await getToken();
+              const headers = new Headers(init?.headers);
+              headers.set("Authorization", `Bearer ${token ?? key}`);
+              return fetch(input, { ...init, headers });
+            },
           },
         }
       : {}),

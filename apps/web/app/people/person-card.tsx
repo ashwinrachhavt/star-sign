@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { resolveActor } from "@/lib/auth/bridge";
 import {
   computeNatalChart,
   generateCompatibilityReport,
@@ -26,13 +26,14 @@ interface Person {
 }
 
 export default async function PersonCard({ person }: { person: Person }) {
-  const supabase = await createClient();
-  const { data: userData } = await supabase.auth.getUser();
+  const actor = await resolveActor();
+  if (!actor) return null;
+  const { userId, supabase } = actor;
 
   const { data: myProfile } = await supabase
     .from("birth_profiles")
     .select("*")
-    .eq("user_id", userData.user!.id)
+    .eq("user_id", userId)
     .single();
 
   const hasBothCharts =

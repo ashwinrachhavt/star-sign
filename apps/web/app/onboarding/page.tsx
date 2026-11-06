@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+
 import { Button, Input } from "@/components/ui";
 import { PlacePicker } from "@/components/PlacePicker";
 import {
@@ -61,19 +61,29 @@ function OnboardingForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isEdit = searchParams.get("edit") === "1";
-  const supabase = createClient();
 
   // Edit mode (ASH-248 criterion 4): pre-fill from the stored profile.
+  // Server route resolves the actor (Clerk or Supabase session), so this
+  // page needs no auth client of its own.
   useEffect(() => {
     if (!isEdit) return;
     (async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) return;
-      const { data: row } = await supabase
-        .from("birth_profiles")
-        .select("*")
-        .eq("user_id", userData.user.id)
-        .maybeSingle();
+      const res = await fetch("/api/me/birth-profile");
+      if (!res.ok) return;
+      const body = await res.json().catch(() => null);
+      const row = body?.data as
+        | {
+            birth_date?: string | null;
+            birth_time?: string | null;
+            birth_time_precision?: string | null;
+            birth_time_zone?: string | null;
+            iana_timezone?: string | null;
+            birth_place_label?: string | null;
+            birth_lat?: number | null;
+            birth_lon?: number | null;
+          }
+        | null
+        | undefined;
       if (!row) return;
       setBirthDate(row.birth_date ?? "");
       setTimeKnown(
@@ -96,7 +106,7 @@ function OnboardingForm() {
         });
       }
     })();
-  }, [isEdit, supabase]);
+  }, [isEdit]);
 
   const precisionChip =
     timeKnown === "yes" ? "Exact" : timeKnown === "approx" ? "Approximate" : "Unknown";
@@ -126,6 +136,13 @@ function OnboardingForm() {
           body: JSON.stringify({ query }),
           signal: controller.signal,
         });
+        if (res.status === 401) {
+          // Signed out or the request carried no session. Without this the
+          // field reports a geocode error for a perfectly valid city and
+          // the user is stuck with no way to recover.
+          router.replace("/login");
+          return;
+        }
         if (res.ok) {
           const body = await res.json();
           setCandidates(dedupeCandidates(body.data.candidates));
@@ -146,19 +163,21 @@ function OnboardingForm() {
         }
       } catch (e) {
         // A newer query aborted this one (cleanup owns the UI now) — not
-        // an error to swallow, a cancellation to honor.
+        // an error to swallow, a cancellation to honor. Swallowed inside
+        // the timer: an uncaught rejection here is unhandled, not styled.
         if (e instanceof DOMException && e.name === "AbortError") return;
         setCandidates([]);
         setPlaceError(geocodeFailureMessage("network", query));
       } finally {
-        setPlaceBusy(false);
+        // A superseded request must not clear the new query's spinner.
+        if (!controller.signal.aborted) setPlaceBusy(false);
       }
     }, 400);
     return () => {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [placeLabel, place]);
+  }, [placeLabel, place, router]);
 
   // Typing releases the lock: the coordinates persist only while the
   // picked candidate's title is what's in the box.
@@ -183,10 +202,7 @@ function OnboardingForm() {
 
   // Onboarding tracking (owner request): record who is onboarding and
   // everything entered, updated as the flow progresses.
-  async function trackOnboarding(
-    userData: { id: string; email?: string },
-    completed: boolean,
-  ) {
+  async function trackOnboarding(completed: boolean) {
     try {
       await fetch("/api/onboarding", {
         method: "POST",
@@ -213,43 +229,49 @@ function OnboardingForm() {
     setBusy(true);
     setError(null);
 
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) {
-      router.push("/login");
-      return;
-    }
-
     if (!place) {
       setBusy(false);
-      setError("Pick a birth place from the list. We resolve the coordinates for you.");
+      setError("Wait for your birth place to resolve, then continue.");
       return;
     }
 
     const precision =
       timeKnown === "yes" ? "exact" : timeKnown === "approx" ? "approximate" : "unknown";
 
-    const { error: upsertErr } = await supabase
-      .from("birth_profiles")
-      .upsert({
-        user_id: userData.user.id,
-        birth_date: birthDate,
-        birth_time: precision === "unknown" ? null : birthTime || null,
-        birth_time_precision: precision,
-        birth_time_zone: timeZone,
-        iana_timezone: timeZone,
-        birth_lat: place.lat,
-        birth_lon: place.lon,
-        birth_place_label: placeLabel || null,
-      });
+    // Save through the server route so the actor is resolved by the auth
+    // bridge (Clerk or Supabase session) — the browser Supabase client
+    // carries no Clerk token.
+    const res = await fetch("/api/me/birth-profile", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        birthDate,
+        birthTime: precision === "unknown" ? null : birthTime || null,
+        birthTimePrecision: precision,
+        birthTimeZone: timeZone,
+        ianaTimeZone: timeZone,
+        birthPlace: {
+          lat: place.lat,
+          lon: place.lon,
+          label: placeLabel || null,
+        },
+      }),
+    });
 
-    if (upsertErr) {
+    if (res.status === 401) {
       setBusy(false);
-      setError(upsertErr.message);
+      router.push("/login");
+      return;
+    }
+
+    if (!res.ok) {
+      setBusy(false);
+      setError("Could not save your birth details. Try again.");
       return;
     }
 
     // Completed onboarding record.
-    await trackOnboarding({ id: userData.user.id, email: userData.user.email }, true);
+    await trackOnboarding(true);
 
     setBusy(false);
     // First-run goes through chart verification (ASH-248); edits return

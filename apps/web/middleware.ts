@@ -11,8 +11,11 @@ import { updateSession } from "@/lib/supabase/middleware";
  * Supabase session-refresh + route-protection logic is preserved
  * verbatim inside the handler.
  */
-export default clerkMiddleware(async (_auth, request) => {
-  return await updateSession(request);
+export default clerkMiddleware(async (auth, request) => {
+  // Pass the verified state through so `updateSession` does not re-read
+  // the session (and cannot disagree with what clerkMiddleware resolved).
+  const { userId } = await auth();
+  return updateSession(request, { clerkAuthed: Boolean(userId) });
 });
 
 export const config = {
