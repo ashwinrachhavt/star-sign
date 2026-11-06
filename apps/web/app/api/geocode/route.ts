@@ -12,6 +12,7 @@
 import { jsonError, jsonOk, parseBody, rateLimit, rateLimitResponse, RATE_LIMITS, requestId, requireActor } from "../_lib/api";
 import { z } from "zod";
 import { adminClient } from "@/lib/auth/admin";
+import { candidateQueries } from "@/lib/geocode";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 const geocodeSchema = z.object({
@@ -72,22 +73,30 @@ export async function POST(req: Request) {
     }
   }
 
-  // Provider lookup.
-  const url = new URL("https://geocoding-api.open-meteo.com/v1/search");
-  url.searchParams.set("name", parsed.data.query);
-  url.searchParams.set("count", "1");
-  url.searchParams.set("language", "en");
-  url.searchParams.set("format", "json");
-
+  // Provider lookup. Open-Meteo needs the full country name ("USA" and
+  // "UK" match nothing), so try the user's text first, then the expanded
+  // and shortened candidates.
   let result: OpenMeteoResult | undefined;
-  try {
-    const res = await fetch(url.toString(), { signal: AbortSignal.timeout(5000) });
-    if (res.ok) {
+  for (const candidate of candidateQueries(parsed.data.query)) {
+    const url = new URL("https://geocoding-api.open-meteo.com/v1/search");
+    url.searchParams.set("name", candidate);
+    url.searchParams.set("count", "1");
+    url.searchParams.set("language", "en");
+    url.searchParams.set("format", "json");
+
+    try {
+      const res = await fetch(url.toString(), {
+        signal: AbortSignal.timeout(5000),
+      });
+      if (!res.ok) continue;
       const body = (await res.json()) as { results?: OpenMeteoResult[] };
       result = body.results?.[0];
+      if (result) break;
+    } catch {
+      // Network problem or timeout: further candidates would repeat the
+      // same failure, so stop and report not-found.
+      break;
     }
-  } catch {
-    // fall through to the not-found path below
   }
 
   if (!result) {

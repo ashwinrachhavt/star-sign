@@ -102,3 +102,31 @@ via `resolveActor` provisioning — matched by email if you pre-import.
 
 Everything works as before ASH-231: Supabase password auth, local e2e,
 db tests. The Clerk path activates only when both env keys are present.
+
+## Local development with Clerk keys
+
+Two things must be true or the app silently falls back / loop-redirects:
+
+1. `apps/web/.env.local` has both `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and
+   `CLERK_SECRET_KEY`. `login/page.tsx` and `middleware.ts` key off them.
+2. `supabase/config.toml` enables Clerk as a third-party issuer, so the
+   local PostgREST accepts Clerk JWTs (RLS v3 resolves the subject):
+
+   ```toml
+   [auth.third_party.clerk]
+   enabled = true
+   domain = "<instance>.clerk.accounts.dev"
+   ```
+
+   The domain is the part of the publishable key: base64-decode the text
+   after `pk_test_` and drop the trailing `$`. After changing it, run
+   `supabase stop && supabase start` (config is applied at container
+   start; `supabase status` keeps working either way).
+
+Restart `next dev` after adding env keys — `NEXT_PUBLIC_*` values are
+inlined at start, so hot reload will not pick them up.
+
+`middleware.ts` wraps `clerkMiddleware()` only when Clerk is configured;
+the Supabase session path stays untouched for local/CI runs. Server pages
+resolve the actor through `lib/auth/bridge.ts` (`resolveActor`) rather
+than `supabase.auth.getUser()`, which returns null for Clerk sessions.

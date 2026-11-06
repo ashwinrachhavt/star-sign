@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { resolveActor } from "@/lib/auth/bridge";
 import { redirect } from "next/navigation";
 import { computeNatalChart, ephemerisInfoOf } from "@star-sign/core";
 import type { BirthProfile } from "@star-sign/core";
@@ -33,9 +33,9 @@ export default async function VerifyPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const supabase = await createClient();
-  const { data: userData } = await supabase.auth.getUser();
-  if (!userData.user) redirect("/login");
+  const actor = await resolveActor();
+  if (!actor) redirect("/login");
+  const { userId, supabase } = actor;
 
   const params = await searchParams;
   const alreadyVerified = params.verified === "1";
@@ -43,7 +43,7 @@ export default async function VerifyPage({
   const { data: profileRow } = await supabase
     .from("birth_profiles")
     .select("*")
-    .eq("user_id", userData.user.id)
+    .eq("user_id", userId)
     .maybeSingle();
   if (!profileRow) redirect("/onboarding");
 

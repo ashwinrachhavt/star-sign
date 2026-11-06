@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { resolveActor } from "@/lib/auth/bridge";
 import { notFound, redirect } from "next/navigation";
 import ConsentActions from "./consent-actions";
 import { ScreenHeader } from "@/components/ui";
@@ -15,10 +15,9 @@ export default async function ConnectionConsentPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = await createClient();
-  const { data: userData } = await supabase.auth.getUser();
-  if (!userData.user) redirect("/login");
-  const userId = userData.user.id;
+  const actor = await resolveActor();
+  if (!actor) redirect("/login");
+  const { userId, supabase } = actor;
 
   const { data: connection } = await supabase
     .from("connections")

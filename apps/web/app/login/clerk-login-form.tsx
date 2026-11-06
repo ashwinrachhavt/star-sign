@@ -17,9 +17,15 @@ export default function ClerkLoginForm() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Email-code step: this Clerk instance verifies addresses at sign-up
+  // (user_settings.attributes.email_address.verify_at_sign_up), so
+  // signUp.create returns "missing_requirements" until the code is
+  // entered. Without this step sign-up dead-ends here.
+  const [code, setCode] = useState("");
+  const [verifying, setVerifying] = useState(false);
   const router = useRouter();
-  const { isLoaded: signInLoaded, signIn } = useSignIn();
-  const { isLoaded: signUpLoaded, signUp } = useSignUp();
+  const { isLoaded: signInLoaded, signIn, setActive: setActiveSignIn } = useSignIn();
+  const { isLoaded: signUpLoaded, signUp, setActive: setActiveSignUp } = useSignUp();
 
   const clerkReady = signInLoaded && signUpLoaded && !!signIn && !!signUp;
 
@@ -32,17 +38,27 @@ export default function ClerkLoginForm() {
       if (mode === "signin") {
         const attempt = await signIn.create({ identifier: email, password });
         if (attempt.status === "complete") {
+          // A complete status is not an active session: activate it or
+          // the server sees an anonymous request and bounces to /login.
+          await setActiveSignIn({ session: attempt.createdSessionId });
           router.push("/day");
           router.refresh();
           return;
         }
-        setError("Sign-in needs another step; check your email.");
+        setError("This account needs another sign-in step. Try again or use a different method.");
         return;
       }
       const attempt = await signUp.create({ emailAddress: email, password });
       if (attempt.status === "complete") {
+        await setActiveSignUp({ session: attempt.createdSessionId });
         router.push("/onboarding");
         router.refresh();
+        return;
+      }
+      if (attempt.status === "missing_requirements") {
+        await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+        setVerifying(true);
+        setError(null);
         return;
       }
       setError("Check your email to finish creating your account.");
@@ -75,6 +91,27 @@ export default function ClerkLoginForm() {
     }
   }
 
+  async function verifyCode(e: React.FormEvent) {
+    e.preventDefault();
+    if (!signUp) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const attempt = await signUp.attemptEmailAddressVerification({ code });
+      if (attempt.status === "complete") {
+        await setActiveSignUp({ session: attempt.createdSessionId });
+        router.push("/onboarding");
+        router.refresh();
+        return;
+      }
+      setError("That code didn't finish creating the account. Check the email and try again.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Verification failed.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <main className="container">
       <Brand />
@@ -88,6 +125,42 @@ export default function ClerkLoginForm() {
           </Button>
         </div>
 
+        {verifying ? (
+          <form onSubmit={verifyCode}>
+            <p
+              className="type-prose t-15"
+              style={{ color: "var(--ink-secondary)", margin: "var(--space-5) 0" }}
+            >
+              We emailed a verification code to {email}. Enter it to finish creating
+              your account.
+            </p>
+            <Input
+              id="code"
+              label="Verification code"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              required
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+            />
+            {error && <p className="form-error type-prose t-15">{error}</p>}
+            <div style={{ marginTop: "var(--space-5)", display: "flex", gap: "var(--space-4)" }}>
+              <Button type="submit" variant="solid" disabled={busy}>
+                {busy ? "…" : "Verify"}
+              </Button>
+              <Button
+                variant="link"
+                onClick={() => {
+                  setVerifying(false);
+                  setCode("");
+                  setError(null);
+                }}
+              >
+                Use a different email
+              </Button>
+            </div>
+          </form>
+        ) : (
         <form onSubmit={submit}>
           <div
             style={{
@@ -124,8 +197,17 @@ export default function ClerkLoginForm() {
             </Button>
           </div>
         </form>
+        )}
       </div>
-      <ModeToggle mode={mode} onToggle={() => setMode(mode === "signin" ? "signup" : "signin")} />
+      <ModeToggle
+        mode={mode}
+        onToggle={() => {
+          setMode(mode === "signin" ? "signup" : "signin");
+          setVerifying(false);
+          setCode("");
+          setError(null);
+        }}
+      />
     </main>
   );
 }

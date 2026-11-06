@@ -8,7 +8,10 @@ import { NextResponse, type NextRequest } from "next/server";
  * applies (local stack / CI — no lockout). Supabase session refresh on
  * the fallback path is preserved.
  */
-export async function updateSession(request: NextRequest) {
+export async function updateSession(
+  request: NextRequest,
+  options: { clerkAuthed?: boolean } = {},
+) {
   let response = NextResponse.next({ request });
 
   const clerkOn = Boolean(
@@ -18,11 +21,17 @@ export async function updateSession(request: NextRequest) {
   let authed = false;
 
   if (clerkOn) {
-    try {
-      const state = await auth();
-      authed = Boolean(state.userId);
-    } catch {
-      authed = false;
+    // When called from clerkMiddleware the verified state is passed in;
+    // the fallback keeps direct calls (tests) working.
+    if (options.clerkAuthed !== undefined) {
+      authed = options.clerkAuthed;
+    } else {
+      try {
+        const state = await auth();
+        authed = Boolean(state.userId);
+      } catch {
+        authed = false;
+      }
     }
   } else {
     const supabase = createServerClient(

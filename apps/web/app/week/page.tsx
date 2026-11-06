@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { resolveActor } from "@/lib/auth/bridge";
 import { computeWeekAhead } from "@star-sign/core";
 import { redirect } from "next/navigation";
 import { ScreenHeader, TransitEventCard } from "@/components/ui";
@@ -47,11 +47,10 @@ function eventProse(e: WeekEvent): string {
 }
 
 export default async function WeekPage() {
-  const supabase = await createClient();
-  const { data: userData } = await supabase.auth.getUser();
-  if (!userData.user) redirect("/login");
+  const actor = await resolveActor();
+  if (!actor) redirect("/login");
 
-  const userId = userData.user.id;
+  const { userId, supabase } = actor;
 
   const { data: profileRow } = await supabase
     .from("birth_profiles")

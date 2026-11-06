@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { resolveActor } from "@/lib/auth/bridge";
 import { redirect } from "next/navigation";
 import { ScreenHeader, PlacementCard, CelestialMark } from "@/components/ui";
 import { fontMono } from "@/app/fonts";
@@ -11,10 +11,9 @@ export const dynamic = "force-dynamic";
  * definition: both tables are RLS-scoped to the actor.
  */
 export default async function YouSavedPage() {
-  const supabase = await createClient();
-  const { data: userData } = await supabase.auth.getUser();
-  if (!userData.user) redirect("/login");
-  const userId = userData.user.id;
+  const actor = await resolveActor();
+  if (!actor) redirect("/login");
+  const { userId, supabase } = actor;
 
   const [{ data: readings }, { data: reflections }] = await Promise.all([
     supabase

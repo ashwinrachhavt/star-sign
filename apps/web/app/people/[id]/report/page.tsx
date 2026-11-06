@@ -3,7 +3,7 @@ import {
   generateCompatibilityReport,
   type BirthProfile,
 } from "@star-sign/core";
-import { createClient } from "@/lib/supabase/server";
+import { resolveActor } from "@/lib/auth/bridge";
 import { notFound, redirect } from "next/navigation";
 import {
   Button,
@@ -72,9 +72,9 @@ export default async function ReportPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const supabase = await createClient();
-  const { data: userData } = await supabase.auth.getUser();
-  if (!userData.user) redirect("/login");
+  const actor = await resolveActor();
+  if (!actor) redirect("/login");
+  const { userId, supabase } = actor;
 
   const { id } = await params;
 
@@ -84,7 +84,7 @@ export default async function ReportPage({
     .from("people")
     .select("*")
     .eq("id", id)
-    .eq("owner_id", userData.user.id)
+    .eq("owner_id", userId)
     .maybeSingle();
 
   if (!person) notFound();
@@ -114,7 +114,7 @@ export default async function ReportPage({
   const { data: myProfile } = await supabase
     .from("birth_profiles")
     .select("*")
-    .eq("user_id", userData.user.id)
+    .eq("user_id", userId)
     .single();
 
   if (!myProfile) redirect("/onboarding");
@@ -126,7 +126,7 @@ export default async function ReportPage({
   const theirChart = computeNatalChart(theirChartInput);
 
   const report = generateCompatibilityReport({
-    a: { userId: userData.user.id, displayName: "You", profile: myChartInput },
+    a: { userId, displayName: "You", profile: myChartInput },
     b: { userId: p.id, displayName: p.display_name, profile: theirChartInput },
   });
 
