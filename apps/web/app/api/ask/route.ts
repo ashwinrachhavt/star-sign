@@ -2,9 +2,25 @@
  * POST /api/ask — bounded Q&A over the caller's stored chart + today's
  * reading (ASH-266 / 7.4). Answers cite their facts; refusals for
  * out-of-bounds asks; nothing computed, only retrieved.
+ *
+ * Pro tier (launch wave 1): a non-refused answer is additionally
+ * narrated by the grounded narrative layer (ai_ask_narrative) — the
+ * deterministic cited answer always ships first; the narrative enriches
+ * it and may be null (refusal path, provider down, rate limit). Same
+ * facts, narrator restates, nobody invents.
  */
-import { answerQuestion, computeNatalChart } from "@star-sign/core";
+import { createHash } from "node:crypto";
+import {
+  allows,
+  answerQuestion,
+  buildAskNarrativeFacts,
+  computeNatalChart,
+  defaultEntitlements,
+} from "@star-sign/core";
 import { rowToBirthProfile } from "@/lib/readings";
+import { getOrGenerateNarrative } from "@/server/narratives/narrate";
+import { supabaseNarrativeStore } from "@/server/narratives/store";
+import { MercuryNarrativeAdapter } from "@/server/narratives/mercury";
 import {
   jsonError,
   jsonOk,
@@ -82,5 +98,37 @@ export async function POST(req: Request) {
     displayName: profileMeta?.display_name ?? "friend",
   });
 
-  return jsonOk(answer, reqId);
+  // Pro tier: enrich the deterministic answer with the grounded
+  // narrative. A refused ask is final — the deterministic refusal IS the
+  // answer, and the narrator never gets a turn on it.
+  let narrative: string | null = null;
+  if (!answer.refused && allows(defaultEntitlements(), "ai_ask_narrative")) {
+    const selectedEvents =
+      (readingRow?.provenance as { selectedEvents?: unknown[] } | null)
+        ?.selectedEvents ?? [];
+    const askFacts = buildAskNarrativeFacts({
+      question: parsed.data.question,
+      answer,
+      selectedEvents,
+    });
+    if (askFacts) {
+      const outcome = await getOrGenerateNarrative({
+        store: supabaseNarrativeStore(actor.supabase),
+        adapter: new MercuryNarrativeAdapter(),
+        userId: actor.userId,
+        scope: "ask",
+        forDate,
+        variant: createHash("sha256")
+          .update(parsed.data.question)
+          .digest("hex")
+          .slice(0, 32),
+        facts: askFacts,
+        admitGeneration: () =>
+          rateLimit(`narrative:${actor.userId}`, RATE_LIMITS.generate).allowed,
+      });
+      narrative = outcome.narrative;
+    }
+  }
+
+  return jsonOk({ ...answer, narrative }, reqId);
 }

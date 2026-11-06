@@ -1,7 +1,7 @@
 import { resolveActor } from "@/lib/auth/bridge";
 import { computeWeekAhead } from "@star-sign/core";
 import { redirect } from "next/navigation";
-import { ScreenHeader, TransitEventCard } from "@/components/ui";
+import { NarrativeCard, ScreenHeader, TransitEventCard } from "@/components/ui";
 import { bodyGlyph, dateRangeLabel } from "@/components/ui/glyphs";
 import { fontMono } from "@/app/fonts";
 
@@ -89,6 +89,11 @@ export default async function WeekPage() {
         ]}
         activeTab="week"
       />
+
+      {/* Launch wave 1 (pro): the week-ahead narrative — same engine
+          facts as the cards below, restated; renders nothing on the free
+          tier or when the narrator honestly declines. */}
+      <NarrativeCard scope="week" />
 
       {week.quiet ? (
         <p

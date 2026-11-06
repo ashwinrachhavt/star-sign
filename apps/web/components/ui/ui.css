@@ -607,3 +607,175 @@
   filter: grayscale(1) contrast(1.1);
   mix-blend-mode: normal;
 }
+
+/* ---- PlacePicker (birth-place combobox listbox) ---- */
+
+/* The listbox floats over the form below the input, so it is painted
+   with the page ground (--bg) — the hairline card treatment would let
+   the form's own text bleed through. Same shape rules as every card:
+   1px hairline, no radius, no shadow. Rows take the --hairline ground
+   when keyboard-active, the established signal (ui-friend-row:active). */
+
+.ui-place-listbox {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--hairline);
+  background: var(--bg);
+}
+
+.ui-place-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+  min-height: 44px;
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  border-bottom: 1px solid var(--hairline);
+  transition: background var(--motion-fast) var(--motion-ease);
+}
+
+.ui-place-option:last-child {
+  border-bottom: none;
+}
+
+.ui-place-option[aria-selected="true"] {
+  background: var(--hairline);
+}
+
+.ui-place-option-meta {
+  color: var(--ink-tertiary);
+  white-space: nowrap;
+}
+
+/* ---- Responsive adaptation ---- */
+
+/* Grid cells must be allowed to shrink below their content's min-width:
+   fr tracks floor at min-content, so a long sign name ("SAGITTARIUS")
+   would push the chart row past the column edge and vanish under
+   overflow-x: clip. With min-width: 0 the track shrinks and the word
+   wraps inside the cell (Floor 5). At desktop widths this never
+   triggers — the column is 600px and the tracks never pinch. */
+.ui-chart-grid-row > [role="cell"],
+.ui-chart-table-row > * {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+/* One mobile boundary at 40rem — the container's own max-width (640px).
+   Below it the app is a phone: navigation leaves the header strip and
+   becomes a fixed bottom bar in thumb reach, primary actions become
+   full-width rows. Above it, nothing changes: the desktop layout keeps
+   the header tab strip and inline actions. All values are tokens.css
+   tokens; no new colors, no new type. */
+
+/* Fixed bottom tab bar (mobile only). Same destinations as the header
+   strip — ScreenHeader renders both from one tabs list. Painted with the
+   page ground so content scrolling beneath is masked; safe-area inset
+   folds in below (viewport-fit=cover, layout.tsx). */
+.ui-app-bottom-nav {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  border-top: 1px solid var(--hairline);
+  background: var(--bg);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@media (max-width: 40rem) {
+  .ui-app-bottom-nav {
+    display: flex;
+  }
+
+  /* The primary strip and the bottom bar never show together — one
+     primary nav per viewport. Section strips (e.g. Chart/Saved/Settings
+     on /you) are NOT the primary nav; they stay visible here or their
+     destinations are unreachable on a phone. (Playwright role queries
+     ignore display:none elements, so the e2e journeys still resolve a
+     single nav link.) */
+  .ui-screen-header-tabs[data-primary="true"] {
+    display: none;
+  }
+
+  /* The sign column holds the row's longest unbreakable words
+     ("SAGITTARIUS") — on a phone it needs the wider track or its names
+     break mid-word (break-word is the last resort, not the layout).
+     Placements copy wraps cleanly at spaces. */
+  .ui-chart-table-row,
+  .ui-chart-grid-row {
+    grid-template-columns: 1.4fr 1fr auto;
+  }
+
+  /* Primary actions as full-width thumb rows. Solid buttons are always
+     the one primary action of their context (sign in, continue, send
+     request); link buttons stay inline text. Some CTAs are wrapped in a
+     link (the verify screen) — the anchor takes the row's width too, or
+     a 100% button inside a content-hugging anchor is a no-op. */
+  .ui-button-solid {
+    width: 100%;
+  }
+
+  a:has(> .ui-button-solid) {
+    display: block;
+    width: 100%;
+  }
+}
+
+/* Coarse pointers get the 48px floor on the small targets (44px is the
+   resting size for fine pointers; the system's min-heights hold). */
+@media (pointer: coarse) {
+  .ui-app-bottom-nav-item {
+    min-height: 56px;
+  }
+
+  .ui-chart-grid-dot-button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .ui-place-option {
+    min-height: 48px;
+  }
+
+  .ui-button-solid,
+  .ui-button-link,
+  .ui-friend-row {
+    min-height: 48px;
+  }
+}
+
+/* Bottom-nav item: the established tab voice — micro-label mono, quiet
+   until active, one press signal. Sits at thumb height, so it is
+   generous where the header strip was dense. */
+.ui-app-bottom-nav-item {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 44px;
+  color: var(--ink-secondary);
+  text-decoration: none;
+  transition: color var(--motion-base) var(--motion-ease);
+}
+
+.ui-app-bottom-nav-item[data-active="true"] {
+  color: var(--ink);
+}
+
+.ui-app-bottom-nav-item:active {
+  color: var(--ink-tertiary);
+}
+
+/* The place listbox floats under a focused input; on a phone the
+   keyboard plus eight candidates can outrun the viewport. Cap it and
+   scroll — the rows stay full-height targets. dvh follows the keyboard
+   (interactiveWidget: resizes-content); vh is the fallback. */
+.ui-place-listbox {
+  max-height: 50vh;
+  max-height: 50dvh;
+  overflow-y: auto;
+}

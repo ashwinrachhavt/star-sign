@@ -6,7 +6,17 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button, Input } from "@/components/ui";
-import { fontMono, fontSerif } from "@/app/fonts";
+import { PlacePicker } from "@/components/PlacePicker";
+import {
+  applyPick,
+  dedupeCandidates,
+  geocodeFailureMessage,
+  shouldFetchPlaceQuery,
+  type GeocodeFailure,
+  type PlaceCandidate,
+  type PickedPlace,
+} from "@/lib/places";
+import { fontSerif } from "@/app/fonts";
 
 const COMMON_ZONES = [
   "America/New_York",
@@ -42,15 +52,10 @@ function OnboardingForm() {
     Intl.DateTimeFormat().resolvedOptions().timeZone,
   );
   const [placeLabel, setPlaceLabel] = useState("");
-  const [place, setPlace] = useState<{
-    lat: number;
-    lon: number;
-    resolvedName: string;
-    country: string | null;
-    timezone: string | null;
-  } | null>(null);
+  const [place, setPlace] = useState<PickedPlace | null>(null);
+  const [candidates, setCandidates] = useState<PlaceCandidate[]>([]);
   const [placeBusy, setPlaceBusy] = useState(false);
-  const [placeNotFound, setPlaceNotFound] = useState(false);
+  const [placeError, setPlaceError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -107,58 +112,93 @@ function OnboardingForm() {
     timeKnown === "yes" ? "Exact" : timeKnown === "approx" ? "Approximate" : "Unknown";
 
   // Geocode on place edits (debounced): the user types a place name and
-  // the server resolves coordinates — no manual lat/lon entry (owner
-  // request, 2026-10-25).
+  // picks a candidate — the server resolves its coordinates (owner
+  // request, 2026-10-25). Every failure surfaces in the form: the API
+  // distinguishes no-match (404) from provider-down (502) and rate
+  // limiting (429), and the client renders the message — never a silent
+  // empty state.
   useEffect(() => {
     const query = placeLabel.trim();
     // All setState happens inside the debounced timer: calling it
     // synchronously in the effect body triggers cascading renders
     // (react-hooks setState-in-effect rule).
+    const controller = new AbortController();
     const timer = setTimeout(async () => {
-      if (query.length < 2) {
-        setPlace(null);
-        setPlaceNotFound(false);
+      if (!shouldFetchPlaceQuery(query, place ? place.resolvedName : null)) {
+        setCandidates([]);
         return;
       }
       setPlaceBusy(true);
-      setPlaceNotFound(false);
       try {
         const res = await fetch("/api/geocode", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ query }),
+          signal: controller.signal,
         });
         if (res.status === 401) {
-          // Signed out or the request carried no session. Without this
-          // the field reports "No match" for a perfectly valid city and
+          // Signed out or the request carried no session. Without this the
+          // field reports a geocode error for a perfectly valid city and
           // the user is stuck with no way to recover.
           router.replace("/login");
           return;
         }
         if (res.ok) {
           const body = await res.json();
-          setPlace({
-            lat: body.data.lat,
-            lon: body.data.lon,
-            resolvedName: body.data.resolvedName ?? query,
-            country: body.data.country ?? null,
-            timezone: body.data.timezone ?? null,
-          });
-          // Adopt the provider's IANA zone suggestion when we have one.
-          if (body.data.timezone) setTimeZone(body.data.timezone);
+          setCandidates(dedupeCandidates(body.data.candidates));
+          setPlaceError(null);
         } else {
-          setPlace(null);
-          setPlaceNotFound(true);
+          const body = await res.json().catch(() => null);
+          const code = body?.error?.code;
+          const failure: GeocodeFailure =
+            code === "not_found" ||
+            code === "upstream_unavailable" ||
+            code === "rate_limited"
+              ? code
+              : "unknown";
+          setCandidates([]);
+          // Prefer the route's copy; the local mapping is the fallback
+          // for an unreadable envelope.
+          setPlaceError(body?.error?.message ?? geocodeFailureMessage(failure, query));
         }
-      } catch {
-        setPlace(null);
-        setPlaceNotFound(true);
+      } catch (e) {
+        // A newer query aborted this one (cleanup owns the UI now) — not
+        // an error to swallow, a cancellation to honor. Swallowed inside
+        // the timer: an uncaught rejection here is unhandled, not styled.
+        if (e instanceof DOMException && e.name === "AbortError") return;
+        setCandidates([]);
+        setPlaceError(geocodeFailureMessage("network", query));
       } finally {
-        setPlaceBusy(false);
+        // A superseded request must not clear the new query's spinner.
+        if (!controller.signal.aborted) setPlaceBusy(false);
       }
     }, 400);
-    return () => clearTimeout(timer);
-  }, [placeLabel, router]);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [placeLabel, place, router]);
+
+  // Typing releases the lock: the coordinates persist only while the
+  // picked candidate's title is what's in the box.
+  function handlePlaceQuery(query: string) {
+    setPlaceLabel(query);
+    setPlaceError(null);
+    if (place && query.trim().toLowerCase() !== place.resolvedName.trim().toLowerCase()) {
+      setPlace(null);
+    }
+  }
+
+  // An explicit pick: lock coordinates, adopt the provider's IANA zone
+  // suggestion when it has one.
+  function handlePlacePick(candidate: PlaceCandidate) {
+    const { place: locked, timeZone: adopted } = applyPick(candidate, timeZone);
+    setPlace(locked);
+    setPlaceLabel(locked.resolvedName);
+    setPlaceError(null);
+    setCandidates([]);
+    if (adopted) setTimeZone(adopted);
+  }
 
   // Onboarding tracking (owner request): record who is onboarding and
   // everything entered, updated as the flow progresses.
@@ -334,46 +374,16 @@ function OnboardingForm() {
             ))}
           </datalist>
 
-          <Input
-            id="pl"
-            label="Birth place"
-            type="text"
-            placeholder="e.g. Pune, India"
-            value={placeLabel}
-            onChange={(e) => setPlaceLabel(e.target.value)}
+          <PlacePicker
+            query={placeLabel}
+            onQueryChange={handlePlaceQuery}
+            candidates={candidates}
+            loading={placeBusy}
+            error={placeError}
+            picked={place}
+            onPick={handlePlacePick}
             required
-            autoComplete="off"
           />
-          {placeBusy && (
-            <p
-              className={`type-mono t-11 ${fontMono.className}`}
-              style={{ color: "var(--ink-tertiary)", margin: "calc(-1 * var(--space-3)) 0 0" }}
-            >
-              Resolving…
-            </p>
-          )}
-          {!placeBusy && place && (
-            <p
-              className={`type-mono t-11 ${fontMono.className}`}
-              style={{ color: "var(--ink-tertiary)", margin: "calc(-1 * var(--space-3)) 0 0" }}
-            >
-              ✓ {place.resolvedName}
-              {place.country ? `, ${place.country}` : ""} ({place.lat.toFixed(2)}°,{" "}
-              {place.lon.toFixed(2)}°)
-              {place.timezone ? ` · ${place.timezone}` : ""}
-            </p>
-          )}
-          {!placeBusy && !place && placeNotFound && (
-            <p
-              className={`type-mono t-11 ${fontMono.className}`}
-              style={{
-                color: "var(--ink-secondary)",
-                margin: "calc(-1 * var(--space-3)) 0 0",
-              }}
-            >
-              No match — try a city name, e.g. &ldquo;Pune, India&rdquo;.
-            </p>
-          )}
 
           {error && <p className="form-error type-prose t-15">{error}</p>}
 

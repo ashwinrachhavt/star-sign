@@ -40,6 +40,7 @@ export type ApiErrorCode =
   | "not_found"
   | "conflict"
   | "rate_limited"
+  | "upstream_unavailable"
   | "internal_error";
 
 export function jsonError(

@@ -8,6 +8,7 @@ import {
   DosDonts,
   Glance,
   LifeAreaRow,
+  NarrativeCard,
   ProvenanceBlock,
   ScreenHeader,
 } from "@/components/ui";
@@ -138,6 +139,11 @@ export default async function DayPage() {
           </Glance>
         </div>
       </section>
+
+      {/* Launch wave 1: the grounded narrative — restates ONLY the
+          reading's facts; renders nothing when the narrator refuses,
+          degrades, or the generation budget is spent. */}
+      <NarrativeCard scope="daily" />
 
       <section className="card" style={{ marginTop: "var(--space-5)" }}>
         <DosDonts
