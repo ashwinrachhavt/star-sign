@@ -104,18 +104,28 @@ export function provisionClerkProfileViaSql(
           provider: "clerk",
           display_name: email ?? "friend",
         });
-        const [anchor] = await tx`
-          insert into auth.users (id, aud, "role", email, raw_user_meta_data, created_at, updated_at)
-          values (gen_random_uuid(), 'authenticated', 'authenticated', ${email}, ${meta}::jsonb, now(), now())
-          on conflict (email) do update set updated_at = now()
-          returning id`;
+        // GoTrue indexes email with a PARTIAL unique index
+        // (users_email_partial_key, where is_sso_user = false), and
+        // Postgres only infers an ON CONFLICT arbiter from a full unique
+        // constraint. Name the index so the email-link path works.
+        // A NULL email cannot conflict, so it takes the plain insert.
+        const anchorRows = email
+          ? await tx`
+              insert into auth.users (id, aud, "role", email, raw_user_meta_data, created_at, updated_at)
+              values (gen_random_uuid(), 'authenticated', 'authenticated', ${email}, ${meta}::jsonb, now(), now())
+              on conflict (email) where is_sso_user = false do update set updated_at = now()
+              returning id`
+          : await tx`
+              insert into auth.users (id, aud, "role", email, raw_user_meta_data, created_at, updated_at)
+              values (gen_random_uuid(), 'authenticated', 'authenticated', ${email}, ${meta}::jsonb, now(), now())
+              returning id`;
 
         // The signup trigger (handle_new_user) created the profile for
         // the anchor within this transaction — map the subject onto it.
         const [profile] = await tx`
           update public.profiles
           set clerk_subject = ${subject}, auth_provider = 'clerk'
-          where id = ${anchor.id}
+          where id = ${anchorRows[0].id}
           returning id`;
 
         return { ok: true as const, profileId: profile.id as string };
